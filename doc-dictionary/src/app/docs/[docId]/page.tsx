@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getDocById } from "@/features/docs/queries";
+import { DocLearningWorkspace } from "@/components/docs/doc-learning-workspace";
 
 type DocPageProps = {
   params: Promise<{
@@ -18,8 +19,8 @@ export default async function DocPage({ params }: DocPageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <div className="mb-8">
+    <>
+      <section className="mx-auto max-w-7xl px-4 pt-8">
         <p className="text-sm text-muted-foreground">
           {doc.siteName ?? new URL(doc.sourceUrl).hostname}
         </p>
@@ -36,26 +37,19 @@ export default async function DocPage({ params }: DocPageProps) {
         >
           Open original source
         </a>
-      </div>
+      </section>
 
-      <article className="prose prose-slate max-w-none rounded-xl border bg-white p-6 shadow-sm">
-        {doc.content?.htmlContent ? (
-           <div
-            className="doc-reader-content"
-            dangerouslySetInnerHTML={{
-                __html: doc.content.htmlContent,
-            }}
-            />
-        ) : doc.content?.textContent ? (
-            <p className="whitespace-pre-wrap text-sm leading-7">
-            {doc.content.textContent}
-            </p>
-        ) : (
-            <p className="text-sm text-muted-foreground">
-            No content yet.
-            </p>
-        )}
-      </article>
-    </main>
+      <DocLearningWorkspace
+        docId={doc.id}
+        htmlContent={doc.content?.htmlContent ?? ""}
+        vocabularies={doc.vocabularies.map((vocab) => ({
+          id: vocab.id,
+          word: vocab.word,
+          meaning: vocab.meaning,
+          note: vocab.note,
+          status: vocab.status,
+        }))}
+      />
+    </>
   );
 }
