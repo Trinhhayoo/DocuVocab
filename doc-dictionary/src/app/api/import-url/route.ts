@@ -36,17 +36,38 @@ export async function POST(request: Request) {
             id: true,
         }
     });
+    console.log(existingDoc);
 
     if (existingDoc) {
-        return NextResponse.json({
-      docId: existingDoc.id,
-    });
+      await prisma.doc.delete({
+        where: {
+          id: existingDoc.id,
+        },
+      });
     }
+
+    console.log("start extractReadableContent");
 
     const article = await extractReadableContent(url);
 
+    console.log('chuan bi normalize');
+
+    console.log("[IMPORT] article has pre:", article.htmlContent.includes("<pre"));
+    console.log("[IMPORT] article has code:", article.htmlContent.includes("<code"));
+    console.log("[IMPORT] article has textarea:", article.htmlContent.includes("<textarea"));
+    console.log("[IMPORT] article has code-like class:", /class="[^"]*(code|highlight|shiki|language)[^"]*"/i.test(article.htmlContent));
+    
+    // img thi show img, link thi show link
     const normalizedHtml = normalizeHtmlUrls(article.htmlContent, url);
+
+    console.log("[IMPORT] normalized has pre:", normalizedHtml.includes("<pre"));
+    console.log("[IMPORT] normalized has code:", normalizedHtml.includes("<code"));
+    console.log("[IMPORT] normalized preview:", normalizedHtml.slice(0, 3000));
+
+    console.log("normalizedHtml", normalizedHtml);
+
     const highlightedHtml = await highlightCodeBlocks(normalizedHtml);
+
     const cleanHtml = sanitizeHtml(highlightedHtml);
 
     const doc = await prisma.doc.create({

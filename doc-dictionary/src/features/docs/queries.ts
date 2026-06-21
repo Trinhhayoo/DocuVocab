@@ -32,6 +32,15 @@ export async function getDocById(docId: string) {
         orderBy: {
           createdAt: "desc",
         },
+        select: {
+          id: true,
+          word: true,
+          meaning: true,
+          note: true,
+          originalSentence: true,
+          exampleSentence: true,
+          status: true,
+        },
       },
     },
   });

@@ -11,6 +11,14 @@ export function sanitizeHtml(html: string) {
       "data-line",
       "data-language",
       "aria-hidden",
+
+      "href",
+      "src",
+      "srcset",
+      "sizes",
+      "width",
+      "height",
+
       "target",
       "rel",
       "loading",

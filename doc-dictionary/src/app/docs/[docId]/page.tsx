@@ -38,7 +38,6 @@ export default async function DocPage({ params }: DocPageProps) {
           Open original source
         </a>
       </section>
-
       <DocLearningWorkspace
         docId={doc.id}
         htmlContent={doc.content?.htmlContent ?? ""}
@@ -47,6 +46,8 @@ export default async function DocPage({ params }: DocPageProps) {
           word: vocab.word,
           meaning: vocab.meaning,
           note: vocab.note,
+          originalSentence: vocab.originalSentence,
+          exampleSentence: vocab.exampleSentence,
           status: vocab.status,
         }))}
       />

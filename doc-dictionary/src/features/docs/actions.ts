@@ -11,7 +11,6 @@ const createManualSchema = z.object ({
 });
 
 export async function createManualDoc(formData: FormData){
-
     const createManualDocDto = createManualSchema.parse({
         title: formData.get("title"),
         sourceUrl: formData.get("sourceUrl"),

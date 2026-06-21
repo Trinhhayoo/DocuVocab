@@ -1,18 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { InteractiveDocReader } from "@/components/docs/interactive-doc-reader";
 import { VocabularyForm } from "@/components/vocab/vocabulary-form";
 import { VocabularyList } from "@/components/vocab/vocabulary-list";
-
-type VocabularyItem = {
-  id: string;
-  word: string;
-  meaning: string | null;
-  note: string | null;
-  status: string;
-};
+import type { VocabularyItem } from "@/features/vocab/types";
+import { normalizeWord } from "@/lib/normalize-word";
 
 type DocLearningWorkspaceProps = {
   docId: string;
@@ -25,7 +19,22 @@ export function DocLearningWorkspace({
   htmlContent,
   vocabularies,
 }: DocLearningWorkspaceProps) {
-  const [selectedText, setSelectedText] = useState("");
+  const [selectedWord, setSelectedWord] = useState("");
+
+  const vocabularyByWord = useMemo(() => {
+    return new Map(
+      vocabularies.map((vocab) => [normalizeWord(vocab.word), vocab])
+    );
+  }, [vocabularies]);
+
+  const existingVocabulary = selectedWord
+    ? vocabularyByWord.get(normalizeWord(selectedWord)) ?? null
+    : null;
+
+  function clearSelection() {
+    setSelectedWord("");
+    window.getSelection()?.removeAllRanges();
+  }
 
   return (
     <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 lg:grid-cols-[1fr_360px]">
@@ -33,7 +42,8 @@ export function DocLearningWorkspace({
         <article className="rounded-xl border bg-white p-6 shadow-sm">
           <InteractiveDocReader
             htmlContent={htmlContent}
-            onSelectText={setSelectedText}
+            vocabularies={vocabularies}
+            onSelectText={setSelectedWord}
           />
         </article>
       </section>
@@ -42,17 +52,24 @@ export function DocLearningWorkspace({
         <div>
           <h2 className="text-lg font-semibold">Vocabulary</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Select a word in the article or type manually.
+            Select a word in the article to add or edit a note.
           </p>
         </div>
 
-        {selectedText && (
-          <div className="rounded-xl border bg-blue-50 p-3 text-sm text-blue-700">
-            Selected: <span className="font-semibold">{selectedText}</span>
+        {selectedWord ? (
+          <VocabularyForm
+            key={`${existingVocabulary?.id ?? "new"}-${selectedWord}`}
+            docId={docId}
+            selectedWord={selectedWord}
+            existingVocabulary={existingVocabulary}
+            onDone={clearSelection}
+            onCancel={clearSelection}
+          />
+        ) : (
+          <div className="rounded-xl border border-dashed bg-white p-4 text-sm text-muted-foreground">
+            Select a word in the document to add a note.
           </div>
         )}
-
-        <VocabularyForm docId={docId} selectedWord={selectedText} />
 
         <VocabularyList vocabularies={vocabularies} />
       </aside>

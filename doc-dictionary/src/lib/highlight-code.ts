@@ -213,24 +213,28 @@ function inferLanguageFromCode(code: string) {
 }
 
 export async function highlightCodeBlocks(html: string) {
+  console.log("check into");
   const highlighter = await highlighterPromise;
 
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
-  const codeBlocks = Array.from(document.querySelectorAll("pre code"));
+  const preElements = Array.from(document.querySelectorAll("pre"));
 
-  for (const codeElement of codeBlocks) {
-    const preElement = codeElement.parentElement;
+  console.log("[HIGHLIGHT] pre count:", preElements.length);
 
-    if (!preElement) continue;
+  for (const preElement of preElements) {
+    const codeElement = preElement.querySelector("code");
 
-    const originalCode = codeElement.textContent ?? "";
+    const originalCode =
+      codeElement?.textContent ?? preElement.textContent ?? "";
+
     const detectedLanguage = getLanguageFromClassName(
-      codeElement.getAttribute("class")
+      codeElement?.getAttribute("class") ?? preElement.getAttribute("class")
     );
 
-    const shouldHighlight = detectedLanguage !== null || looksLikeCode(originalCode);
+    const shouldHighlight =
+      detectedLanguage !== null || looksLikeCode(originalCode);
 
     if (!shouldHighlight) {
       preElement.classList.add("plain-text-block");
@@ -246,44 +250,50 @@ export async function highlightCodeBlocks(html: string) {
 
     const language = detectedLanguage ?? inferLanguageFromCode(cleanedCode);
 
-const highlightedHtml = highlighter.codeToHtml(cleanedCode, {
-  lang: language,
-  theme: "vitesse-dark",
-  transformers: [
-    {
-      line(node, line) {
-        const originalChildren = node.children;
+    console.log("[HIGHLIGHT] highlighting block:", {
+      detectedLanguage,
+      language,
+      preview: cleanedCode.slice(0, 160),
+    });
 
-        node.children = [
-          {
-            type: "element",
-            tagName: "span",
-            properties: {
-              class: "line-number",
-              "aria-hidden": "true",
-            },
-            children: [
+    const highlightedHtml = highlighter.codeToHtml(cleanedCode, {
+      lang: language,
+      theme: "vitesse-dark",
+      transformers: [
+        {
+          line(node, line) {
+            const originalChildren = node.children;
+
+            node.children = [
               {
-                type: "text",
-                value: String(line),
+                type: "element",
+                tagName: "span",
+                properties: {
+                  class: "line-number",
+                  "aria-hidden": "true",
+                },
+                children: [
+                  {
+                    type: "text",
+                    value: String(line),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            type: "element",
-            tagName: "span",
-            properties: {
-              class: "line-code",
-            },
-            children: originalChildren,
-          },
-        ];
+              {
+                type: "element",
+                tagName: "span",
+                properties: {
+                  class: "line-code",
+                },
+                children: originalChildren,
+              },
+            ];
 
-        node.properties["data-line"] = String(line);
-      },
-    },
-  ],
-});
+            node.properties["data-line"] = String(line);
+          },
+        },
+      ],
+    });
 
     const highlightedDom = new JSDOM(highlightedHtml);
     const highlightedPre = highlightedDom.window.document.querySelector("pre");
@@ -296,5 +306,11 @@ const highlightedHtml = highlighter.codeToHtml(cleanedCode, {
     preElement.replaceWith(highlightedPre);
   }
 
-  return document.body.innerHTML;
+  const result = document.body.innerHTML;
+
+  console.log("[HIGHLIGHT] result has shiki:", result.includes("shiki-code-block"));
+  console.log("[HIGHLIGHT] result has line-number:", result.includes("line-number"));
+  console.log("[HIGHLIGHT] result has style:", result.includes("style="));
+
+  return result;
 }

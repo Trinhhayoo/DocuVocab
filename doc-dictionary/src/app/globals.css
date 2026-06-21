@@ -122,62 +122,342 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    @apply font-sans;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
-  }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Imported document reader                                                    */
+/* -------------------------------------------------------------------------- */
+
+.doc-reader-content {
+  width: 100%;
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: left;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.doc-reader-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+.doc-reader-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Text rhythm */
+
+.doc-reader-content p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.doc-reader-content strong,
+.doc-reader-content b {
+  font-weight: 700;
+  color: #020617;
+}
+
+.doc-reader-content em,
+.doc-reader-content i {
+  font-style: italic;
+}
+
+/* Headings */
+
+.doc-reader-content h1,
+.doc-reader-content h2,
+.doc-reader-content h3,
+.doc-reader-content h4,
+.doc-reader-content h5,
+.doc-reader-content h6 {
+  color: #020617;
+  text-align: left;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.doc-reader-content h1 {
+  margin-top: 2.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 2.25rem;
+}
+
+.doc-reader-content h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.75rem;
+}
+
+.doc-reader-content h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.375rem;
+}
+
+.doc-reader-content h4 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.625rem;
+  font-size: 1.125rem;
+}
+
+.doc-reader-content h5,
+.doc-reader-content h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Keep heading + first paragraph visually connected */
+
+.doc-reader-content h1 + p,
+.doc-reader-content h2 + p,
+.doc-reader-content h3 + p,
+.doc-reader-content h4 + p {
+  margin-top: 0.5rem;
+}
+
+/* Links */
+
+.doc-reader-content a {
+  color: #2563eb;
+  font-weight: 550;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.doc-reader-content a:hover {
+  color: #1d4ed8;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.doc-reader-content a:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+/* Lists */
+
+.doc-reader-content ul,
+.doc-reader-content ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  text-align: left;
+}
+
+.doc-reader-content ul {
+  list-style-type: disc;
+}
+
+.doc-reader-content ol {
+  list-style-type: decimal;
+}
+
+.doc-reader-content li {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  padding-left: 0.25rem;
+  text-align: left;
+}
+
+.doc-reader-content li > p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.doc-reader-content li::marker {
+  color: #64748b;
+}
+
+/* Blockquote */
+
+.doc-reader-content blockquote {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #cbd5e1;
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  color: #475569;
+  font-style: italic;
+  text-align: left;
+}
+
+.doc-reader-content blockquote p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Media */
 
 .doc-reader-content img {
+  display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 0.75rem;
   margin: 1.5rem auto;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
 }
 
-.doc-reader-content pre {
-  overflow-x: auto;
-  border-radius: 0.75rem;
-  padding: 1rem;
+.doc-reader-content figure {
+  margin-top: 1.75rem;
+  margin-bottom: 1.75rem;
+  text-align: center;
 }
 
-.doc-reader-content code {
+.doc-reader-content figcaption {
+  margin-top: 0.75rem;
+  color: #64748b;
   font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
 }
+
+.doc-reader-content iframe,
+.doc-reader-content video {
+  max-width: 100%;
+  border-radius: 0.875rem;
+}
+
+/* Tables */
 
 .doc-reader-content table {
+  display: block;
   width: 100%;
-  overflow: hidden;
+  max-width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
   border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.doc-reader-content thead {
+  background: #f8fafc;
 }
 
 .doc-reader-content th,
 .doc-reader-content td {
-  border: 1px solid hsl(var(--border));
-  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  padding: 0.625rem 0.75rem;
+  vertical-align: top;
+  text-align: left;
 }
 
-.doc-reader-content blockquote {
-  border-left: 4px solid hsl(var(--border));
-  padding-left: 1rem;
-  color: hsl(var(--muted-foreground));
+.doc-reader-content th {
+  color: #0f172a;
+  font-weight: 700;
 }
 
-.doc-reader-content iframe {
-  max-width: 100%;
+.doc-reader-content tbody tr:nth-child(even) {
+  background: #f8fafc;
 }
 
-/* .doc-reader-content pre.shiki-code-block {
-  position: relative;
+/* Horizontal rule */
+
+.doc-reader-content hr {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Inline code */
+
+.doc-reader-content :not(pre) > code {
+  border-radius: 0.375rem;
+  background: #f1f5f9;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.875em;
+  white-space: break-spaces;
+}
+
+/* Prevent imported source styles from visually breaking common text blocks */
+
+.doc-reader-content p,
+.doc-reader-content li,
+.doc-reader-content blockquote,
+.doc-reader-content th,
+.doc-reader-content td {
+  text-align: left;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Plain text code-like blocks                                                 */
+/* -------------------------------------------------------------------------- */
+
+.doc-reader-content pre.plain-text-block {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   overflow-x: auto;
   border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 1rem;
+  color: #334155;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+.doc-reader-content pre.plain-text-block code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Shiki code blocks                                                           */
+/* -------------------------------------------------------------------------- */
+
+.doc-reader-content pre.shiki-code-block {
+  position: relative;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #334155;
   padding: 1rem 0;
   font-size: 0.875rem;
-  line-height: 0.75;
+  line-height: 1;
+  text-align: left;
+  box-shadow: 0 14px 30px rgb(15 23 42 / 0.16);
+}
+
+.doc-reader-content pre.shiki-code-block::before {
+  content: attr(data-language);
+  display: block;
+  padding: 0 1rem 0.75rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .doc-reader-content pre.shiki-code-block code {
@@ -189,33 +469,32 @@
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
+  font-size: inherit;
   line-height: inherit;
+  text-align: left;
 }
 
 .doc-reader-content pre.shiki-code-block .line {
   display: grid;
-  grid-template-columns: 3rem 1fr;
+  grid-template-columns: 3rem max-content;
+  column-gap: 1rem;
   min-height: 1em;
   padding-right: 1rem;
   white-space: pre;
   line-height: inherit;
+  text-align: left;
 }
 
 .doc-reader-content pre.shiki-code-block .line-number {
-  display: inline-block;
-  padding-right: 1rem;
   color: #64748b;
   text-align: right;
   user-select: none;
-  line-height: inherit;
-} */
+}
 
-.doc-reader-content :not(pre) > code {
-  border-radius: 0.375rem;
-  background: #f1f5f9;
-  padding: 0.125rem 0.375rem;
-  font-size: 0.875em;
-  color: #be123c;
+.doc-reader-content pre.shiki-code-block .line-code {
+  min-width: max-content;
+  white-space: pre;
+  text-align: left;
 }
 
 .doc-reader-content pre.shiki-code-block::-webkit-scrollbar {
@@ -231,77 +510,191 @@
   background: transparent;
 }
 
-.doc-reader-content pre.plain-text-block {
+/* Generic pre fallback.
+   Keep this after Shiki/plain-text rules but exclude their classes. */
+
+.doc-reader-content pre:not(.shiki-code-block):not(.plain-text-block) {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   overflow-x: auto;
   border-radius: 0.875rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #0f172a;
   padding: 1rem;
-  color: #334155;
+  color: #e2e8f0;
   font-size: 0.875rem;
   line-height: 1.45;
-  white-space: pre-wrap;
+  text-align: left;
 }
 
-.doc-reader-content pre.plain-text-block code {
+.doc-reader-content pre:not(.shiki-code-block):not(.plain-text-block) code {
   background: transparent;
   padding: 0;
   color: inherit;
 }
 
-.doc-reader-content pre.shiki-code-block {
-  position: relative;
+/* -------------------------------------------------------------------------- */
+/* Vocabulary highlight                                                        */
+/* -------------------------------------------------------------------------- */
+
+.doc-reader-content mark.vocab-highlight {
+  border-radius: 0.25rem;
+  background: #fef08a;
+  padding: 0.05rem 0.18rem;
+  color: inherit;
+  cursor: pointer;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.doc-reader-content mark.vocab-highlight:hover {
+  background: #fde047;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dark mode reader                                                            */
+/* -------------------------------------------------------------------------- */
+
+.dark .doc-reader-content {
+  color: #e5e7eb;
+}
+
+.dark .doc-reader-content h1,
+.dark .doc-reader-content h2,
+.dark .doc-reader-content h3,
+.dark .doc-reader-content h4,
+.dark .doc-reader-content h5,
+.dark .doc-reader-content h6,
+.dark .doc-reader-content strong,
+.dark .doc-reader-content b {
+  color: #f8fafc;
+}
+
+.dark .doc-reader-content h2 {
+  border-bottom-color: rgb(255 255 255 / 12%);
+}
+
+.dark .doc-reader-content a {
+  color: #93c5fd;
+}
+
+.dark .doc-reader-content a:hover {
+  color: #bfdbfe;
+  background-color: rgb(59 130 246 / 12%);
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 12%);
+}
+
+.dark .doc-reader-content blockquote {
+  border-left-color: #475569;
+  background: rgb(255 255 255 / 5%);
+  color: #cbd5e1;
+}
+
+.dark .doc-reader-content img {
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.dark .doc-reader-content figcaption,
+.dark .doc-reader-content li::marker {
+  color: #94a3b8;
+}
+
+.dark .doc-reader-content thead,
+.dark .doc-reader-content tbody tr:nth-child(even) {
+  background: rgb(255 255 255 / 5%);
+}
+
+.dark .doc-reader-content th,
+.dark .doc-reader-content td {
+  border-color: rgb(255 255 255 / 14%);
+}
+
+.dark .doc-reader-content th {
+  color: #f8fafc;
+}
+
+.dark .doc-reader-content hr {
+  border-top-color: rgb(255 255 255 / 12%);
+}
+
+.dark .doc-reader-content :not(pre) > code {
+  background: rgb(255 255 255 / 10%);
+  color: #fda4af;
+}
+
+.dark .doc-reader-content pre.plain-text-block {
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(255 255 255 / 5%);
+  color: #cbd5e1;
+}
+
+.dark .doc-reader-content mark.vocab-highlight {
+  background: #854d0e;
+  color: #fef9c3;
+}
+
+.dark .doc-reader-content mark.vocab-highlight:hover {
+  background: #a16207;
+}
+
+.doc-reader-content figure.code-figure {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
-  overflow-x: auto;
+  overflow: hidden;
   border-radius: 1rem;
-  padding: 1rem 0;
-  font-size: 0.875rem;
-  line-height: 1.45;
   border: 1px solid #334155;
+  background: #0f172a;
+  text-align: left;
+  box-shadow: 0 14px 30px rgb(15 23 42 / 0.16);
 }
 
-.doc-reader-content pre.shiki-code-block::before {
-  content: attr(data-language);
-  display: block;
-  padding: 0 1rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-transform: uppercase;
-}
-
-.doc-reader-content pre.shiki-code-block code {
-  display: block;
-  min-width: max-content;
-  background: transparent;
-  padding: 0;
-  color: inherit;
+.doc-reader-content figure.code-figure > figcaption.code-filename {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  border-bottom: 1px solid #334155;
+  background: #111827;
+  padding: 0.625rem 1rem;
+  color: #cbd5e1;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  line-height: inherit;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
 }
 
-.doc-reader-content pre.shiki-code-block .line {
-  display: grid;
-  grid-template-columns: 3rem max-content;
-  column-gap: 1rem;
-  min-height: 1.45em;
-  padding-right: 1rem;
-  white-space: pre;
-  line-height: inherit;
+.doc-reader-content .code-filename-path {
+  min-width: 0;
+  overflow: hidden;
+  color: #e2e8f0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.doc-reader-content pre.shiki-code-block .line-number {
-  color: #64748b;
-  text-align: right;
-  user-select: none;
+.doc-reader-content .code-filename-language {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgb(148 163 184 / 0.16);
+  padding: 0.2rem 0.5rem;
+  color: #94a3b8;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.doc-reader-content pre.shiki-code-block .line-code {
-  white-space: pre;
-  min-width: max-content;
+.doc-reader-content figure.code-figure > pre.shiki-code-block {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Hide Shiki's default language label when a filename header exists */
+.doc-reader-content figure.code-figure > pre.shiki-code-block::before {
+  display: none;
 }

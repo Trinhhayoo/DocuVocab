@@ -1,11 +1,9 @@
 import { ArrowRight } from "lucide-react";
+import { Suspense } from 'react'
 
 import { AppHeader } from "@/components/layout/app-header";
-import { DocCard } from "@/components/docs/doc-card";
 import { Button } from "@/components/ui/button";
-import { mockDocs } from "@/features/docs/mock-docs";
 import { getRecentDocs } from "@/features/docs/queries";
-import { ManualDocForm } from "@/components/docs/manual-doc-form";
 import { UrlImportForm } from "@/components/docs/url-import-form";
 
 export default async function HomePage() {
@@ -48,6 +46,7 @@ export default async function HomePage() {
           </p>
         </div>
 
+        <Suspense fallback={<div>Loading...</div>}>
         {recentDocs.length === 0 ? (
           <div className="rounded-xl border border-dashed bg-white p-8 text-center text-sm text-muted-foreground">
             No documents yet. Create your first test document above.
@@ -70,6 +69,7 @@ export default async function HomePage() {
             ))}
           </div>
         )}
+      </Suspense>
       </section>
 
       </main>

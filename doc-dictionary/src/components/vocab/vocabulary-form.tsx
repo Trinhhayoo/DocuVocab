@@ -1,63 +1,73 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { createVocabulary } from "@/features/vocab/api";
+
+import { createVocabulary, updateVocabulary } from "@/features/vocab/api";
 import {
   createVocabularySchema,
   type CreateVocabularyInput,
 } from "@/features/vocab/validators";
+import type { VocabularyItem } from "@/features/vocab/types";
 
 type VocabularyFormProps = {
   docId: string;
-  selectedWord?: string;
-  originalSentence?: string;
+  selectedWord: string;
+  existingVocabulary: VocabularyItem | null;
+  onDone: () => void;
+  onCancel: () => void;
 };
 
 export function VocabularyForm({
   docId,
-  selectedWord = "",
-  originalSentence = "",
+  selectedWord,
+  existingVocabulary,
+  onDone,
+  onCancel,
 }: VocabularyFormProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const isEditMode = Boolean(existingVocabulary);
 
-  const createMutation = useMutation({
-    mutationFn: createVocabulary,
+  const saveMutation = useMutation({
+    mutationFn: async (input: CreateVocabularyInput) => {
+      if (existingVocabulary) {
+        return updateVocabulary({
+          vocabId: existingVocabulary.id,
+          input: {
+            word: input.word,
+            meaning: input.meaning || null,
+            note: input.note || null,
+            originalSentence: input.originalSentence || null,
+            exampleSentence: input.exampleSentence || null,
+          },
+        });
+      }
+
+      return createVocabulary(input);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["vocabularies", docId],
-      });
-
       router.refresh();
-      form.reset();
+      onDone();
     },
   });
 
   const form = useForm({
     defaultValues: {
       docId,
-      word: selectedWord,
-      meaning: "",
-      note: "",
-      originalSentence,
-      exampleSentence: "",
+      word: existingVocabulary?.word ?? selectedWord,
+      meaning: existingVocabulary?.meaning ?? "",
+      note: existingVocabulary?.note ?? "",
+      originalSentence: existingVocabulary?.originalSentence ?? "",
+      exampleSentence: existingVocabulary?.exampleSentence ?? "",
     } satisfies CreateVocabularyInput,
     validators: {
       onSubmit: createVocabularySchema,
     },
     onSubmit: async ({ value }) => {
-      createMutation.mutate(value);
+      saveMutation.mutate(value);
     },
   });
-
-  useEffect(() => {
-  if (!selectedWord) return;
-
-  form.setFieldValue("word", selectedWord);
-}, [selectedWord, form]);
 
   return (
     <form
@@ -68,6 +78,27 @@ export function VocabularyForm({
       }}
       className="space-y-3 rounded-xl border bg-white p-4 shadow-sm"
     >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">
+            {isEditMode ? "Edit noted word" : "Add noted word"}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isEditMode
+              ? "This word already has a note."
+              : "Save this word to your vocabulary."}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-slate-100"
+        >
+          Close
+        </button>
+      </div>
+
       <form.Field
         name="word"
         // eslint-disable-next-line react/no-children-prop
@@ -78,7 +109,6 @@ export function VocabularyForm({
               value={field.state.value}
               onChange={(event) => field.handleChange(event.target.value)}
               onBlur={field.handleBlur}
-              placeholder="middleware"
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
             />
             {field.state.meta.errors.length > 0 && (
@@ -99,7 +129,7 @@ export function VocabularyForm({
             <input
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Vietnamese or simple English meaning"
+              placeholder="Meaning or translation"
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
             />
           </div>
@@ -115,25 +145,37 @@ export function VocabularyForm({
             <textarea
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Why this word is useful..."
+              placeholder="Your personal note..."
               className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm"
             />
           </div>
         )}
       />
 
-      <button
-        type="submit"
-        disabled={createMutation.isPending}
-        className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-      >
-        {createMutation.isPending ? "Saving..." : "Save vocabulary"}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={saveMutation.isPending}
+          className="flex-1 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+        >
+          {saveMutation.isPending
+            ? "Saving..."
+            : isEditMode
+              ? "Update note"
+              : "Save word"}
+        </button>
 
-      {createMutation.isError && (
-        <p className="text-sm text-red-500">
-          {createMutation.error.message}
-        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md border px-4 py-2 text-sm font-medium"
+        >
+          Cancel
+        </button>
+      </div>
+
+      {saveMutation.isError && (
+        <p className="text-sm text-red-500">{saveMutation.error.message}</p>
       )}
     </form>
   );
