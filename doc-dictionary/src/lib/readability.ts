@@ -226,9 +226,6 @@ export async function extractReadableContent(
 
   const rawDocument = rawDom.window.document;
 
-  console.log("[EXTRACT] raw pre count:", rawDocument.querySelectorAll("pre").length);
-  console.log("[EXTRACT] raw code count:", rawDocument.querySelectorAll("code").length);
-
   const rawContentResult = extractFromRawContentRoot(rawDocument, url);
 
   if (rawContentResult) {
@@ -286,24 +283,6 @@ const LANGUAGE_LABELS = [
   "SQL",
   "Markdown",
 ];
-
-function looksLikeCodeFilename(text: string) {
-  const value = normalizeText(text);
-
-  if (value.length < 3 || value.length > 160) return false;
-
-  return (
-    /\.(tsx|ts|jsx|js|json|css|scss|html|md|mdx|sql|env|yml|yaml|toml|prisma)$/.test(
-      value
-    ) ||
-    /^(app|src|pages|components|lib|server|client|public|styles|prisma)\//.test(
-      value
-    ) ||
-    /^(package\.json|tsconfig\.json|next\.config\.(js|ts|mjs)|middleware\.(ts|js))/.test(
-      value
-    )
-  );
-}
 
 function extractLanguageFromCaptionSuffix(suffix: string) {
   const value = normalizeText(suffix)
@@ -449,14 +428,6 @@ function wrapPreBlocksWithFigure(root: Element) {
   });
 }
 
-function classNameIncludes(element: Element, keywords: string[]) {
-  const className = element.getAttribute("class") ?? "";
-
-  return keywords.some((keyword) =>
-    className.toLowerCase().includes(keyword.toLowerCase())
-  );
-}
-
 function isDarkOnlyElement(element: Element) {
   const className = element.getAttribute("class") ?? "";
 
@@ -466,16 +437,6 @@ function isDarkOnlyElement(element: Element) {
     className.includes("dark:flex") ||
     className.includes("dark:grid") ||
     className.includes("dark:contents")
-  );
-}
-
-function isLightOnlyElement(element: Element) {
-  const className = element.getAttribute("class") ?? "";
-
-  return (
-    className.includes("dark:hidden") ||
-    className.includes("light") ||
-    className.includes("Light")
   );
 }
 

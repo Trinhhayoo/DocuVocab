@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -13,26 +8,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id
-  email     String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           String       @id
+  email        String?      @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   docs         Doc[]
   vocabularies Vocabulary[]
 }
 
 model Doc {
-  id        String @id @default(uuid())
-  userId    String
-
-  title     String
-  sourceUrl String
-  siteName  String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           String       @id @default(uuid())
+  userId       String
+  title        String
+  sourceUrl    String
+  siteName     String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   content      DocContent?
   vocabularies Vocabulary[]
@@ -42,35 +33,29 @@ model Doc {
 }
 
 model DocContent {
-  id    String @id @default(uuid())
-  docId String @unique
-
+  id          String   @id @default(uuid())
+  docId       String   @unique
   htmlContent String?
   textContent String
-  wordCount   Int     @default(0)
-
-  createdAt DateTime @default(now())
-
-  doc Doc @relation(fields: [docId], references: [id], onDelete: Cascade)
+  wordCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  doc         Doc      @relation(fields: [docId], references: [id], onDelete: Cascade)
 }
 
 model Vocabulary {
-  id     String  @id @default(uuid())
-  userId String
-  docId  String?
-
+  id               String   @id @default(uuid())
+  userId           String
+  docId            String?
   word             String
   meaning          String?
   note             String?
   originalSentence String?
   exampleSentence  String?
-  status           String  @default("new")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  doc  Doc? @relation(fields: [docId], references: [id], onDelete: SetNull)
+  status           String   @default("new")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  doc              Doc?     @relation(fields: [docId], references: [id])
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([docId])
