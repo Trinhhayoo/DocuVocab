@@ -7,7 +7,7 @@ import { MOCK_USER_ID } from "@/lib/constants";
 
 const createManualSchema = z.object ({
     title: z.string().min(1, "Title is required").max(200),
-    sourceUrl: z.string().url("Source URL must be valid"),
+    sourceUrl: z.url("Source URL must be valid"),
 });
 
 export async function createManualDoc(formData: FormData){

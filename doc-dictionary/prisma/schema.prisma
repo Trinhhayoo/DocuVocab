@@ -46,6 +46,11 @@ model Vocabulary {
   id               String   @id @default(uuid())
   userId           String
   docId            String?
+
+  sourceUrl        String?
+  sourceHostname   String?
+  pageTitle        String?
+  
   word             String
   meaning          String?
   note             String?
@@ -59,5 +64,7 @@ model Vocabulary {
 
   @@index([userId])
   @@index([docId])
+  @@index([sourceUrl])
+  @@index([sourceHostname])
   @@index([word])
 }
