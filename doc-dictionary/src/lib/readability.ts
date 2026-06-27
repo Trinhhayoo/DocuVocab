@@ -229,13 +229,7 @@ export async function extractReadableContent(
   const rawContentResult = extractFromRawContentRoot(rawDocument, url);
 
   if (rawContentResult) {
-    const resultDom = new JSDOM(rawContentResult.htmlContent);
-
-    console.log("[EXTRACT] strategy: raw content root");
-    console.log(
-      "[EXTRACT] final pre count:",
-      resultDom.window.document.querySelectorAll("pre").length
-    );
+   
 
     return rawContentResult;
   }
@@ -250,13 +244,7 @@ export async function extractReadableContent(
   );
 
   if (readabilityResult) {
-    const resultDom = new JSDOM(readabilityResult.htmlContent);
-
-    console.log("[EXTRACT] strategy: readability fallback");
-    console.log(
-      "[EXTRACT] final pre count:",
-      resultDom.window.document.querySelectorAll("pre").length
-    );
+   
 
     return readabilityResult;
   }
@@ -401,7 +389,6 @@ function wrapPreBlocksWithFigure(root: Element) {
     figure.className = "code-figure";
 
     if (filenameResult) {
-      console.log("[CODE CAPTION]", filenameResult.caption);
       const figcaption = document.createElement("figcaption");
       figcaption.className = "code-filename";
 

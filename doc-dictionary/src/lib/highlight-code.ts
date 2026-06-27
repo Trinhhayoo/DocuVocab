@@ -213,16 +213,12 @@ function inferLanguageFromCode(code: string) {
 }
 
 export async function highlightCodeBlocks(html: string) {
-  console.log("check into");
   const highlighter = await highlighterPromise;
 
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
   const preElements = Array.from(document.querySelectorAll("pre"));
-
-  console.log("[HIGHLIGHT] pre count:", preElements.length);
-
   for (const preElement of preElements) {
     const codeElement = preElement.querySelector("code");
 
@@ -249,12 +245,6 @@ export async function highlightCodeBlocks(html: string) {
     }
 
     const language = detectedLanguage ?? inferLanguageFromCode(cleanedCode);
-
-    console.log("[HIGHLIGHT] highlighting block:", {
-      detectedLanguage,
-      language,
-      preview: cleanedCode.slice(0, 160),
-    });
 
     const highlightedHtml = highlighter.codeToHtml(cleanedCode, {
       lang: language,
@@ -307,10 +297,6 @@ export async function highlightCodeBlocks(html: string) {
   }
 
   const result = document.body.innerHTML;
-
-  console.log("[HIGHLIGHT] result has shiki:", result.includes("shiki-code-block"));
-  console.log("[HIGHLIGHT] result has line-number:", result.includes("line-number"));
-  console.log("[HIGHLIGHT] result has style:", result.includes("style="));
 
   return result;
 }
