@@ -8,6 +8,13 @@
     - Located in /features/[featureName]
     - CRUD the table.
 
+# Project structure
+src/app: routes only
+    src/app/api/xxx: route handlers
+src/features: business features
+src/components: shared UI
+src/lib: shared utilities
+
 # APP
 
 1. User can select and take note about: DONE
