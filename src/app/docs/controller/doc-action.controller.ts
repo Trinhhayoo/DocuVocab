@@ -24,4 +24,3 @@ export async function createManualDoc(formData: FormData) {
 
   redirect(`/docs/${result.data.id}`);
 }
-

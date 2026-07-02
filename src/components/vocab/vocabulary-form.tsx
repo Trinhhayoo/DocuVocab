@@ -5,9 +5,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 
-import { createVocabulary, updateVocabulary } from "@/features/vocab/api";
-import type { CreateVocabularyInput } from "@/features/vocab/validators";
-import type { VocabularyItem } from "@/features/vocab/types";
+import { createVocabulary, updateVocabulary } from "@/app/docs/view/client/vocab-api";
+import type { CreateVocabularyInput } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
+import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
 const formSchema = z.object({
   docId: z.string(),

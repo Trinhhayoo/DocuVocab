@@ -4,11 +4,11 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { importUrl } from "@/features/docs/api";
+import { importUrl } from "@/app/docs/view/client/doc-api";
 import {
   importUrlSchema,
   type ImportUrlInput,
-} from "@/features/docs/validators";
+} from "@/feature/core/doc/domain/params/doc.param";
 
 export function UrlImportForm() {
   const router = useRouter();

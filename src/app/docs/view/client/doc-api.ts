@@ -1,4 +1,4 @@
-import type { ImportUrlInput } from "@/features/docs/validators";
+import type { ImportUrlInput } from "@/feature/core/doc/domain/params/doc.param";
 
 export type ImportUrlResponse = {
   docId: string;

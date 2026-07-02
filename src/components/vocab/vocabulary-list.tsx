@@ -1,4 +1,4 @@
-import type { VocabularyItem } from "@/features/vocab/types";
+import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 import { VocabularyCard } from "@/components/vocab/vocabulary-card";
 
 type VocabularyListProps = {

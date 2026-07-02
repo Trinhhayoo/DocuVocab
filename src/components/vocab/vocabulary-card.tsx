@@ -5,8 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 
-import { updateVocabulary } from "@/features/vocab/api";
-import type { VocabularyItem } from "@/features/vocab/types";
+import { updateVocabulary } from "@/app/docs/view/client/vocab-api";
+import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
 type VocabularyCardProps = {
   vocabulary: VocabularyItem;

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { MockDoc } from "@/features/docs/mock-docs";
+import type { MockDoc } from "@/app/docs/view/server/mock-docs";
 
 type DocCardProps = {
   doc: MockDoc;

@@ -6,7 +6,7 @@ import {
   createHighlightedVocabularyHtml,
   type HighlightVocabularyItem,
 } from "@/lib/highlight-vocabulary-client";
-import type { VocabularyItem } from "@/features/vocab/types";
+import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
 type TooltipState = {
   vocab: VocabularyItem;

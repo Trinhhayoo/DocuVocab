@@ -1,7 +1,7 @@
 import type {
   CreateVocabularyInput,
   UpdateVocabularyInput,
-} from "@/features/vocab/validators";
+} from "@/feature/core/vocabulary/domain/params/vocabulary.param";
 
 export type VocabularyResponse = {
   vocabulary: {

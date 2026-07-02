@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 
 import { AppHeader } from "@/components/layout/app-header";
 import { Button } from "@/components/ui/button";
-import { getRecentDocs } from "@/features/docs/queries";
+import { getRecentDocs } from "@/app/docs/controller/doc.controller";
 import { UrlImportForm } from "@/components/docs/url-import-form";
 
 export default async function HomePage() {

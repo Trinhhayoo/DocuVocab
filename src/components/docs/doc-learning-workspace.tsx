@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { InteractiveDocReader } from "@/components/docs/interactive-doc-reader";
 import { VocabularyForm } from "@/components/vocab/vocabulary-form";
 import { VocabularyList } from "@/components/vocab/vocabulary-list";
-import type { VocabularyItem } from "@/features/vocab/types";
+import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
 
 type DocLearningWorkspaceProps = {

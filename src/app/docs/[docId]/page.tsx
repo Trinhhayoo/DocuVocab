@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getDocById } from "@/features/docs/queries";
+import { getDocById } from "@/app/docs/controller/doc.controller";
 import { DocLearningWorkspace } from "@/components/docs/doc-learning-workspace";
 
 type DocPageProps = {
