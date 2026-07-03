@@ -1,23 +1,21 @@
 import type { ImportUrlInput } from "@/feature/core/doc/domain/params/doc.param";
+import type IBaseHttpResponse from "@/feature/common/data/http/i-base-http-response";
+import BaseHttpResponse from "@/feature/common/data/http/base-http-response";
+import EndpointProvider from "@/bootstrap/endpoint/endpoint-provider";
 
 export type ImportUrlResponse = {
   docId: string;
 };
 
+const endpoint = EndpointProvider.backend;
+
 export async function importUrl(input: ImportUrlInput): Promise<ImportUrlResponse> {
-  const response = await fetch("/api/import-url", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input),
-  });
+  const raw = await endpoint.HttpBoundary.post<IBaseHttpResponse<ImportUrlResponse>>(
+    endpoint.importUrl,
+    { body: input },
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Could not import URL.");
-  }
-
-  return data;
+  return BaseHttpResponse.getHTTPResponseData(
+    endpoint.toHttpResponse<ImportUrlResponse>(raw),
+  );
 }

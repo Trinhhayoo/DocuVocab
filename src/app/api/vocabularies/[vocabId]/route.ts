@@ -22,8 +22,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid vocabulary data." },
-      { status: 400 }
+      { success: false, status: "400", message: "Invalid vocabulary data." },
+      { status: 400 },
     );
   }
 
@@ -37,12 +37,14 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (!result.success) {
     const status = result.failure.message === "vocabulary.notFound" ? 404 : 500;
     return NextResponse.json(
-      { error: result.failure.message },
-      { status }
+      { success: false, status: String(status), message: result.failure.message },
+      { status },
     );
   }
 
   return NextResponse.json({
-    vocabulary: VocabularyMapper.toDto(result.data),
+    success: true,
+    status: "200",
+    data: { vocabulary: VocabularyMapper.toDto(result.data) },
   });
 }

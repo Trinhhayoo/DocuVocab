@@ -1,0 +1,17 @@
+@startuml Failure Class Diagram
+abstract BaseFailure<META_DATA> {
+ + String message
+ + String namespace
+ + META_DATA metadata
+ constructor(String message, String namespace, META_DATA metadata )
+}
+
+ 
+class UserModificationAlreadyExistsFailure {
+}
+note right 
+	Extends parent and passing message, namespace and metadata
+		to parent class
+end note
+UserModificationAlreadyExistsFailure --|> BaseFailure 
+@enduml

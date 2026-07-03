@@ -15,24 +15,12 @@ export function AppHeader() {
           <span>DocuVocab</span>
         </Link>
 
-        <form className="hidden w-full max-w-xl items-center gap-2 md:flex">
-          <Input
-            placeholder="Paste documentation or blog URL..."
-            className="h-10"
-          />
-          <Button type="submit" className="h-10 bg-slate-700 hover:bg-slate-800">
-            Import Doc
-          </Button>
-        </form>
+       
 
         <nav className="flex items-center gap-3 text-sm">
           <Button size="sm" variant="default">
             Login
           </Button>
-
-          <Link href="#" className="hidden text-emerald-600 hover:underline sm:block">
-            Join waitlist
-          </Link>
 
           <Link href="#" className="hidden text-muted-foreground hover:text-foreground sm:block">
             Feedback

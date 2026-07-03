@@ -2,6 +2,9 @@ import type {
   CreateVocabularyInput,
   UpdateVocabularyInput,
 } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
+import type IBaseHttpResponse from "@/feature/common/data/http/i-base-http-response";
+import BaseHttpResponse from "@/feature/common/data/http/base-http-response";
+import EndpointProvider from "@/bootstrap/endpoint/endpoint-provider";
 
 export type VocabularyResponse = {
   vocabulary: {
@@ -15,24 +18,19 @@ export type VocabularyResponse = {
   };
 };
 
+const endpoint = EndpointProvider.backend;
+
 export async function createVocabulary(
-  input: CreateVocabularyInput
+  input: CreateVocabularyInput,
 ): Promise<VocabularyResponse> {
-  const response = await fetch("/api/vocabularies", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input),
-  });
+  const raw = await endpoint.HttpBoundary.post<IBaseHttpResponse<VocabularyResponse>>(
+    endpoint.vocabularies,
+    { body: input },
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Could not save vocabulary.");
-  }
-
-  return data;
+  return BaseHttpResponse.getHTTPResponseData(
+    endpoint.toHttpResponse<VocabularyResponse>(raw),
+  );
 }
 
 export async function updateVocabulary({
@@ -42,19 +40,12 @@ export async function updateVocabulary({
   vocabId: string;
   input: UpdateVocabularyInput;
 }): Promise<VocabularyResponse> {
-  const response = await fetch(`/api/vocabularies/${vocabId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input),
-  });
+  const raw = await endpoint.HttpBoundary.patch<IBaseHttpResponse<VocabularyResponse>>(
+    endpoint.vocabularyById(vocabId),
+    { body: input },
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Could not update vocabulary.");
-  }
-
-  return data;
+  return BaseHttpResponse.getHTTPResponseData(
+    endpoint.toHttpResponse<VocabularyResponse>(raw),
+  );
 }

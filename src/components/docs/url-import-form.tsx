@@ -16,6 +16,8 @@ export function UrlImportForm() {
   const importMutation = useMutation({
     mutationFn: importUrl,
     onSuccess: (data) => {
+      console.log("[IMPORT_SUCCESS_DATA]", data);
+
       router.push(`/docs/${data.docId}`);
     },
   });

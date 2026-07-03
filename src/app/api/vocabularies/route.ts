@@ -15,8 +15,8 @@ export async function POST(request: Request) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid vocabulary data" },
-      { status: 400 }
+      { success: false, status: "400", message: "Invalid vocabulary data" },
+      { status: 400 },
     );
   }
 
@@ -28,12 +28,14 @@ export async function POST(request: Request) {
 
   if (!result.success) {
     return NextResponse.json(
-      { error: result.failure.message },
-      { status: 500 }
+      { success: false, status: "500", message: result.failure.message },
+      { status: 500 },
     );
   }
 
   return NextResponse.json({
-    vocabulary: VocabularyMapper.toDto(result.data),
+    success: true,
+    status: "200",
+    data: { vocabulary: VocabularyMapper.toDto(result.data) },
   });
 }
