@@ -2,7 +2,6 @@ import Link from "next/link";
 import { BookOpenText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export function AppHeader() {
   return (

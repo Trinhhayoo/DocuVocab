@@ -26,12 +26,6 @@ export default async function HomePage() {
             working life.
           </p>
 
-          <div className="mt-7 flex justify-center">
-            <Button className="gap-2 bg-emerald-500 px-6 hover:bg-emerald-600">
-              Start building your vocabulary
-              <ArrowRight className="size-4" />
-            </Button>
-          </div>
         </section>
 
         <UrlImportForm />
