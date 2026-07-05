@@ -33,81 +33,49 @@ export function InteractiveDocReader({
     return new Map(vocabularies.map((vocab) => [vocab.id, vocab]));
   }, [vocabularies]);
 
-  const highlightItems = useMemo<HighlightVocabularyItem[]>(() => {
-    return vocabularies.map((vocab) => ({
-      id: vocab.id,
-      word: vocab.word,
-    }));
-  }, [vocabularies]);
-
   const [isHydrated, setIsHydrated] = useState(false);
 
-useEffect(() => {
-  const frameId = requestAnimationFrame(() => {
-    setIsHydrated(true);
-  });
+  useEffect(() => {
+    const frameId = requestAnimationFrame(() => {
+      setIsHydrated(true);
+    });
 
-  return () => {
-    cancelAnimationFrame(frameId);
-  };
-}, []);
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, []);
 
-const highlightedHtml = useMemo(() => {
-  if (!isHydrated) {
-    return htmlContent;
+  const highlightedHtml = useMemo(() => {
+    if (!isHydrated) {
+      return htmlContent;
+    }
+
+    return createHighlightedVocabularyHtml(htmlContent, vocabularies);
+  }, [htmlContent, vocabularies, isHydrated]);
+
+  function handleMouseDown() {
+    setIsSelecting(true);
+    setTooltip(null);
   }
 
-  return createHighlightedVocabularyHtml(htmlContent, vocabularies);
-}, [htmlContent, vocabularies, isHydrated]);
+  function handleMouseUp() {
+    setIsSelecting(false);
 
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim();
 
+    if (!selectedText) return;
 
-  // const highlightedHtml = useMemo(() => {
-  //   if (typeof window === "undefined") {
-  //     return htmlContent;
-  //   }
+    const cleanText = selectedText
+      .replace(/\s+/g, " ")
+      .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
+      .trim();
 
-  //   return createHighlightedVocabularyHtml(htmlContent, highlightItems);
-  // }, [htmlContent, highlightItems]);
+    if (!cleanText) return;
+    if (cleanText.length > 80) return;
 
-  // function handleMouseUp() {
-  //   const selectedText = window.getSelection()?.toString().trim();
-
-  //   if (!selectedText) return;
-
-  //   const cleanText = selectedText
-  //     .replace(/\s+/g, " ")
-  //     .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
-  //     .trim();
-
-  //   if (!cleanText) return;
-  //   if (cleanText.length > 80) return;
-
-  //   onSelectText(cleanText);
-  // }
-  function handleMouseDown() {
-  setIsSelecting(true);
-  setTooltip(null);
-}
-
-function handleMouseUp() {
-  setIsSelecting(false);
-
-  const selection = window.getSelection();
-  const selectedText = selection?.toString().trim();
-
-  if (!selectedText) return;
-
-  const cleanText = selectedText
-    .replace(/\s+/g, " ")
-    .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
-    .trim();
-
-  if (!cleanText) return;
-  if (cleanText.length > 80) return;
-
-  onSelectText(cleanText);
-}
+    onSelectText(cleanText);
+  }
 
   function handleMouseOver(event: React.MouseEvent<HTMLDivElement>) {
     if (isSelecting) return;
