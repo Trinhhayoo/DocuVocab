@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-
+import { Trash2 } from "lucide-react";
 import { updateVocabulary } from "@/app/docs/view/client/vocab-api";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
@@ -21,6 +21,21 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
     onSuccess: () => {
       router.refresh();
       setIsEditing(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (vocabId: string) => {
+      return fetch(`/api/vocabularies/${vocabId}`, {
+        method: "DELETE",
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to delete vocabulary");
+        }
+      });
+    },
+    onSuccess: () => {
+      router.refresh();
     },
   });
 
@@ -147,6 +162,15 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
         <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">
           {vocabulary.status}
         </span>
+      </div>
+      <div className="mt-3 flex justify-end">
+        <button
+          type="button"
+          onClick={() => deleteMutation.mutate(vocabulary.id)}
+          className="rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-100"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

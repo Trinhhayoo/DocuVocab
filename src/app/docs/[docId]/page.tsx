@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { getDocById } from "@/app/docs/controller/doc.controller";
 import { DocLearningWorkspace } from "@/components/docs/doc-learning-workspace";
+import { BackButton } from "@/components/common/back-navigation";
 
 type DocPageProps = {
   params: Promise<{
@@ -20,24 +21,29 @@ export default async function DocPage({ params }: DocPageProps) {
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-4 pt-8">
-        <p className="text-sm text-muted-foreground">
-          {doc.siteName ?? new URL(doc.sourceUrl).hostname}
-        </p>
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <BackButton />
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
-          {doc.title}
-        </h1>
+        <div className="mt-8 rounded-2xl border bg-white px-6 py-8 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            {doc.siteName ?? new URL(doc.sourceUrl).hostname}
+          </p>
 
-        <a
-          href={doc.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-block text-sm text-blue-600 hover:underline"
-        >
-          Open original source
-        </a>
+          <h1 className="mt-3 max-w-4xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            {doc.title}
+          </h1>
+
+          <a
+            href={doc.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-5 inline-flex text-sm font-medium text-blue-600 hover:underline"
+          >
+            Open original source
+          </a>
+        </div>
       </section>
+
       <DocLearningWorkspace
         docId={doc.id}
         htmlContent={doc.content?.htmlContent ?? ""}

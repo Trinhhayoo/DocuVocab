@@ -25,6 +25,8 @@ export function InteractiveDocReader({
   vocabularies,
   onSelectText,
 }: InteractiveDocReaderProps) {
+  const [isSelecting, setIsSelecting] = useState(false);
+
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const vocabularyById = useMemo(() => {
@@ -68,23 +70,47 @@ const highlightedHtml = useMemo(() => {
   //   return createHighlightedVocabularyHtml(htmlContent, highlightItems);
   // }, [htmlContent, highlightItems]);
 
-  function handleMouseUp() {
-    const selectedText = window.getSelection()?.toString().trim();
+  // function handleMouseUp() {
+  //   const selectedText = window.getSelection()?.toString().trim();
 
-    if (!selectedText) return;
+  //   if (!selectedText) return;
 
-    const cleanText = selectedText
-      .replace(/\s+/g, " ")
-      .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
-      .trim();
+  //   const cleanText = selectedText
+  //     .replace(/\s+/g, " ")
+  //     .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
+  //     .trim();
 
-    if (!cleanText) return;
-    if (cleanText.length > 80) return;
+  //   if (!cleanText) return;
+  //   if (cleanText.length > 80) return;
 
-    onSelectText(cleanText);
-  }
+  //   onSelectText(cleanText);
+  // }
+  function handleMouseDown() {
+  setIsSelecting(true);
+  setTooltip(null);
+}
+
+function handleMouseUp() {
+  setIsSelecting(false);
+
+  const selection = window.getSelection();
+  const selectedText = selection?.toString().trim();
+
+  if (!selectedText) return;
+
+  const cleanText = selectedText
+    .replace(/\s+/g, " ")
+    .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
+    .trim();
+
+  if (!cleanText) return;
+  if (cleanText.length > 80) return;
+
+  onSelectText(cleanText);
+}
 
   function handleMouseOver(event: React.MouseEvent<HTMLDivElement>) {
+    if (isSelecting) return;
     const target = event.target;
 
     if (!(target instanceof HTMLElement)) return;
@@ -111,6 +137,7 @@ const highlightedHtml = useMemo(() => {
   }
 
   function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+    if (isSelecting) return;
     const target = event.target;
 
     if (!(target instanceof HTMLElement)) {
@@ -133,6 +160,7 @@ const highlightedHtml = useMemo(() => {
     <div className="relative">
       <div
         className="doc-reader-content"
+        onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseOver={handleMouseOver}
         onMouseMove={handleMouseMove}

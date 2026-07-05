@@ -48,3 +48,23 @@ export async function PATCH(request: Request, context: RouteContext) {
     data: { vocabulary: VocabularyMapper.toDto(result.data) },
   });
 }
+
+export async function DELETE(request: Request, context: RouteContext) {
+  const { vocabId } = await context.params;
+
+  const result = await vocabularyRepo.delete(MOCK_USER_ID, vocabId);
+
+  if (!result.success) {
+    const status = result.failure.message === "vocabulary.notFound" ? 404 : 500;
+    return NextResponse.json(
+      { success: false, status: String(status), message: result.failure.message },
+      { status },
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+    status: "200",
+    message: "Vocabulary deleted successfully.",
+  });
+}
