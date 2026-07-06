@@ -43,4 +43,8 @@ export default class BackendEndpoint extends Endpoint {
   vocabularyById(vocabId: string): string {
     return this.compose(this.vocabularies, vocabId);
   }
+
+  get vocabularyExplain(): string {
+    return this.compose(this.vocabularies, "explain");
+  }
 }

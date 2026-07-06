@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 
-import { createVocabulary, updateVocabulary } from "@/app/docs/view/client/vocab-api";
+import {
+  createVocabulary,
+  updateVocabulary,
+  explainVocabulary,
+} from "@/app/docs/view/client/vocab-api";
 import type { CreateVocabularyInput } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
@@ -21,6 +26,9 @@ const formSchema = z.object({
 type VocabularyFormProps = {
   docId: string;
   selectedWord: string;
+  selectedSentence?: string;
+  sourceTitle?: string;
+  sourceUrl?: string;
   existingVocabulary: VocabularyItem | null;
   onDone: () => void;
   onCancel: () => void;
@@ -29,12 +37,21 @@ type VocabularyFormProps = {
 export function VocabularyForm({
   docId,
   selectedWord,
+  selectedSentence,
+  sourceTitle,
+  sourceUrl,
   existingVocabulary,
   onDone,
   onCancel,
 }: VocabularyFormProps) {
   const router = useRouter();
   const isEditMode = Boolean(existingVocabulary);
+  const hasAutoExplained = useRef(false);
+  const [isExplaining, setIsExplaining] = useState(false);
+
+  const explainMutation = useMutation({
+    mutationFn: explainVocabulary,
+  });
 
   const saveMutation = useMutation({
     mutationFn: async (input: CreateVocabularyInput) => {
@@ -76,6 +93,57 @@ export function VocabularyForm({
     },
   });
 
+  // Auto-explain for new vocabulary only (not edit mode)
+  useEffect(() => {
+  if (isEditMode || hasAutoExplained.current || !selectedWord) return;
+
+  hasAutoExplained.current = true;
+
+  async function runExplain() {
+    setIsExplaining(true);
+
+    try {
+      const data = await explainMutation.mutateAsync({
+        text: selectedWord,
+        sentence: selectedSentence,
+        sourceTitle,
+        sourceUrl,
+      });
+
+      form.setFieldValue("meaning", data.meaning ?? "");
+      form.setFieldValue("note", data.simpleExplanation ?? "");
+      form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
+
+      if (selectedSentence) {
+        form.setFieldValue("originalSentence", selectedSentence);
+      }
+    } finally {
+      setIsExplaining(false);
+    }
+  }
+
+  runExplain();
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+async function handleRegenerate() {
+  setIsExplaining(true);
+
+  try {
+    const data = await explainMutation.mutateAsync({
+      text: form.getFieldValue("word"),
+      sentence: selectedSentence,
+      sourceTitle,
+      sourceUrl,
+    });
+
+    form.setFieldValue("meaning", data.meaning ?? "");
+    form.setFieldValue("note", data.simpleExplanation ?? "");
+    form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
+  } finally {
+    setIsExplaining(false);
+  }
+}
+
   return (
     <form
       onSubmit={(event) => {
@@ -105,6 +173,19 @@ export function VocabularyForm({
           Close
         </button>
       </div>
+
+      {isExplaining && (
+        <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-700">
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-700 border-t-transparent" />
+          Generating explanation...
+        </div>
+      )}
+
+      {explainMutation.isError && (
+        <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          Could not generate explanation. You can fill in manually or try again.
+        </div>
+      )}
 
       <form.Field
         name="word"
@@ -148,12 +229,44 @@ export function VocabularyForm({
         // eslint-disable-next-line react/no-children-prop
         children={(field) => (
           <div>
-            <label className="text-sm font-medium">Note</label>
+            <label className="text-sm font-medium">Simple Explanation</label>
             <textarea
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Your personal note..."
+              placeholder="A simple explanation of the word in context..."
               className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm"
+            />
+          </div>
+        )}
+      />
+
+      <form.Field
+        name="exampleSentence"
+        // eslint-disable-next-line react/no-children-prop
+        children={(field) => (
+          <div>
+            <label className="text-sm font-medium">Example Sentence</label>
+            <input
+              value={field.state.value ?? ""}
+              onChange={(event) => field.handleChange(event.target.value)}
+              placeholder="An example sentence..."
+              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+            />
+          </div>
+        )}
+      />
+
+      <form.Field
+        name="originalSentence"
+        // eslint-disable-next-line react/no-children-prop
+        children={(field) => (
+          <div>
+            <label className="text-sm font-medium">Original Sentence</label>
+            <input
+              value={field.state.value ?? ""}
+              onChange={(event) => field.handleChange(event.target.value)}
+              placeholder="The sentence from the article..."
+              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
             />
           </div>
         )}
@@ -170,6 +283,15 @@ export function VocabularyForm({
             : isEditMode
               ? "Update note"
               : "Save word"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleRegenerate}
+          disabled={isExplaining}
+          className="rounded-md border px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-60"
+        >
+          {isExplaining ? "..." : "✨ Regenerate"}
         </button>
 
         <button

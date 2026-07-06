@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  createHighlightedVocabularyHtml,
-  type HighlightVocabularyItem,
-} from "@/lib/highlight-vocabulary-client";
+import { createHighlightedVocabularyHtml } from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 
 type TooltipState = {
@@ -17,7 +14,7 @@ type TooltipState = {
 type InteractiveDocReaderProps = {
   htmlContent: string;
   vocabularies: VocabularyItem[];
-  onSelectText: (text: string) => void;
+  onSelectText: (text: string, sentence: string) => void;
 };
 
 export function InteractiveDocReader({
@@ -25,15 +22,13 @@ export function InteractiveDocReader({
   vocabularies,
   onSelectText,
 }: InteractiveDocReaderProps) {
-  const [isSelecting, setIsSelecting] = useState(false);
-
+  const isSelectingRef = useRef(false);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const vocabularyById = useMemo(() => {
     return new Map(vocabularies.map((vocab) => [vocab.id, vocab]));
   }, [vocabularies]);
-
-  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const frameId = requestAnimationFrame(() => {
@@ -46,20 +41,19 @@ export function InteractiveDocReader({
   }, []);
 
   const highlightedHtml = useMemo(() => {
-    if (!isHydrated) {
-      return htmlContent;
-    }
+    if (!isHydrated) return htmlContent;
+    if (vocabularies.length === 0) return htmlContent;
 
     return createHighlightedVocabularyHtml(htmlContent, vocabularies);
   }, [htmlContent, vocabularies, isHydrated]);
 
   function handleMouseDown() {
-    setIsSelecting(true);
+    isSelectingRef.current = true;
     setTooltip(null);
   }
 
   function handleMouseUp() {
-    setIsSelecting(false);
+    isSelectingRef.current = false;
 
     const selection = window.getSelection();
     const selectedText = selection?.toString().trim();
@@ -74,11 +68,54 @@ export function InteractiveDocReader({
     if (!cleanText) return;
     if (cleanText.length > 80) return;
 
-    onSelectText(cleanText);
+    const sentence = extractSentenceFromSelection(selection);
+
+    onSelectText(cleanText, sentence);
+  }
+
+  function extractSentenceFromSelection(selection: Selection | null): string {
+    if (!selection?.anchorNode) return "";
+
+    const blockParent =
+      selection.anchorNode.nodeType === Node.TEXT_NODE
+        ? selection.anchorNode.parentElement
+        : selection.anchorNode instanceof HTMLElement
+          ? selection.anchorNode
+          : null;
+
+    const fullText = blockParent?.textContent ?? "";
+    const selected = selection.toString().trim();
+
+    const idx = fullText.indexOf(selected);
+
+    if (idx === -1) {
+      return fullText.slice(0, 200).trim();
+    }
+
+    let start = idx;
+    while (start > 0 && !/[.!?]/.test(fullText[start - 1])) {
+      start--;
+    }
+
+    if (start > 0 && /[.!?]/.test(fullText[start - 1])) {
+      start++;
+    }
+
+    let end = idx + selected.length;
+    while (end < fullText.length && !/[.!?]/.test(fullText[end])) {
+      end++;
+    }
+
+    if (end < fullText.length) {
+      end++;
+    }
+
+    return fullText.slice(start, end).trim().slice(0, 500);
   }
 
   function handleMouseOver(event: React.MouseEvent<HTMLDivElement>) {
-    if (isSelecting) return;
+    if (isSelectingRef.current) return;
+
     const target = event.target;
 
     if (!(target instanceof HTMLElement)) return;
@@ -88,11 +125,9 @@ export function InteractiveDocReader({
     if (!(mark instanceof HTMLElement)) return;
 
     const vocabId = mark.dataset.vocabId;
-
     if (!vocabId) return;
 
     const vocab = vocabularyById.get(vocabId);
-
     if (!vocab) return;
 
     const rect = mark.getBoundingClientRect();
@@ -105,7 +140,8 @@ export function InteractiveDocReader({
   }
 
   function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-    if (isSelecting) return;
+    if (isSelectingRef.current) return;
+
     const target = event.target;
 
     if (!(target instanceof HTMLElement)) {
@@ -121,6 +157,7 @@ export function InteractiveDocReader({
   }
 
   function handleMouseLeave() {
+    isSelectingRef.current = false;
     setTooltip(null);
   }
 

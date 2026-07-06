@@ -339,12 +339,16 @@ function showSavePopup(word, sentence) {
       <button class="dd-save-popup-close">&times;</button>
     </div>
     <div class="dd-save-popup-sentence">${escapeHtml(sentence)}</div>
+    <div class="dd-save-popup-explain-status">✨ Generating explanation...</div>
     <label>Meaning</label>
-    <input type="text" class="dd-save-popup-meaning" placeholder="Enter meaning..." />
+    <input type="text" class="dd-save-popup-meaning" placeholder="Generating..." disabled />
     <label>Note</label>
-    <input type="text" class="dd-save-popup-note" placeholder="Add a note..." />
+    <input type="text" class="dd-save-popup-note" placeholder="Generating..." disabled />
+    <label>Example</label>
+    <input type="text" class="dd-save-popup-example" placeholder="Generating..." disabled />
     <div class="dd-save-popup-actions">
       <button class="dd-save-popup-submit">Save</button>
+      <button class="dd-save-popup-regenerate" title="Regenerate explanation">✨</button>
     </div>
     <div class="dd-save-popup-status"></div>
   `;
@@ -357,26 +361,68 @@ function showSavePopup(word, sentence) {
   popup.style.left = "50%";
   popup.style.transform = "translateX(-50%)";
 
+  const meaningInput = popup.querySelector(".dd-save-popup-meaning");
+  const noteInput = popup.querySelector(".dd-save-popup-note");
+  const exampleInput = popup.querySelector(".dd-save-popup-example");
+  const explainStatus = popup.querySelector(".dd-save-popup-explain-status");
+
+  // Auto-explain via AI
+  async function requestExplanation() {
+    explainStatus.textContent = "✨ Generating explanation...";
+    explainStatus.style.display = "block";
+    meaningInput.disabled = true;
+    noteInput.disabled = true;
+    exampleInput.disabled = true;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: "EXPLAIN_VOCABULARY",
+        payload: {
+          text: word,
+          sentence: sentence || undefined,
+          sourceTitle: document.title,
+          sourceUrl: location.href,
+        },
+      });
+
+      if (response?.success && response.data) {
+        meaningInput.value = response.data.meaning || "";
+        noteInput.value = response.data.simpleExplanation || "";
+        exampleInput.value = response.data.exampleSentence || "";
+        explainStatus.style.display = "none";
+      } else {
+        explainStatus.textContent = "Could not generate explanation. Fill in manually.";
+      }
+    } catch {
+      explainStatus.textContent = "Could not generate explanation. Fill in manually.";
+    }
+
+    meaningInput.disabled = false;
+    noteInput.disabled = false;
+    exampleInput.disabled = false;
+  }
+
+  requestExplanation();
+
   // Close button
   popup.querySelector(".dd-save-popup-close").addEventListener("click", () => {
     popup.remove();
   });
 
+  // Regenerate button
+  popup.querySelector(".dd-save-popup-regenerate").addEventListener("click", () => {
+    requestExplanation();
+  });
+
   // Submit
   popup.querySelector(".dd-save-popup-submit").addEventListener("click", async () => {
-    const meaning = popup.querySelector(".dd-save-popup-meaning").value.trim();
-    const note = popup.querySelector(".dd-save-popup-note").value.trim();
+    const meaning = meaningInput.value.trim();
+    const note = noteInput.value.trim();
+    const example = exampleInput.value.trim();
     const statusEl = popup.querySelector(".dd-save-popup-status");
 
     statusEl.textContent = "Saving...";
 
-    /**
-     * Send message to background service worker.
-     * The content script cannot call the API directly because
-     * the page's CSP may block cross-origin requests. The background
-     * worker has the host_permissions declared in manifest.json,
-     * so it can freely call our API.
-     */
     try {
       const response = await chrome.runtime.sendMessage({
         type: "SAVE_VOCABULARY",
@@ -385,6 +431,7 @@ function showSavePopup(word, sentence) {
           meaning: meaning || undefined,
           note: note || undefined,
           originalSentence: sentence || undefined,
+          exampleSentence: example || undefined,
           sourceUrl: location.href,
           sourceHostname: location.hostname,
           pageTitle: document.title,

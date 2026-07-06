@@ -10,16 +10,21 @@ import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
 
 type DocLearningWorkspaceProps = {
   docId: string;
+  docTitle: string;
+  sourceUrl: string;
   htmlContent: string;
   vocabularies: VocabularyItem[];
 };
 
 export function DocLearningWorkspace({
   docId,
+  docTitle,
+  sourceUrl,
   htmlContent,
   vocabularies,
 }: DocLearningWorkspaceProps) {
   const [selectedWord, setSelectedWord] = useState("");
+  const [selectedSentence, setSelectedSentence] = useState("");
 
   const vocabularyByWord = useMemo(() => {
     return new Map(
@@ -33,7 +38,13 @@ export function DocLearningWorkspace({
 
   function clearSelection() {
     setSelectedWord("");
+    setSelectedSentence("");
     window.getSelection()?.removeAllRanges();
+  }
+
+  function handleSelectText(text: string, sentence: string) {
+    setSelectedWord(text);
+    setSelectedSentence(sentence);
   }
 
   return (
@@ -43,7 +54,7 @@ export function DocLearningWorkspace({
           <InteractiveDocReader
             htmlContent={htmlContent}
             vocabularies={vocabularies}
-            onSelectText={setSelectedWord}
+            onSelectText={handleSelectText}
           />
         </article>
       </section>
@@ -61,6 +72,9 @@ export function DocLearningWorkspace({
             key={`${existingVocabulary?.id ?? "new"}-${selectedWord}`}
             docId={docId}
             selectedWord={selectedWord}
+            selectedSentence={selectedSentence}
+            sourceTitle={docTitle}
+            sourceUrl={sourceUrl}
             existingVocabulary={existingVocabulary}
             onDone={clearSelection}
             onCancel={clearSelection}

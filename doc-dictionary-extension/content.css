@@ -133,6 +133,7 @@ mark.dd-vocab-highlight:hover {
   margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .dd-save-popup-submit {
@@ -150,6 +151,36 @@ mark.dd-vocab-highlight:hover {
 
 .dd-save-popup-submit:hover {
   background: #1d4ed8;
+}
+
+.dd-save-popup-regenerate {
+  padding: 8px 12px;
+  background: #f0f9ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.dd-save-popup-regenerate:hover {
+  background: #dbeafe;
+}
+
+.dd-save-popup-explain-status {
+  font-size: 12px;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.dd-save-popup input:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
 }
 
 .dd-save-popup-status {

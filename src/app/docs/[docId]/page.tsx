@@ -46,6 +46,8 @@ export default async function DocPage({ params }: DocPageProps) {
 
       <DocLearningWorkspace
         docId={doc.id}
+        docTitle={doc.title}
+        sourceUrl={doc.sourceUrl}
         htmlContent={doc.content?.htmlContent ?? ""}
         vocabularies={doc.vocabularies.map((vocab) => ({
           id: vocab.id,

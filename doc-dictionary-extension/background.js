@@ -38,6 +38,8 @@ async function handleMessage(message) {
       return getVocabularies(message.payload);
     case "SAVE_VOCABULARY":
       return saveVocabulary(message.payload);
+    case "EXPLAIN_VOCABULARY":
+      return explainVocabulary(message.payload);
     case "HEALTH_CHECK":
       return { success: true, status: "ok" };
     default:
@@ -72,6 +74,24 @@ async function getVocabularies({ url, hostname }) {
 async function saveVocabulary(payload) {
   try {
     const response = await fetch(`${API_BASE}/vocabularies`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+}
+
+/**
+ * Request an AI-generated explanation for a word/phrase in context.
+ * Called before saving so the popup can pre-fill meaning and note fields.
+ */
+async function explainVocabulary(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/vocabularies/explain`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
