@@ -1,9 +1,12 @@
+export type MeaningLanguage = "English" | "Vietnamese";
+
 export type ExplainVocabularyRequest = {
   text: string;
   sentence?: string;
   paragraph?: string;
   sourceTitle?: string;
   sourceUrl?: string;
+  meaningLanguage?: MeaningLanguage;
 };
 
 export type ExplainVocabularyResponse = {

@@ -48,6 +48,9 @@ export function VocabularyForm({
   const isEditMode = Boolean(existingVocabulary);
   const hasAutoExplained = useRef(false);
   const [isExplaining, setIsExplaining] = useState(false);
+  const [meaningLanguage, setMeaningLanguage] = useState<
+    "English" | "Vietnamese"
+  >("Vietnamese");
 
   const explainMutation = useMutation({
     mutationFn: explainVocabulary,
@@ -95,54 +98,56 @@ export function VocabularyForm({
 
   // Auto-explain for new vocabulary only (not edit mode)
   useEffect(() => {
-  if (isEditMode || hasAutoExplained.current || !selectedWord) return;
+    if (isEditMode || hasAutoExplained.current || !selectedWord) return;
 
-  hasAutoExplained.current = true;
+    hasAutoExplained.current = true;
 
-  async function runExplain() {
+    async function runExplain() {
+      setIsExplaining(true);
+
+      try {
+        const data = await explainMutation.mutateAsync({
+          text: selectedWord,
+          sentence: selectedSentence,
+          sourceTitle,
+          sourceUrl,
+          meaningLanguage,
+        });
+
+        form.setFieldValue("meaning", data.meaning ?? "");
+        form.setFieldValue("note", data.simpleExplanation ?? "");
+        form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
+
+        if (selectedSentence) {
+          form.setFieldValue("originalSentence", selectedSentence);
+        }
+      } finally {
+        setIsExplaining(false);
+      }
+    }
+
+    runExplain();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleRegenerate() {
     setIsExplaining(true);
 
     try {
       const data = await explainMutation.mutateAsync({
-        text: selectedWord,
+        text: form.getFieldValue("word"),
         sentence: selectedSentence,
         sourceTitle,
         sourceUrl,
+        meaningLanguage,
       });
 
       form.setFieldValue("meaning", data.meaning ?? "");
       form.setFieldValue("note", data.simpleExplanation ?? "");
       form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
-
-      if (selectedSentence) {
-        form.setFieldValue("originalSentence", selectedSentence);
-      }
     } finally {
       setIsExplaining(false);
     }
   }
-
-  runExplain();
-}, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-async function handleRegenerate() {
-  setIsExplaining(true);
-
-  try {
-    const data = await explainMutation.mutateAsync({
-      text: form.getFieldValue("word"),
-      sentence: selectedSentence,
-      sourceTitle,
-      sourceUrl,
-    });
-
-    form.setFieldValue("meaning", data.meaning ?? "");
-    form.setFieldValue("note", data.simpleExplanation ?? "");
-    form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
-  } finally {
-    setIsExplaining(false);
-  }
-}
 
   return (
     <form
@@ -207,6 +212,21 @@ async function handleRegenerate() {
           </div>
         )}
       />
+
+      <div>
+        <label className="text-sm font-medium">Meaning Language</label>
+        <select
+          value={meaningLanguage}
+          onChange={(event) => {
+            console.log("selected language", event.target.value);
+            setMeaningLanguage(event.target.value as "English" | "Vietnamese");
+          }}
+          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+        >
+          <option value="English">English</option>
+          <option value="Vietnamese">Vietnamese</option>
+        </select>
+      </div>
 
       <form.Field
         name="meaning"

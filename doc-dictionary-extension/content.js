@@ -19,9 +19,21 @@ const API_BASE = "http://localhost:3000/api/extension";
  * Modifying these could break interactive elements or code blocks.
  */
 const SKIP_TAGS = new Set([
-  "SCRIPT", "STYLE", "PRE", "CODE", "A",
-  "BUTTON", "INPUT", "TEXTAREA", "SELECT", "MARK",
-  "SVG", "CANVAS", "VIDEO", "AUDIO", "IFRAME",
+  "SCRIPT",
+  "STYLE",
+  "PRE",
+  "CODE",
+  "A",
+  "BUTTON",
+  "INPUT",
+  "TEXTAREA",
+  "SELECT",
+  "MARK",
+  "SVG",
+  "CANVAS",
+  "VIDEO",
+  "AUDIO",
+  "IFRAME",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -98,17 +110,13 @@ function shouldSkip(node) {
 function highlightTextNodes(root = document.body) {
   if (!vocabRegex) return;
 
-  const walker = document.createTreeWalker(
-    root,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        if (shouldSkip(node)) return NodeFilter.FILTER_REJECT;
-        if (!node.textContent?.trim()) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      },
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (shouldSkip(node)) return NodeFilter.FILTER_REJECT;
+      if (!node.textContent?.trim()) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
     },
-  );
+  });
 
   // Collect first, mutate later — avoids invalidating walker position.
   const textNodes = [];
@@ -129,7 +137,9 @@ function highlightTextNodes(root = document.body) {
 
       // Text before this match
       if (matchIndex > lastIndex) {
-        fragment.append(document.createTextNode(text.slice(lastIndex, matchIndex)));
+        fragment.append(
+          document.createTextNode(text.slice(lastIndex, matchIndex)),
+        );
       }
 
       // <mark> element wrapping the matched word
@@ -253,7 +263,9 @@ function handleSelection(event) {
   }
 
   // Don't show save button if selection is inside our own UI
-  if (event.target.closest?.(".dd-save-button, .dd-vocab-tooltip, .dd-save-popup")) {
+  if (
+    event.target.closest?.(".dd-save-button, .dd-vocab-tooltip, .dd-save-popup")
+  ) {
     return;
   }
 
@@ -340,6 +352,11 @@ function showSavePopup(word, sentence) {
     </div>
     <div class="dd-save-popup-sentence">${escapeHtml(sentence)}</div>
     <div class="dd-save-popup-explain-status">✨ Generating explanation...</div>
+    <label>Meaning Language</label>
+    <select class="dd-save-popup-language">
+    <option value="English">English</option>
+    <option value="Vietnamese">Vietnamese</option>
+    </select>
     <label>Meaning</label>
     <input type="text" class="dd-save-popup-meaning" placeholder="Generating..." disabled />
     <label>Note</label>
@@ -369,6 +386,7 @@ function showSavePopup(word, sentence) {
   // Auto-explain via AI
   async function requestExplanation() {
     explainStatus.textContent = "✨ Generating explanation...";
+    const languageSelect = popup.querySelector(".dd-save-popup-language");
     explainStatus.style.display = "block";
     meaningInput.disabled = true;
     noteInput.disabled = true;
@@ -382,6 +400,7 @@ function showSavePopup(word, sentence) {
           sentence: sentence || undefined,
           sourceTitle: document.title,
           sourceUrl: location.href,
+          meaningLanguage: languageSelect.value,
         },
       });
 
@@ -391,10 +410,12 @@ function showSavePopup(word, sentence) {
         exampleInput.value = response.data.exampleSentence || "";
         explainStatus.style.display = "none";
       } else {
-        explainStatus.textContent = "Could not generate explanation. Fill in manually.";
+        explainStatus.textContent =
+          "Could not generate explanation. Fill in manually.";
       }
     } catch {
-      explainStatus.textContent = "Could not generate explanation. Fill in manually.";
+      explainStatus.textContent =
+        "Could not generate explanation. Fill in manually.";
     }
 
     meaningInput.disabled = false;
@@ -410,54 +431,58 @@ function showSavePopup(word, sentence) {
   });
 
   // Regenerate button
-  popup.querySelector(".dd-save-popup-regenerate").addEventListener("click", () => {
-    requestExplanation();
-  });
+  popup
+    .querySelector(".dd-save-popup-regenerate")
+    .addEventListener("click", () => {
+      requestExplanation();
+    });
 
   // Submit
-  popup.querySelector(".dd-save-popup-submit").addEventListener("click", async () => {
-    const meaning = meaningInput.value.trim();
-    const note = noteInput.value.trim();
-    const example = exampleInput.value.trim();
-    const statusEl = popup.querySelector(".dd-save-popup-status");
+  popup
+    .querySelector(".dd-save-popup-submit")
+    .addEventListener("click", async () => {
+      const meaning = meaningInput.value.trim();
+      const note = noteInput.value.trim();
+      const example = exampleInput.value.trim();
+      const statusEl = popup.querySelector(".dd-save-popup-status");
 
-    statusEl.textContent = "Saving...";
+      statusEl.textContent = "Saving...";
 
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: "SAVE_VOCABULARY",
-        payload: {
-          word,
-          meaning: meaning || undefined,
-          note: note || undefined,
-          originalSentence: sentence || undefined,
-          exampleSentence: example || undefined,
-          sourceUrl: location.href,
-          sourceHostname: location.hostname,
-          pageTitle: document.title,
-        },
-      });
+      try {
+        const response = await chrome.runtime.sendMessage({
+          type: "SAVE_VOCABULARY",
+          payload: {
+            word,
+            meaning: meaning || undefined,
+            note: note || undefined,
+            originalSentence: sentence || undefined,
+            exampleSentence: example || undefined,
+            sourceUrl: location.href,
+            sourceHostname: location.hostname,
+            pageTitle: document.title,
+          },
+        });
 
-      if (response?.success) {
-        statusEl.textContent = "✓ Saved!";
-        statusEl.classList.add("dd-status-success");
+        if (response?.success) {
+          statusEl.textContent = "✓ Saved!";
+          statusEl.classList.add("dd-status-success");
 
-        // Add to local state and re-highlight immediately
-        vocabularies.push(response.data.vocabulary);
-        rebuildRegex();
-        clearHighlights();
-        highlightTextNodes();
+          // Add to local state and re-highlight immediately
+          vocabularies.push(response.data.vocabulary);
+          rebuildRegex();
+          clearHighlights();
+          highlightTextNodes();
 
-        setTimeout(() => popup.remove(), 800);
-      } else {
-        statusEl.textContent = `Error: ${response?.message ?? "Unknown error"}`;
+          setTimeout(() => popup.remove(), 800);
+        } else {
+          statusEl.textContent = `Error: ${response?.message ?? "Unknown error"}`;
+          statusEl.classList.add("dd-status-error");
+        }
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
         statusEl.classList.add("dd-status-error");
       }
-    } catch (err) {
-      statusEl.textContent = `Error: ${err.message}`;
-      statusEl.classList.add("dd-status-error");
-    }
-  });
+    });
 
   // Auto-focus meaning input
   popup.querySelector(".dd-save-popup-meaning").focus();
@@ -577,7 +602,10 @@ async function init() {
   await fetchVocabularies();
   highlightTextNodes();
   initSpaObserver();
-  console.log("[Doc Dictionary] Init complete. Vocabularies:", vocabularies.length);
+  console.log(
+    "[Doc Dictionary] Init complete. Vocabularies:",
+    vocabularies.length,
+  );
 }
 
 init();

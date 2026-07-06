@@ -6,6 +6,7 @@ export const explainVocabularySchema = z.object({
   paragraph: z.string().max(2000).optional(),
   sourceTitle: z.string().max(255).optional(),
   sourceUrl: z.string().max(2000).optional(),
+  meaningLanguage: z.enum(["English", "Vietnamese"]).default("English").optional(),
 });
 
 export type ExplainVocabularyInput = z.infer<typeof explainVocabularySchema>;
