@@ -416,7 +416,20 @@ function showSavePopup(word, sentence) {
     exampleInput.disabled = false;
   }
 
-  requestExplanation();
+  const isExistingVocab = vocabularies.find(
+    (v) => v.word.toLowerCase().trim() === word.toLowerCase().trim(),
+  );
+  if (isExistingVocab) {
+    explainStatus.textContent = "This word is already saved.";
+    meaningInput.value = isExistingVocab.meaning || "";
+    noteInput.value = isExistingVocab.note || "";
+    exampleInput.value = isExistingVocab.exampleSentence || "";
+    meaningInput.disabled = false;
+    noteInput.disabled = false;
+    exampleInput.disabled = false;
+  } else {
+    requestExplanation();
+  }
 
   // Close button
   popup.querySelector(".dd-save-popup-close").addEventListener("click", () => {
