@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { MOCK_USER_ID } from "@/bootstrap/configs/server/constants.config";
 import PrismaVocabularyRepository from "@/feature/core/vocabulary/data/repository/prisma-vocabulary.repository";
 import VocabularyMapper from "@/feature/core/vocabulary/data/repository/vocabulary.mapper";
 import { createExtensionVocabularySchema } from "@/feature/core/vocabulary/domain/params/extension-vocabulary.param";
+import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 
 const vocabularyRepo = new PrismaVocabularyRepository();
 
@@ -22,6 +22,7 @@ export async function OPTIONS() {
  * Returns vocabularies for a given page URL so the extension can highlight them.
  */
 export async function GET(request: NextRequest) {
+  const user = await requireCurrentUser();
   const { searchParams } = request.nextUrl;
   const sourceUrl = searchParams.get("url");
   const sourceHostname = searchParams.get("hostname");
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   const result = await vocabularyRepo.findBySource(
-    MOCK_USER_ID,
+    user.id,
     sourceUrl,
     sourceHostname,
   );
@@ -71,7 +72,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const result = await vocabularyRepo.create(MOCK_USER_ID, {
+  const user = await requireCurrentUser();
+  const result = await vocabularyRepo.create(user.id, {
     ...parsed.data,
     docId: parsed.data.docId ?? null,
   } as any);

@@ -1,9 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { MOCK_USER_ID } from "@/bootstrap/configs/server/constants.config";
 import { createManualDocSchema } from "@/feature/core/doc/domain/params/doc.param";
 import PrismaDocRepository from "@/feature/core/doc/data/repository/prisma-doc.repository";
+import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 
 const docRepo = new PrismaDocRepository();
 
@@ -13,7 +13,8 @@ export async function createManualDoc(formData: FormData) {
     sourceUrl: formData.get("sourceUrl"),
   });
 
-  const result = await docRepo.createManualDoc(MOCK_USER_ID, {
+  const user = await requireCurrentUser();
+  const result = await docRepo.createManualDoc(user.id, {
     title: parsed.title,
     sourceUrl: parsed.sourceUrl,
   });

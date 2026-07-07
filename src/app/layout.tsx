@@ -4,6 +4,8 @@ import { QueryProvider } from "@/components/providers/query-provider";
 
 import "./globals.css";
 import { AppHeader } from "@/components/layout/app-header";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 
 const geistSans = Geist({
@@ -24,11 +26,16 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createSupabaseServerClient();
+
+  const {
+  data: { user },
+  } = await supabase.auth.getUser();
   return (
     <html
       lang="en"
@@ -36,10 +43,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
 
+      <AuthProvider initialUser={user}>
         <QueryProvider>
           <AppHeader />
           <main className="flex-1">{children}</main>
         </QueryProvider>
+      </AuthProvider>
       </body>
     </html>
   );

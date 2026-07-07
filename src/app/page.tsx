@@ -1,8 +1,5 @@
-import { ArrowRight } from "lucide-react";
 import { Suspense } from 'react'
 
-import { AppHeader } from "@/components/layout/app-header";
-import { Button } from "@/components/ui/button";
 import { getRecentDocs } from "@/app/docs/controller/doc.controller";
 import { UrlImportForm } from "@/components/docs/url-import-form";
 
@@ -11,7 +8,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <AppHeader />
 
       <main>
         <section className="mx-auto max-w-4xl px-4 pb-10 pt-16 text-center sm:pt-20">

@@ -2,8 +2,11 @@ import Link from "next/link";
 import { BookOpenText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 
-export function AppHeader() {
+export async function AppHeader() {
+  const user = await requireCurrentUser();
+
   return (
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -18,7 +21,7 @@ export function AppHeader() {
 
         <nav className="flex items-center gap-3 text-sm">
           <Button size="sm" variant="default">
-            Login
+           {user ? 'Logout' : 'Login'}
           </Button>
 
           <Link href="#" className="hidden text-muted-foreground hover:text-foreground sm:block">

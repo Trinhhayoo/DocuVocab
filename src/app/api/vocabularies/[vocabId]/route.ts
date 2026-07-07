@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_USER_ID } from "@/bootstrap/configs/server/constants.config";
 import { updateVocabularySchema } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
 import PrismaVocabularyRepository from "@/feature/core/vocabulary/data/repository/prisma-vocabulary.repository";
 import updateVocabularyUsecase from "@/feature/core/vocabulary/domain/usecase/update-vocabulary.usecase";
 import VocabularyMapper from "@/feature/core/vocabulary/data/repository/vocabulary.mapper";
+import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 
 type RouteContext = {
   params: Promise<{
@@ -15,6 +15,7 @@ type RouteContext = {
 const vocabularyRepo = new PrismaVocabularyRepository();
 
 export async function PATCH(request: Request, context: RouteContext) {
+  const user = await requireCurrentUser();
   const { vocabId } = await context.params;
   const body = await request.json();
 
@@ -29,7 +30,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const result = await updateVocabularyUsecase(
     vocabularyRepo,
-    MOCK_USER_ID,
+    user.id,
     vocabId,
     parsed.data,
   );
@@ -52,7 +53,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 export async function DELETE(request: Request, context: RouteContext) {
   const { vocabId } = await context.params;
 
-  const result = await vocabularyRepo.delete(MOCK_USER_ID, vocabId);
+  const user = await requireCurrentUser();
+  const result = await vocabularyRepo.delete(user.id, vocabId);
 
   if (!result.success) {
     const status = result.failure.message === "vocabulary.notFound" ? 404 : 500;

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_USER_ID } from "@/bootstrap/configs/server/constants.config";
 import { extractReadableContent } from "@/lib/readability";
 import { sanitizeHtml } from "@/lib/sanitize-html";
 import { normalizeHtmlUrls } from "@/lib/normalize-html";
@@ -8,6 +7,7 @@ import { highlightCodeBlocks } from "@/lib/highlight-code";
 import { importUrlSchema } from "@/feature/core/doc/domain/params/doc.param";
 import PrismaDocRepository from "@/feature/core/doc/data/repository/prisma-doc.repository";
 import importDocUsecase from "@/feature/core/doc/domain/usecase/import-doc.usecase";
+import requireCurrentUserUsecase from "@/feature/core/user/domain/usecase/require-current-user.usecase";
 
 const docRepo = new PrismaDocRepository();
 
@@ -18,6 +18,7 @@ async function processHtml(html: string, sourceUrl: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
+  const user = await requireCurrentUserUsecase();
   const body = await request.json();
 
   const parsed = importUrlSchema.safeParse(body);
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await importDocUsecase(docRepo, MOCK_USER_ID, {
+  const result = await importDocUsecase(docRepo, user.id, {
     url: parsed.data.url,
     extractContent: extractReadableContent,
     processHtml,
