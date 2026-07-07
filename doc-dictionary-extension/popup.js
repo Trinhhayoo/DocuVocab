@@ -1,3 +1,5 @@
+import { UrlConfig } from "./urlConfig.js";
+
 /* ============================================================
    Doc Dictionary — Popup Script
    ============================================================
@@ -18,7 +20,7 @@ async function init() {
   try {
     const hostname = pageUrl ? new URL(pageUrl).hostname : "";
     const params = new URLSearchParams({ url: pageUrl, hostname });
-    const res = await fetch(`${process.env.API_BASE}/vocabularies?${params}`);
+    const res = await fetch(`${UrlConfig.API_BASE}/vocabularies?${params}`);
     const data = await res.json();
 
     if (data.success) {
