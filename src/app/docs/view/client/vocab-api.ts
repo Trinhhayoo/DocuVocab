@@ -55,7 +55,6 @@ export async function updateVocabulary({
 export async function explainVocabulary(
   input: ExplainVocabularyInput,
 ): Promise<ExplainVocabularyResponse> {
-  console.log("Calling explainVocabulary API with input:", input);
   const raw = await endpoint.HttpBoundary.post<
     IBaseHttpResponse<ExplainVocabularyResponse>
   >(endpoint.vocabularyExplain, { body: input });

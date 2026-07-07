@@ -3,13 +3,12 @@ import type {
     ExplainVocabularyRequest,
     ExplainVocabularyResponse,
 } from "./llm-provider.interface";
+import { Ollama } from 'ollama'
 
-const OLLAMA_API_URL = "http://localhost:11434/api/generate";
-const OLLAMA_MODEL = "llama3.2:3b";
+const OLLAMA_MODEL = "gpt-oss:120b";
 
 function buildPrompt(request: ExplainVocabularyRequest): string {
     const meaningLanguage = request.meaningLanguage ?? "English";
-    console.log("Real Building prompt with meaningLanguage:", request);
 
     const languageRule =
         meaningLanguage === "Vietnamese"
@@ -47,7 +46,7 @@ function buildPrompt(request: ExplainVocabularyRequest): string {
         }
 
         Rules:
-        - The meaning must match this context.
+        - The meaning must match this context - Just the meaning of the word like dictionary entries.
         - The example sentence must be different from the original sentence.
         - The domain must be one of: "tech", "finance", "legal", "general".`;
 }
@@ -63,57 +62,46 @@ function cleanJsonText(text: string): string {
 
 export default class GeminiLLMProvider implements LLMProvider {
     private apiKey: string;
+    public ollama: Ollama;
 
     constructor(apiKey: string) {
         this.apiKey = apiKey;
+        this.ollama = new Ollama({
+        host: 'https://ollama.com',
+        headers: { Authorization: 'Bearer ' + this.apiKey },
+        })
     }
 
     async explainVocabulary(
         request: ExplainVocabularyRequest,
     ): Promise<ExplainVocabularyResponse> {
-        console.log("Calling explainVocabulary with request:", request);
         const prompt = buildPrompt(request);
 
-        const response = await fetch(OLLAMA_API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
+        const generateResponse = await this.ollama.generate({
                 model: OLLAMA_MODEL,
                 prompt,
                 stream: false,
                 format: "json",
                 options: {
                     temperature: 0.3,
-                },
-            }),
-        });
+                }});
 
-        if (!response.ok) {
-            const errorBody = await response.text();
+        if (!generateResponse.done) {
+            const errorBody = await generateResponse.response;
 
-            throw new Error(`Ollama API error (${response.status}): ${errorBody}`);
+            throw new Error(`Ollama API error: ${errorBody}`);
         }
 
-        const data = await response.json();
-
-        const rawText = data?.response ?? "";
-
-        if (!rawText) {
-            throw new Error("Ollama returned an empty response.");
-        }
-
-        const parsed = JSON.parse(
-            cleanJsonText(rawText),
+        const data = await JSON.parse(
+            cleanJsonText(generateResponse.response)
         ) as ExplainVocabularyResponse;
 
         const validDomains = ["tech", "finance", "legal", "general"] as const;
 
-        if (!validDomains.includes(parsed.domain)) {
-            parsed.domain = "general";
+        if (!validDomains.includes(data.domain)) {
+            data.domain = "general";
         }
 
-        return parsed;
+        return data;
     }
 }

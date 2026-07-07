@@ -218,7 +218,6 @@ export function VocabularyForm({
         <select
           value={meaningLanguage}
           onChange={(event) => {
-            console.log("selected language", event.target.value);
             setMeaningLanguage(event.target.value as "English" | "Vietnamese");
           }}
           className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
@@ -234,11 +233,11 @@ export function VocabularyForm({
         children={(field) => (
           <div>
             <label className="text-sm font-medium">Meaning</label>
-            <input
+            <textarea
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
               placeholder="Meaning or translation"
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="mt-1 min-h-12 w-full rounded-md border px-3 py-2 text-sm"
             />
           </div>
         )}
@@ -270,22 +269,6 @@ export function VocabularyForm({
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
               placeholder="An example sentence..."
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-            />
-          </div>
-        )}
-      />
-
-      <form.Field
-        name="originalSentence"
-        // eslint-disable-next-line react/no-children-prop
-        children={(field) => (
-          <div>
-            <label className="text-sm font-medium">Original Sentence</label>
-            <input
-              value={field.state.value ?? ""}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="The sentence from the article..."
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
             />
           </div>

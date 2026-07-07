@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 
 import { explainVocabularySchema } from "@/feature/core/vocabulary/domain/params/explain-vocabulary.param";
 import explainVocabularyUsecase from "@/feature/core/vocabulary/domain/usecase/explain-vocabulary.usecase";
-import GeminiLLMProvider from "@/feature/support/llm/gemini-llm-provider";
+import GeminiLLMProvider from "@/feature/support/llm/ollama-llm-provider";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 export async function POST(request: Request) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  console.log("GEMINI_API_KEY:", apiKey);
+  const apiKey = process.env.OLLAMA_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json(
@@ -21,7 +20,6 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const parsed = explainVocabularySchema.safeParse(body);
-  console.log("Parsed request body:", parsed);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -30,28 +28,9 @@ export async function POST(request: Request) {
     );
   }
 
-  // const llmProvider = new GeminiLLMProvider(apiKey);
-  // const result = await explainVocabularyUsecase(llmProvider, parsed.data);
-
-  // if (!result.success) {
-  //   return NextResponse.json(
-  //     { success: false, status: "500", message: result.failure.message },
-  //     { status: 500 },
-  //   );
-  // }
-
-  // return NextResponse.json({
-  //   success: true,
-  //   status: "200",
-  //   data: result.data,
-  // });
-
   try {
   const llmProvider = new GeminiLLMProvider(apiKey);
   const result = await explainVocabularyUsecase(llmProvider, parsed.data);
-
-  console.log("Usecase result:", result);
-
   if (!result.success) {
     console.error("Explain failed:", result.failure);
 

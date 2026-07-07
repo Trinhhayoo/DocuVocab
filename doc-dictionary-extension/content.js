@@ -255,9 +255,6 @@ function initSelectionListener() {
 function handleSelection(event) {
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
-
-  console.log("[Doc Dictionary] Selection detected:", selectedText);
-
   if (!selectedText || selectedText.length === 0 || selectedText.length > 100) {
     return;
   }
@@ -597,15 +594,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 async function init() {
-  console.log("[Doc Dictionary] Content script loaded on:", location.href);
   initSelectionListener();
   await fetchVocabularies();
   highlightTextNodes();
   initSpaObserver();
-  console.log(
-    "[Doc Dictionary] Init complete. Vocabularies:",
-    vocabularies.length,
-  );
 }
 
 init();
