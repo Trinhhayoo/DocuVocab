@@ -11,9 +11,6 @@
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-
-const API_BASE = "http://localhost:3000/api/extension";
-
 /**
  * Tags whose text nodes must NOT be highlighted.
  * Modifying these could break interactive elements or code blocks.
@@ -203,7 +200,6 @@ function showTooltip(event) {
   const parts = [];
   if (vocab.meaning) parts.push(vocab.meaning);
   if (vocab.note) parts.push(`📝 ${vocab.note}`);
-  if (vocab.originalSentence) parts.push(`"${vocab.originalSentence}"`);
   if (parts.length === 0) parts.push("(no meaning saved)");
 
   tip.innerHTML = parts.map((p) => `<div>${escapeHtml(p)}</div>`).join("");

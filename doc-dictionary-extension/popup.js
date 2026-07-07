@@ -5,9 +5,6 @@
    Shows: API connection status, word count for current page,
    page URL, and action buttons.
    ============================================================ */
-
-const API_BASE = "http://localhost:3000/api/extension";
-
 async function init() {
   // 1. Show current page URL
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -21,7 +18,7 @@ async function init() {
   try {
     const hostname = pageUrl ? new URL(pageUrl).hostname : "";
     const params = new URLSearchParams({ url: pageUrl, hostname });
-    const res = await fetch(`${API_BASE}/vocabularies?${params}`);
+    const res = await fetch(`${process.env.API_BASE}/vocabularies?${params}`);
     const data = await res.json();
 
     if (data.success) {

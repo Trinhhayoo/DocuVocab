@@ -19,8 +19,6 @@
      3. Route messages between content script and popup.
    ============================================================ */
 
-const API_BASE = "http://localhost:3000/api/extension";
-
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
@@ -59,7 +57,7 @@ async function handleMessage(message) {
 async function getVocabularies({ url, hostname }) {
   try {
     const params = new URLSearchParams({ url, hostname });
-    const response = await fetch(`${API_BASE}/vocabularies?${params}`);
+    const response = await fetch(`${process.env.API_BASE}/vocabularies?${params}`);
     const data = await response.json();
     return data;
   } catch (err) {
@@ -73,7 +71,7 @@ async function getVocabularies({ url, hostname }) {
  */
 async function saveVocabulary(payload) {
   try {
-    const response = await fetch(`${API_BASE}/vocabularies`, {
+    const response = await fetch(`${process.env.API_BASE}/vocabularies`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -91,7 +89,7 @@ async function saveVocabulary(payload) {
  */
 async function explainVocabulary(payload) {
   try {
-    const response = await fetch(`${API_BASE}/vocabularies/explain`, {
+    const response = await fetch(`${process.env.API_BASE}/vocabularies/explain`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
