@@ -16,6 +16,12 @@ const vocabularyRepo = new PrismaVocabularyRepository();
 
 export async function PATCH(request: Request, context: RouteContext) {
   const user = await requireCurrentUser();
+  if (!user) {
+    return NextResponse.json(
+      { success: false, status: "401", message: "Unauthorized" },
+      { status: 401 },
+    );
+  }
   const { vocabId } = await context.params;
   const body = await request.json();
 
@@ -54,6 +60,12 @@ export async function DELETE(request: Request, context: RouteContext) {
   const { vocabId } = await context.params;
 
   const user = await requireCurrentUser();
+  if (!user) {
+    return NextResponse.json(
+      { success: false, status: "401", message: "Unauthorized" },
+      { status: 401 },
+    );
+  }
   const result = await vocabularyRepo.delete(user.id, vocabId);
 
   if (!result.success) {

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function requireCurrentUser() {
@@ -10,7 +9,7 @@ export async function requireCurrentUser() {
     } = await supabase.auth.getUser();
 
     if (error || !user) {
-       redirect("/login");
+        return null;
     }
     console.log("Current user:", user);
     return user;

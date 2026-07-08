@@ -13,6 +13,7 @@ import {
 } from "@/app/docs/view/client/vocab-api";
 import type { CreateVocabularyInput } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
+import { mapHttpErrorToMessage } from "@/feature/common/data/http/http-error-message.mapper";
 
 const formSchema = z.object({
   docId: z.string(),
@@ -188,7 +189,7 @@ export function VocabularyForm({
 
       {explainMutation.isError && (
         <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Could not generate explanation. You can fill in manually or try again.
+          {mapHttpErrorToMessage(explainMutation.error)}
         </div>
       )}
 
@@ -307,7 +308,7 @@ export function VocabularyForm({
       </div>
 
       {saveMutation.isError && (
-        <p className="text-sm text-red-500">{saveMutation.error.message}</p>
+        <p className="text-sm text-red-500">{mapHttpErrorToMessage(saveMutation.error)}</p>
       )}
     </form>
   );

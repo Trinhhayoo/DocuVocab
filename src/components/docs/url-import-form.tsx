@@ -9,6 +9,7 @@ import {
   importUrlSchema,
   type ImportUrlInput,
 } from "@/feature/core/doc/domain/params/doc.param";
+import { mapHttpErrorToMessage } from "@/feature/common/data/http/http-error-message.mapper";
 
 export function UrlImportForm() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export function UrlImportForm() {
 
       {importMutation.isError && (
         <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {importMutation.error.message}
+            {mapHttpErrorToMessage(importMutation.error)}
         </div>
       )}
 

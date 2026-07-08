@@ -1,11 +1,23 @@
+"use client";
 import Link from "next/link";
 import { BookOpenText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
+import { useAuth } from "../providers/auth-provider";
+import { signInWithGoogle } from "@/lib/supabase/signInWithGoogle";
+import signOutUsecase from "@/feature/core/user/domain/usecase/sign-out.usecase";
 
-export async function AppHeader() {
-  const user = await requireCurrentUser();
+export function AppHeader() {
+  const { user } = useAuth();
+
+  const handleClick = async () => {
+    if (user) {
+      await signOutUsecase();
+      window.location.href = "/";
+    } else {
+      await signInWithGoogle();
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
@@ -20,8 +32,8 @@ export async function AppHeader() {
        
 
         <nav className="flex items-center gap-3 text-sm">
-          <Button size="sm" variant="default">
-           {user ? 'Logout' : 'Login'}
+          <Button size="sm" variant="default" onClick={handleClick}>
+            {user != null ? 'Logout' : 'Login'}
           </Button>
 
           <Link href="#" className="hidden text-muted-foreground hover:text-foreground sm:block">

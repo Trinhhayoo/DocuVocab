@@ -8,9 +8,9 @@ const docRepo = new PrismaDocRepository();
 
 export async function getRecentDocs() {
   const user = await requireCurrentUser();
-  const result = await getRecentDocsUsecase(docRepo, user.id);
+  const result = user ? await getRecentDocsUsecase(docRepo, user.id) : null;
 
-  if (!result.success) {
+  if (!result || !result.success) {
     return [];
   }
 

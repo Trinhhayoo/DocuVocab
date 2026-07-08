@@ -14,13 +14,13 @@ export async function createManualDoc(formData: FormData) {
   });
 
   const user = await requireCurrentUser();
-  const result = await docRepo.createManualDoc(user.id, {
+  const result = user ? await docRepo.createManualDoc(user.id, {
     title: parsed.title,
     sourceUrl: parsed.sourceUrl,
-  });
+  }) : null;
 
-  if (!result.success) {
-    throw new Error(result.failure.message);
+  if (!result || !result.success) {
+    throw new Error(result?.failure?.message || "Failed to create document");
   }
 
   redirect(`/docs/${result.data.id}`);

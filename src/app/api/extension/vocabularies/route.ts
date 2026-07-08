@@ -23,6 +23,12 @@ export async function OPTIONS() {
  */
 export async function GET(request: NextRequest) {
   const user = await requireCurrentUser();
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401, headers: CORS_HEADERS },
+    );
+  }
   const { searchParams } = request.nextUrl;
   const sourceUrl = searchParams.get("url");
   const sourceHostname = searchParams.get("hostname");
@@ -73,6 +79,12 @@ export async function POST(request: NextRequest) {
   }
 
   const user = await requireCurrentUser();
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401, headers: CORS_HEADERS },
+    );
+  }
   const result = await vocabularyRepo.create(user.id, {
     ...parsed.data,
     docId: parsed.data.docId ?? null,

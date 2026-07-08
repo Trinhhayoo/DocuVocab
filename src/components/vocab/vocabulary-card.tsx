@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { updateVocabulary } from "@/app/docs/view/client/vocab-api";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
+import { mapHttpErrorToMessage } from "@/feature/common/data/http/http-error-message.mapper";
 
 type VocabularyCardProps = {
   vocabulary: VocabularyItem;
@@ -125,7 +126,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
 
         {updateMutation.isError && (
           <p className="text-xs text-red-500">
-            {updateMutation.error.message}
+              {mapHttpErrorToMessage(updateMutation.error)}
           </p>
         )}
       </form>
