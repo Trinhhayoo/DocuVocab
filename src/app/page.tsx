@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 
 import { getRecentDocs } from "@/app/docs/controller/doc.controller";
 import { UrlImportForm } from "@/components/docs/url-import-form";
+import { DocList } from '@/components/docs/doc-list';
 
 export default async function HomePage() {
   const recentDocs = await getRecentDocs();
@@ -37,28 +38,7 @@ export default async function HomePage() {
         </div>
 
         <Suspense fallback={<div>Loading...</div>}>
-        {recentDocs.length === 0 ? (
-          <div className="rounded-xl border border-dashed bg-white p-8 text-center text-sm text-muted-foreground">
-            No documents yet. Create your first test document above.
-          </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {recentDocs.map((doc) => (
-              <a
-                key={doc.id}
-                href={`/docs/${doc.id}`}
-                className="rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <h3 className="line-clamp-2 text-sm font-semibold">
-                  {doc.title}
-                </h3>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {doc.siteName ?? new URL(doc.sourceUrl).hostname}
-                </p>
-              </a>
-            ))}
-          </div>
-        )}
+        <DocList initialDocs={recentDocs} />
       </Suspense>
       </section>
 

@@ -4,7 +4,6 @@ import { createVocabularySchema } from "@/feature/core/vocabulary/domain/params/
 import PrismaVocabularyRepository from "@/feature/core/vocabulary/data/repository/prisma-vocabulary.repository";
 import createVocabularyUsecase from "@/feature/core/vocabulary/domain/usecase/create-vocabulary.usecase";
 import VocabularyMapper from "@/feature/core/vocabulary/data/repository/vocabulary.mapper";
-import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 import requireCurrentUserUsecase from "@/feature/core/user/domain/usecase/require-current-user.usecase";
 
 const vocabularyRepo = new PrismaVocabularyRepository();
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  
+
   const result = await createVocabularyUsecase(
     vocabularyRepo,
     user.id,
