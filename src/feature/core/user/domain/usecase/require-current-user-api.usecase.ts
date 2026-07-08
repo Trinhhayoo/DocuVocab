@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { failure, success } from "@/feature/common/data/result";
 import UnauthorizedFailure from "../failure/unauthorized.failure";
+import type { User } from "@supabase/supabase-js";
 
 export default async function requireCurrentUserApiUsecase() {
   const supabase = await createSupabaseServerClient();
@@ -16,5 +17,5 @@ export default async function requireCurrentUserApiUsecase() {
     return failure(new UnauthorizedFailure());
   }
 
-  return success(user);
+  return success<User>(user);
 }
