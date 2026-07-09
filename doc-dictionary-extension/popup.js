@@ -1,5 +1,4 @@
-import { UrlConfig } from "./urlConfig.js";
-
+const API_BASE = "https://docu-vocab-kappa.vercel.app/api/extension"; // TODO: Use env variable for production
 /* ============================================================
    Doc Dictionary — Popup Script
    ============================================================
@@ -20,10 +19,11 @@ async function init() {
   try {
     const hostname = pageUrl ? new URL(pageUrl).hostname : "";
     const params = new URLSearchParams({ url: pageUrl, hostname });
-    const res = await fetch(`${UrlConfig.API_BASE}/vocabularies?${params}`, {
+    const res = await fetch(`${API_BASE}/vocabularies?${params}`, {
       headers: { "Content-Type": "application/json", credentials: "include" },
     });
     const data = await res.json();
+    console.log("API health check response:", data);
 
     if (data.success) {
       apiDot.classList.add("ok");
@@ -43,7 +43,7 @@ async function init() {
 
   // 3. Dashboard button — opens the web app
   document.getElementById("btn-dashboard").addEventListener("click", () => {
-    chrome.tabs.create({ url: "http://localhost:3000" });
+    chrome.tabs.create({ url: "https://docu-vocab-kappa.vercel.app" });
   });
 
   // 4. Re-highlight — tells the content script to re-run highlighting

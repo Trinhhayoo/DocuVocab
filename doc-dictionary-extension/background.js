@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
-const WEB_APP_URL = "http://localhost:3000";
+const WEB_APP_URL = "https://docu-vocab-kappa.vercel.app";
 const API_BASE = `${WEB_APP_URL}/api/extension`;
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
