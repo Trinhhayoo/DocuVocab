@@ -1,9 +1,8 @@
-// src/feature/core/user/domain/usecase/require-current-user-api.usecase.ts
+import type { User } from "@supabase/supabase-js";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { failure, Result, success } from "@/feature/common/data/result";
+import { failure, type Result, success } from "@/feature/common/data/result";
 import UnauthorizedFailure from "../failure/unauthorized.failure";
-import type { User } from "@supabase/supabase-js";
 
 export default async function requireCurrentUserApiUsecase(): Promise<Result<User>> {
   const supabase = await createSupabaseServerClient();
@@ -17,5 +16,5 @@ export default async function requireCurrentUserApiUsecase(): Promise<Result<Use
     return failure(new UnauthorizedFailure());
   }
 
-  return success<User>(user);
+  return success(user);
 }

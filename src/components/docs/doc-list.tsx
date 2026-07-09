@@ -1,5 +1,3 @@
-// src/components/docs/recent-docs-section.tsx
-
 "use client";
 
 import Link from "next/link";

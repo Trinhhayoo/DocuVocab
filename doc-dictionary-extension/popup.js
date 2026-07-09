@@ -20,7 +20,9 @@ async function init() {
   try {
     const hostname = pageUrl ? new URL(pageUrl).hostname : "";
     const params = new URLSearchParams({ url: pageUrl, hostname });
-    const res = await fetch(`${UrlConfig.API_BASE}/vocabularies?${params}`);
+    const res = await fetch(`${UrlConfig.API_BASE}/vocabularies?${params}`, {
+      headers: { "Content-Type": "application/json", credentials: "include" },
+    });
     const data = await res.json();
 
     if (data.success) {

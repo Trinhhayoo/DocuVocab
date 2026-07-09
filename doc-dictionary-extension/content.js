@@ -481,11 +481,20 @@ function showSavePopup(word, sentence) {
 
           setTimeout(() => popup.remove(), 800);
         } else {
-          statusEl.textContent = `Error: ${response?.message ?? "Unknown error"}`;
+          
+          if (response?.status === "401") {
+            renderAuthError(statusEl);
+            return;
+          }
+
+          statusEl.textContent = mapApiErrorToUserMessage(response);
           statusEl.classList.add("dd-status-error");
         }
       } catch (err) {
-        statusEl.textContent = `Error: ${err.message}`;
+        statusEl.textContent = mapApiErrorToUserMessage({
+          status: "500",
+          message: "Cannot connect to DocuVocab. Please try again.",
+        });
         statusEl.classList.add("dd-status-error");
       }
     });
@@ -590,8 +599,34 @@ function rebuildRegex() {
   vocabRegex = buildRegex(vocabularies.map((v) => v.word));
 }
 
+function renderAuthError(statusEl) {
+  statusEl.classList.add("dd-status-error");
+  statusEl.innerHTML = `
+    <div>🔒 Please sign in to save vocabulary.</div>
+    <button class="dd-login-button">Login with Google</button>
+  `;
+  console.log("renderAuthError called with statusEl:", statusEl);
+
+  statusEl.querySelector(".dd-login-button").addEventListener("click", () => {
+    console.log("Login button clicked");
+
+    chrome.runtime.sendMessage(
+      {
+        type: "OPEN_LOGIN_PAGE",
+        payload: {
+          returnTo: location.href,
+        },
+      },
+      (response) => {
+        console.log("Background response:", response);
+        console.log("Runtime error:", chrome.runtime.lastError);
+      },
+    );
+  });
+}
+
 // ---------------------------------------------------------------------------
-// 7. Init
+// 8. Init
 // ---------------------------------------------------------------------------
 
 /** Listen for messages from popup (e.g., re-highlight command). */
@@ -599,6 +634,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "REHIGHLIGHT") {
     onPageChange().then(() => sendResponse({ success: true }));
     return true; // async response
+  }
+  if (message.type === "AUTH_LOGIN_SUCCESS") {
+    const statusEl = document.querySelector(".dd-save-popup-status");
+
+    if (statusEl) {
+      statusEl.textContent = "✓ Signed in. You can save now.";
+      statusEl.classList.remove("dd-status-error");
+      statusEl.classList.add("dd-status-success");
+    }
+
+    sendResponse({ success: true });
+    return true;
   }
 });
 

@@ -4,19 +4,20 @@
   "version": "0.1.0",
   "description": "Highlight saved vocabulary on any webpage. Select text to save new words.",
 
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "scripting", "tabs", "identity"],
 
-  "host_permissions": ["http://localhost:3000/*"],
+  "host_permissions": [
+    "https://docu-vocab-kappa.vercel.app/*",
+    "http://localhost:3000/*"
+  ],
 
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
+    "service_worker": "background.js"  },
 
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["error-mapper.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }

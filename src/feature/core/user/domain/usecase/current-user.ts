@@ -9,7 +9,8 @@ export async function requireCurrentUser() {
     } = await supabase.auth.getUser();
 
     if (error || !user) {
-        return null;
+
+        return new Error("Unauthorized: No current user found.");
     }
     console.log("Current user:", user);
     return user;

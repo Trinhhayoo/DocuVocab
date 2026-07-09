@@ -1,5 +1,3 @@
-import { UrlConfig } from "./urlConfig.js";
-
 /* ============================================================
    Doc Dictionary — Background Service Worker
    ============================================================
@@ -24,11 +22,25 @@ import { UrlConfig } from "./urlConfig.js";
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
+const WEB_APP_URL = "http://localhost:3000";
+const API_BASE = `${WEB_APP_URL}/api/extension`;
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  console.log("Received message:", message);
+
   // Return true to indicate we will respond asynchronously.
   // Without this, the message channel closes before the fetch completes.
-  handleMessage(message).then(sendResponse);
+  // handleMessage(message).then(sendResponse);
+  handleMessage(message)
+    .then(sendResponse)
+    .catch((error) => {
+      console.error("Background error:", error);
+      sendResponse({
+        success: false,
+        status: "500",
+        message: error.message,
+      });
+    });
   return true;
 });
 
@@ -42,14 +54,89 @@ async function handleMessage(message) {
       return explainVocabulary(message.payload);
     case "HEALTH_CHECK":
       return { success: true, status: "ok" };
+
+    case "OPEN_LOGIN_PAGE":
+      console.log(
+        "OPEN_LOGIN_PAGE message received with payload:",
+        message.payload,
+      );
+      return loginWithGoogleFromExtension(message.payload?.returnTo);
     default:
-      return { success: false, message: `Unknown message type: ${message.type}` };
+      return {
+        success: false,
+        message: `Unknown message type: ${message.type}`,
+      };
   }
 }
 
 // ---------------------------------------------------------------------------
 // API calls
 // ---------------------------------------------------------------------------
+
+async function getAuthToken() {
+  const result = await chrome.storage.local.get(["supabaseAccessToken"]);
+  return result.supabaseAccessToken ?? null;
+}
+
+async function loginWithGoogleFromExtension(returnTo) {
+  console.log("loginWithGoogleFromExtension called with returnTo:", returnTo);
+  const redirectUrl = chrome.identity.getRedirectURL();
+
+  const loginUrl = new URL(`${WEB_APP_URL}/auth/extension/login`);
+  loginUrl.searchParams.set("next", returnTo || WEB_APP_URL);
+  loginUrl.searchParams.set("redirect_uri", redirectUrl);
+
+  return new Promise((resolve) => {
+    chrome.identity.launchWebAuthFlow(
+      {
+        url: loginUrl.toString(),
+        interactive: true,
+      },
+      async (callbackUrl) => {
+        if (chrome.runtime.lastError || !callbackUrl) {
+          resolve({
+            success: false,
+            status: "401",
+            message:
+              chrome.runtime.lastError?.message ?? "Login was cancelled.",
+          });
+          return;
+        }
+
+        const url = new URL(callbackUrl);
+        const accessToken = url.searchParams.get("access_token");
+        const refreshToken = url.searchParams.get("refresh_token");
+
+        if (!accessToken || !refreshToken) {
+          resolve({
+            success: false,
+            status: "401",
+            message: "Login failed. Missing auth token.",
+          });
+          return;
+        }
+
+        await chrome.storage.local.set({
+          supabaseAccessToken: accessToken,
+          supabaseRefreshToken: refreshToken,
+        });
+
+        const [activeTab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+
+        if (activeTab?.id) {
+          await chrome.tabs.sendMessage(activeTab.id, {
+            type: "AUTH_LOGIN_SUCCESS",
+          });
+        }
+
+        resolve({ success: true });
+      },
+    );
+  });
+}
 
 /**
  * Fetch vocabularies for a given page URL.
@@ -58,8 +145,23 @@ async function handleMessage(message) {
  */
 async function getVocabularies({ url, hostname }) {
   try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      return {
+        success: false,
+        status: "401",
+        message: "Please log in before saving vocabulary.",
+      };
+    }
+
     const params = new URLSearchParams({ url, hostname });
-    const response = await fetch(`${UrlConfig.API_BASE}/vocabularies?${params}`);
+    const response = await fetch(`${API_BASE}/vocabularies?${params}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const data = await response.json();
     return data;
   } catch (err) {
@@ -73,10 +175,22 @@ async function getVocabularies({ url, hostname }) {
  */
 async function saveVocabulary(payload) {
   try {
+    const token = await getAuthToken();
 
-    const response = await fetch(`${UrlConfig.API_BASE}/vocabularies`, {
+    if (!token) {
+      return {
+        success: false,
+        status: "401",
+        message: "Please log in before saving vocabulary.",
+      };
+    }
+    const response = await fetch(`${API_BASE}/vocabularies`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(payload),
     });
     const data = await response.json();
@@ -92,7 +206,7 @@ async function saveVocabulary(payload) {
  */
 async function explainVocabulary(payload) {
   try {
-    const response = await fetch(`${UrlConfig.API_BASE}/vocabularies/explain`, {
+    const response = await fetch(`${API_BASE}/vocabularies/explain`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
