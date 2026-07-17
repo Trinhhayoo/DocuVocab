@@ -67,6 +67,8 @@ async function handleMessage(message) {
         message.payload,
       );
       return loginWithGoogleFromExtension(message.payload?.returnTo);
+    case "LOGOUT":
+      return logoutFromExtension();
     default:
       return {
         success: false,
@@ -191,6 +193,23 @@ async function loginWithGoogleFromExtension(returnTo) {
       },
     );
   });
+}
+
+async function logoutFromExtension() {
+  try {
+    await chrome.storage.local.remove([
+      "supabaseAccessToken",
+      "supabaseRefreshToken",
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      status: "500",
+      message: error.message,
+    };
+  }
 }
 
 /**

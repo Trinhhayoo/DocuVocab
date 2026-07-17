@@ -5,6 +5,12 @@ const settingsState = {
   loading: false,
 };
 
+function isUnauthorizedResponse(data) {
+  const status = String(data?.status ?? "");
+  const message = String(data?.message ?? "").toLowerCase();
+  return status === "401" || message.includes("unauthorized");
+}
+
 function sendBackgroundMessage(message) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (response) => {
@@ -151,6 +157,7 @@ async function init() {
   const apiDot = document.getElementById("api-dot");
   const apiStatus = document.getElementById("api-status");
   const loginButton = document.getElementById("btn-login");
+  const logoutButton = document.getElementById("btn-logout");
 
   function setLoggedOutState(message) {
     apiDot.classList.remove("ok");
@@ -158,6 +165,7 @@ async function init() {
     apiStatus.textContent = message;
     document.getElementById("word-count").textContent = "0";
     loginButton.style.display = "block";
+    logoutButton.style.display = "none";
   }
 
   function setLoggedInState(wordCount) {
@@ -166,6 +174,7 @@ async function init() {
     apiStatus.textContent = "API connected";
     document.getElementById("word-count").textContent = String(wordCount);
     loginButton.style.display = "none";
+    logoutButton.style.display = "block";
   }
 
   try {
@@ -181,7 +190,7 @@ async function init() {
     if (data.success) {
       const count = data.data?.vocabularies?.length ?? 0;
       setLoggedInState(count);
-    } else if (data.status === "401") {
+    } else if (isUnauthorizedResponse(data)) {
       setLoggedOutState("Please sign in to continue");
     } else {
       apiDot.classList.add("err");
@@ -201,8 +210,35 @@ async function init() {
     });
 
     if (response?.success) {
+      if (tab?.id) {
+        await sendBackgroundMessage({
+          type: "REHIGHLIGHT_PAGE",
+          payload: { tabId: tab.id },
+        });
+      }
+
       window.location.reload();
     }
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    const response = await sendBackgroundMessage({ type: "LOGOUT" });
+
+    if (response?.success) {
+      if (tab?.id) {
+        await sendBackgroundMessage({
+          type: "REHIGHLIGHT_PAGE",
+          payload: { tabId: tab.id },
+        });
+      }
+
+      setLoggedOutState("You are logged out.");
+      setSettingsPanelOpen(false);
+      return;
+    }
+
+    apiDot.classList.add("err");
+    apiStatus.textContent = response?.message || "Cannot logout right now.";
   });
 
   // 3. Dashboard button — opens the web app

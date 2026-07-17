@@ -234,6 +234,8 @@ function showTooltip(event) {
   const parts = [];
   if (vocab.meaning) parts.push(vocab.meaning);
   if (vocab.note) parts.push(`📝 ${vocab.note}`);
+  const example = getVocabularyExample(vocab);
+  if (example) parts.push(`💡 ${example}`);
   if (parts.length === 0) parts.push("(no meaning saved)");
 
   tip.innerHTML = parts.map((p) => `<div>${escapeHtml(p)}</div>`).join("");
@@ -252,6 +254,10 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+function getVocabularyExample(vocab) {
+  return vocab?.exampleSentence || vocab?.example || "";
 }
 
 // ---------------------------------------------------------------------------
@@ -434,7 +440,8 @@ function showSavePopup(word, sentence) {
       if (response?.success && response.data) {
         meaningInput.value = response.data.meaning || "";
         noteInput.value = response.data.simpleExplanation || "";
-        exampleInput.value = response.data.exampleSentence || "";
+        exampleInput.value =
+          response.data.exampleSentence || response.data.example || "";
         explainStatus.style.display = "none";
       } else {
         explainStatus.textContent =
@@ -457,7 +464,7 @@ function showSavePopup(word, sentence) {
     explainStatus.textContent = "This word is already saved.";
     meaningInput.value = isExistingVocab.meaning || "";
     noteInput.value = isExistingVocab.note || "";
-    exampleInput.value = isExistingVocab.exampleSentence || "";
+    exampleInput.value = getVocabularyExample(isExistingVocab);
     meaningInput.disabled = false;
     noteInput.disabled = false;
     exampleInput.disabled = false;
@@ -688,7 +695,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       statusEl.classList.add("dd-status-success");
     }
 
-    sendResponse({ success: true });
+    onPageChange().then(() => sendResponse({ success: true }));
     return true;
   }
 });

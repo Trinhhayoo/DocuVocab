@@ -86,6 +86,12 @@
         border-color: #2563eb;
       }
       .actions button.primary:hover { background: #1d4ed8; }
+      .actions button.danger {
+        border-color: #fecaca;
+        color: #991b1b;
+        background: #fef2f2;
+      }
+      .actions button.danger:hover { background: #fee2e2; }
 
       .popup-shell {
         position: relative;
@@ -261,6 +267,7 @@
 
       <div class="actions">
         <button id="btn-login" style="display:none;">Login with Google</button>
+        <button id="btn-logout" class="danger" style="display:none;">Logout</button>
         <button class="primary" id="btn-dashboard">Open Dashboard</button>
         <button id="btn-refresh">↻ Re-highlight this page</button>
         <button id="btn-settings">⚙ Settings</button>
