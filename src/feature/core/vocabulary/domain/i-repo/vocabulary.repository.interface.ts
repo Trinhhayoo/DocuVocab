@@ -3,6 +3,14 @@ import Vocabulary from "../entity/vocabulary.entity";
 import { CreateVocabularyInput, UpdateVocabularyInput } from "../params/vocabulary.param";
 
 export default interface VocabularyRepository {
+  findByUserId(userId: string): Promise<Result<Vocabulary[]>>;
+  findByDocOrSource(
+    userId: string,
+    scope: {
+      docId?: string | null;
+      sourceUrl?: string | null;
+    },
+  ): Promise<Result<Vocabulary[]>>;
   findByDocId(userId: string, docId: string): Promise<Result<Vocabulary[]>>;
   findBySource(
     userId: string,

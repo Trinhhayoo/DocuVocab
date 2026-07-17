@@ -86,28 +86,208 @@
         border-color: #2563eb;
       }
       .actions button.primary:hover { background: #1d4ed8; }
+
+      .popup-shell {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .settings-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.24);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .settings-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .settings-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: #ffffff;
+        border-left: 1px solid #e2e8f0;
+        box-shadow: -8px 0 24px rgba(15, 23, 42, 0.12);
+        transform: translateX(102%);
+        transition: transform 0.2s ease;
+        padding: 14px;
+      }
+
+      .settings-panel.open {
+        transform: translateX(0);
+      }
+
+      .settings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .settings-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .settings-close {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .settings-description {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #64748b;
+        margin-bottom: 14px;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+      }
+
+      .settings-label {
+        display: block;
+        font-size: 12px;
+        color: #334155;
+        font-weight: 600;
+      }
+
+      .settings-hint {
+        margin-top: 3px;
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .switch {
+        position: relative;
+        width: 60px;
+        height: 24px;
+        border: 1px solid #b8c3d6;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #dbe3ef 0%, #c8d3e2 100%);
+        cursor: pointer;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.12);
+        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -2px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 1px solid #c7d1e0;
+        background: linear-gradient(180deg, #f8fafc 0%, #e9eef7 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      }
+
+      .switch.on {
+        border-color: #1d4ed8;
+        background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.22);
+      }
+
+      .switch.on::after {
+        border-color: #d4def1;
+        background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+        transform: translateX(20px);
+      }
+
+      .switch:focus-visible {
+        outline: 2px solid rgba(37, 99, 235, 0.35);
+        outline-offset: 2px;
+      }
+
+      .settings-status {
+        margin-top: 10px;
+        min-height: 18px;
+        font-size: 12px;
+      }
+
+      .settings-status.error {
+        color: #dc2626;
+      }
+
+      .settings-status.success {
+        color: #16a34a;
+      }
+
+      .switch:disabled,
+      .settings-close:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>📖 Doc Dictionary</h1>
-    </div>
+    <div class="popup-shell">
+      <div class="header">
+        <h1>📖 Doc Dictionary</h1>
+      </div>
 
-    <div class="status-row">
-      <span id="api-dot" class="status-dot"></span>
-      <span id="api-status">Checking API...</span>
-    </div>
+      <div class="status-row">
+        <span id="api-dot" class="status-dot"></span>
+        <span id="api-status">Checking API...</span>
+      </div>
 
-    <div class="stat-box">
-      <div class="stat-label">Words on this page</div>
-      <div id="word-count" class="stat-value">—</div>
-    </div>
+      <div class="stat-box">
+        <div class="stat-label">Words on this page</div>
+        <div id="word-count" class="stat-value">—</div>
+      </div>
 
-    <div class="page-url" id="page-url"></div>
+      <div class="page-url" id="page-url"></div>
 
-    <div class="actions">
-      <button class="primary" id="btn-dashboard">Open Dashboard</button>
-      <button id="btn-refresh">↻ Re-highlight this page</button>
+      <div class="actions">
+        <button id="btn-login" style="display:none;">Login with Google</button>
+        <button class="primary" id="btn-dashboard">Open Dashboard</button>
+        <button id="btn-refresh">↻ Re-highlight this page</button>
+        <button id="btn-settings">⚙ Settings</button>
+      </div>
+
+      <div id="settings-overlay" class="settings-overlay" aria-hidden="true"></div>
+
+      <aside id="settings-panel" class="settings-panel" aria-hidden="true">
+        <div class="settings-header">
+          <h2 class="settings-title">Settings</h2>
+          <button id="btn-close-settings" class="settings-close" aria-label="Close settings">×</button>
+        </div>
+
+        <p class="settings-description">
+          Configure global vocabulary behavior for highlighting.
+        </p>
+
+        <div class="settings-row">
+          <div>
+            <span class="settings-label">Enable Global Vocabulary</span>
+            <p class="settings-hint">When enabled, highlight from all your saved words.</p>
+          </div>
+          <button id="settings-global-toggle" class="switch" aria-label="Toggle global vocabulary" type="button"></button>
+        </div>
+
+        <p id="settings-status" class="settings-status" aria-live="polite"></p>
+      </aside>
     </div>
 
     <script src="popup.js"></script>

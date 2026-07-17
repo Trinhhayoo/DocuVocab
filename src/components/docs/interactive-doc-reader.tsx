@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { createHighlightedVocabularyHtml } from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
+import { AnchorPosition } from "./doc-learning-workspace";
 
 type TooltipState = {
   vocab: VocabularyItem;
@@ -14,7 +15,11 @@ type TooltipState = {
 type InteractiveDocReaderProps = {
   htmlContent: string;
   vocabularies: VocabularyItem[];
-  onSelectText: (text: string, sentence: string) => void;
+  onSelectText: (
+    text: string,
+    sentence: string,
+    anchorPosition?: AnchorPosition
+  ) => void;
 };
 
 export function InteractiveDocReader({
@@ -69,8 +74,28 @@ export function InteractiveDocReader({
     if (cleanText.length > 80) return;
 
     const sentence = extractSentenceFromSelection(selection);
+    const anchorPosition = getSelectionAnchorPosition(selection);
 
-    onSelectText(cleanText, sentence);
+    onSelectText(cleanText, sentence, anchorPosition);
+  }
+
+  function getSelectionAnchorPosition(
+    selection: Selection | null
+  ): AnchorPosition | undefined {
+    if (!selection) return undefined;
+
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    if (!range) return undefined;
+
+    const rect = range.getBoundingClientRect();
+    if (!rect.width && !rect.height) return undefined;
+
+    return {
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+    };
   }
 
   function extractSentenceFromSelection(selection: Selection | null): string {

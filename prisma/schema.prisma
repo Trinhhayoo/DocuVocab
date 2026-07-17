@@ -14,6 +14,16 @@ model User {
   updatedAt    DateTime     @updatedAt
   docs         Doc[]
   vocabularies Vocabulary[]
+  settings     UserSetting?
+}
+
+model UserSetting {
+  userId                String   @id
+  allowGlobalVocabulary Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Doc {
@@ -43,14 +53,14 @@ model DocContent {
 }
 
 model Vocabulary {
-  id               String   @id @default(uuid())
-  userId           String
-  docId            String?
+  id     String  @id @default(uuid())
+  userId String
+  docId  String?
 
-  sourceUrl        String?
-  sourceHostname   String?
-  pageTitle        String?
-  
+  sourceUrl      String?
+  sourceHostname String?
+  pageTitle      String?
+
   word             String
   meaning          String?
   note             String?

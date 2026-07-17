@@ -1,12 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BookOpen } from "lucide-react";
 
 import { InteractiveDocReader } from "@/components/docs/interactive-doc-reader";
+import { VocabularyEditorModal } from "@/components/docs/vocabulary-editor-modal";
+import { Button } from "@/components/ui/button";
 import { VocabularyForm } from "@/components/vocab/vocabulary-form";
 import { VocabularyList } from "@/components/vocab/vocabulary-list";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
+
+export type AnchorPosition = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
 
 type DocLearningWorkspaceProps = {
   docId: string;
@@ -25,6 +35,8 @@ export function DocLearningWorkspace({
 }: DocLearningWorkspaceProps) {
   const [selectedWord, setSelectedWord] = useState("");
   const [selectedSentence, setSelectedSentence] = useState("");
+  const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const vocabularyByWord = useMemo(() => {
     return new Map(
@@ -39,17 +51,55 @@ export function DocLearningWorkspace({
   function clearSelection() {
     setSelectedWord("");
     setSelectedSentence("");
+    setAnchorPosition(null);
+    setIsModalOpen(false);
     window.getSelection()?.removeAllRanges();
   }
 
-  function handleSelectText(text: string, sentence: string) {
+  function handleSelectText(
+    text: string,
+    sentence: string,
+    nextAnchorPosition?: AnchorPosition
+  ) {
     setSelectedWord(text);
     setSelectedSentence(sentence);
+    setAnchorPosition(nextAnchorPosition ?? null);
+    setIsModalOpen(Boolean(text));
+  }
+
+  function openModal() {
+    if (!selectedWord) return;
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    clearSelection();
   }
 
   return (
     <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 lg:grid-cols-[1fr_360px]">
       <section className="min-w-0">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm lg:hidden">
+          <div>
+            <p className="text-sm font-semibold">Vocabulary</p>
+            <p className="text-xs text-muted-foreground">
+              Open the editor for selected words and saved notes.
+            </p>
+          </div>
+          {selectedWord ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={openModal}
+            >
+              <BookOpen className="size-4" />
+              Open
+            </Button>
+          ) : null}
+        </div>
+
         <article className="rounded-xl border bg-white p-6 shadow-sm">
           <InteractiveDocReader
             htmlContent={htmlContent}
@@ -59,7 +109,7 @@ export function DocLearningWorkspace({
         </article>
       </section>
 
-      <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <aside className="hidden space-y-4 lg:sticky lg:top-20 lg:block lg:self-start">
         <div>
           <h2 className="text-lg font-semibold">Vocabulary</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -67,6 +117,21 @@ export function DocLearningWorkspace({
           </p>
         </div>
 
+        <VocabularyList vocabularies={vocabularies} />
+      </aside>
+
+      {isModalOpen && selectedWord ? (
+        <VocabularyEditorModal
+          isOpen={isModalOpen}
+          title="Vocabulary editor"
+          description={
+            selectedWord
+              ? `Editing “${selectedWord}”`
+              : "Select a word to save or edit it."
+          }
+          anchorPosition={anchorPosition}
+          onClose={closeModal}
+        >
         {selectedWord ? (
           <VocabularyForm
             key={`${existingVocabulary?.id ?? "new"}-${selectedWord}`}
@@ -77,16 +142,15 @@ export function DocLearningWorkspace({
             sourceUrl={sourceUrl}
             existingVocabulary={existingVocabulary}
             onDone={clearSelection}
-            onCancel={clearSelection}
+            onCancel={closeModal}
           />
         ) : (
-          <div className="rounded-xl border border-dashed bg-white p-4 text-sm text-muted-foreground">
-            Select a word in the document to add a note.
+          <div className="rounded-xl border border-dashed bg-slate-50 p-4 text-sm text-muted-foreground">
+            Select a word in the article to add or edit a note.
           </div>
         )}
-
-        <VocabularyList vocabularies={vocabularies} />
-      </aside>
+        </VocabularyEditorModal>
+      ) : null}
     </main>
   );
 }

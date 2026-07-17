@@ -74,13 +74,20 @@ export default class PrismaDocRepository implements DocRepository {
     },
   ): Promise<Result<Doc>> {
     try {
-      const existingDoc = await prisma.doc.findFirst({
+      const existingDocId = await prisma.doc.findFirst({
         where: { userId, sourceUrl: data.sourceUrl },
         select: { id: true },
       });
+      
+      if (existingDocId) {
+        const existingDoc = await prisma.doc.findUnique({
+          where: { id: existingDocId.id },
+        });
 
-      if (existingDoc) {
-        await prisma.doc.delete({ where: { id: existingDoc.id } });
+        if (!existingDoc) {
+          return failure(new ServerFailure({ error: new Error("Existing doc not found") }));
+        }
+        return success(DocMapper.toEntity(existingDoc));
       }
 
       const record = await prisma.doc.create({

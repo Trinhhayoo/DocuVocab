@@ -72,6 +72,40 @@ function buildRegex(words) {
   return new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function wordAppearsInPageText(pageText, word) {
+  const normalizedWord = (word || "").trim().toLowerCase();
+  if (!normalizedWord) return false;
+
+  const regex = new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, "i");
+  return regex.test(pageText);
+}
+
+function filterVocabulariesForCurrentPage(items) {
+  const pageText = (document.body?.innerText || "").toLowerCase();
+  if (!pageText) return [];
+
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const normalizedWord = (item.word || "").trim().toLowerCase();
+
+    if (!normalizedWord || seen.has(normalizedWord)) {
+      return false;
+    }
+
+    if (!wordAppearsInPageText(pageText, item.word)) {
+      return false;
+    }
+
+    seen.add(normalizedWord);
+    return true;
+  });
+}
+
 /**
  * Should we skip highlighting inside this text node?
  * Walks up the ancestor chain checking against SKIP_TAGS.
@@ -358,7 +392,7 @@ function showSavePopup(word, sentence) {
     <input type="text" class="dd-save-popup-example" placeholder="Generating..." disabled />
     <div class="dd-save-popup-actions">
       <button class="dd-save-popup-submit">Save</button>
-      <button class="dd-save-popup-regenerate" title="Regenerate explanation">✨</button>
+      <button class="dd-save-popup-regenerate" title="Regenerate explanation">✨ Regenerate</button>
     </div>
     <div class="dd-save-popup-status"></div>
   `;
@@ -490,7 +524,7 @@ function showSavePopup(word, sentence) {
           statusEl.textContent = mapApiErrorToUserMessage(response);
           statusEl.classList.add("dd-status-error");
         }
-      } catch (err) {
+      } catch {
         statusEl.textContent = mapApiErrorToUserMessage({
           status: "500",
           message: "Cannot connect to DocuVocab. Please try again.",
@@ -583,10 +617,20 @@ async function fetchVocabularies() {
     });
 
     if (response?.success) {
-      vocabularies = response.data.vocabularies;
+      vocabularies = filterVocabulariesForCurrentPage(
+        response.data.vocabularies || [],
+      );
       rebuildRegex();
+      return;
     }
+
+    vocabularies = [];
+    rebuildRegex();
+    clearHighlights();
   } catch (err) {
+    vocabularies = [];
+    rebuildRegex();
+    clearHighlights();
     console.warn("[Doc Dictionary] Failed to fetch vocabularies:", err.message);
   }
 }

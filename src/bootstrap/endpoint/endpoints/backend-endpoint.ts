@@ -38,6 +38,10 @@ export default class BackendEndpoint extends Endpoint {
     return this.buildEndpoint("docs");
   }
 
+  get settings(): string {
+    return this.buildEndpoint("settings");
+  }
+
   // ── Vocabulary endpoints ──
 
   get vocabularies(): string {

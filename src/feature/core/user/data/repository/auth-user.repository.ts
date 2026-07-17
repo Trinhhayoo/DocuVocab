@@ -9,10 +9,25 @@ export default class PrismaAuthUserRepository implements IAuthUserRepository {
       },
       update: {
         email: params.email,
+
+        settings: {
+          upsert: {
+            create: {
+              allowGlobalVocabulary: false,
+            },
+            update: {},
+          },
+        },
       },
       create: {
         id: params.id,
         email: params.email,
+
+        settings: {
+          create: {
+            allowGlobalVocabulary: false,
+          },
+        },
       },
     });
   }

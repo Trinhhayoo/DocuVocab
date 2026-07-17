@@ -25,6 +25,8 @@ export async function GET(request: Request) {
 
   const supabase = await createSupabaseServerClient();
 
+  //https://supabase.com/docs/guides/auth/server-side/advanced-guide
+  // It automatically store cookies in requests' header.
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.session?.user) {

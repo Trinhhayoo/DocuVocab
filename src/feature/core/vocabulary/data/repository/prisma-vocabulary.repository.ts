@@ -10,6 +10,60 @@ import type { CreateVocabularyInput, UpdateVocabularyInput } from "../../domain/
 import VocabularyMapper from "./vocabulary.mapper";
 
 export default class PrismaVocabularyRepository implements VocabularyRepository {
+  async findByUserId(userId: string): Promise<Result<Vocabulary[]>> {
+    try {
+      const records = await prisma.vocabulary.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return success(VocabularyMapper.toEntityList(records));
+    } catch (error) {
+      return failure(new ServerFailure({ error }));
+    }
+  }
+
+  async findByDocOrSource(
+    userId: string,
+    scope: {
+      docId?: string | null;
+      sourceUrl?: string | null;
+    },
+  ): Promise<Result<Vocabulary[]>> {
+    try {
+      const conditions: Array<{
+        docId?: string;
+        sourceUrl?: string;
+        doc?: { is: { sourceUrl: string } };
+      }> = [];
+
+      if (scope.docId) {
+        conditions.push({ docId: scope.docId });
+      }
+
+      if (scope.sourceUrl) {
+        conditions.push({ sourceUrl: scope.sourceUrl });
+        conditions.push({ doc: { is: { sourceUrl: scope.sourceUrl } } });
+      }
+
+      if (conditions.length === 0) {
+        return success([]);
+      }
+
+      const records = await prisma.vocabulary.findMany({
+        where: {
+          userId,
+          OR: conditions,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return success(VocabularyMapper.toEntityList(records));
+    } catch (error) {
+      return failure(new ServerFailure({ error }));
+    }
+  }
+
   async create(
     userId: string,
     input: CreateVocabularyInput,

@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
-const WEB_APP_URL = "https://docu-vocab-kappa.vercel.app";
+const WEB_APP_URL = "http://localhost:3000"; // "https://docu-vocab-kappa.vercel.app";
 const API_BASE = `${WEB_APP_URL}/api/extension`;
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -48,6 +48,12 @@ async function handleMessage(message) {
   switch (message.type) {
     case "GET_VOCABULARIES":
       return getVocabularies(message.payload);
+    case "REHIGHLIGHT_PAGE":
+      return rehighlightPage(message.payload);
+    case "GET_SETTINGS":
+      return getSettings();
+    case "UPDATE_SETTINGS":
+      return updateSettings(message.payload);
     case "SAVE_VOCABULARY":
       return saveVocabulary(message.payload);
     case "EXPLAIN_VOCABULARY":
@@ -69,6 +75,39 @@ async function handleMessage(message) {
   }
 }
 
+async function rehighlightPage(payload = {}) {
+  try {
+    const tabId = payload?.tabId;
+
+    if (typeof tabId === "number") {
+      await chrome.tabs.sendMessage(tabId, { type: "REHIGHLIGHT" });
+      return { success: true };
+    }
+
+    const [activeTab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (!activeTab?.id) {
+      return {
+        success: false,
+        status: "400",
+        message: "No active tab found for rehighlight.",
+      };
+    }
+
+    await chrome.tabs.sendMessage(activeTab.id, { type: "REHIGHLIGHT" });
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      status: "500",
+      message: error.message,
+    };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // API calls
 // ---------------------------------------------------------------------------
@@ -78,8 +117,24 @@ async function getAuthToken() {
   return result.supabaseAccessToken ?? null;
 }
 
+async function parseApiResponse(response, fallbackMessage) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  const isHtmlResponse = text.trim().startsWith("<!DOCTYPE") || text.includes("<html");
+
+  return {
+    success: false,
+    status: String(response.status || 500),
+    message: isHtmlResponse ? fallbackMessage : text || fallbackMessage,
+  };
+}
+
 async function loginWithGoogleFromExtension(returnTo) {
-  console.log("loginWithGoogleFromExtension called with returnTo:", returnTo);
   const redirectUrl = chrome.identity.getRedirectURL();
 
   const loginUrl = new URL(`${WEB_APP_URL}/auth/extension/login`);
@@ -162,10 +217,92 @@ async function getVocabularies({ url, hostname }) {
         Authorization: `Bearer ${token}`,
       },
     });
-    const data = await response.json();
-    return data;
+    return parseApiResponse(
+      response,
+      "Cannot fetch vocabularies. Please sign in again.",
+    );
   } catch (err) {
     return { success: false, message: err.message };
+  }
+}
+
+async function getSettings() {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      return {
+        success: false,
+        status: "401",
+        message: "Please sign in first.",
+      };
+    }
+
+    let response = await fetch(`${API_BASE}/settings`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 404) {
+      response = await fetch(`${WEB_APP_URL}/api/settings`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+
+    return parseApiResponse(
+      response,
+      "Cannot load settings. Please sign in again.",
+    );
+  } catch (err) {
+    return { success: false, status: "500", message: err.message };
+  }
+}
+
+async function updateSettings(payload) {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      return {
+        success: false,
+        status: "401",
+        message: "Please sign in first.",
+      };
+    }
+
+    let response = await fetch(`${API_BASE}/settings`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status === 404) {
+      response = await fetch(`${WEB_APP_URL}/api/settings`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    return parseApiResponse(
+      response,
+      "Cannot save settings. Please sign in again.",
+    );
+  } catch (err) {
+    return { success: false, status: "500", message: err.message };
   }
 }
 
@@ -193,8 +330,10 @@ async function saveVocabulary(payload) {
       },
       body: JSON.stringify(payload),
     });
-    const data = await response.json();
-    return data;
+    return parseApiResponse(
+      response,
+      "Cannot save vocabulary. Please sign in again.",
+    );
   } catch (err) {
     return { success: false, message: err.message };
   }
@@ -211,8 +350,11 @@ async function explainVocabulary(payload) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await response.json();
-    return data;
+
+    return parseApiResponse(
+      response,
+      "Cannot generate explanation right now.",
+    );
   } catch (err) {
     return { success: false, message: err.message };
   }
