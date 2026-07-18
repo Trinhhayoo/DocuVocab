@@ -7,7 +7,6 @@ import { InteractiveDocReader } from "@/components/docs/interactive-doc-reader";
 import { VocabularyEditorModal } from "@/components/docs/vocabulary-editor-modal";
 import { Button } from "@/components/ui/button";
 import { VocabularyForm } from "@/components/vocab/vocabulary-form";
-import { VocabularyList } from "@/components/vocab/vocabulary-list";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
 
@@ -77,7 +76,7 @@ export function DocLearningWorkspace({
   }
 
   return (
-    <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 lg:grid-cols-[1fr_360px]">
+    <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8">
       <section className="min-w-0">
         <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm lg:hidden">
           <div>
@@ -108,17 +107,6 @@ export function DocLearningWorkspace({
           />
         </article>
       </section>
-
-      <aside className="hidden space-y-4 lg:sticky lg:top-20 lg:block lg:self-start">
-        <div>
-          <h2 className="text-lg font-semibold">Vocabulary</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Select a word in the article to add or edit a note.
-          </p>
-        </div>
-
-        <VocabularyList vocabularies={vocabularies} />
-      </aside>
 
       {isModalOpen && selectedWord ? (
         <VocabularyEditorModal

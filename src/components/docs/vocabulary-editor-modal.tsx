@@ -1,91 +1,8 @@
-// "use client";
-
-// import type { ReactNode } from "react";
-// import { X } from "lucide-react";
-
-// import { Button } from "@/components/ui/button";
-// import { cn } from "@/lib/utils";
-
-// type VocabularyEditorModalProps = {
-//   isOpen: boolean;
-//   title: string;
-//   description?: string;
-//   anchorPosition?: { x: number; y: number } | null;
-//   onClose: () => void;
-//   children: ReactNode;
-// };
-
-// export function VocabularyEditorModal({
-//   isOpen,
-//   title,
-//   description,
-//   anchorPosition,
-//   onClose,
-//   children,
-// }: VocabularyEditorModalProps) {
-//   const viewportWidth = typeof window === "undefined" ? 0 : window.innerWidth;
-//   const viewportHeight = typeof window === "undefined" ? 0 : window.innerHeight;
-
-//   const positionStyle = anchorPosition
-//     ? {
-//         left: `${Math.min(
-//           Math.max(anchorPosition.x, 24),
-//           viewportWidth > 0 ? viewportWidth - 24 : anchorPosition.x
-//         )}px`,
-//         top: `${Math.min(
-//           Math.max(anchorPosition.y + 12, 24),
-//           viewportHeight > 0 ? viewportHeight - 24 : anchorPosition.y + 12
-//         )}px`,
-//         transform: "translate(-50%, 0)",
-//       }
-//     : undefined;
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <div
-//       className={cn(
-//         "pointer-events-none fixed z-[60] w-[min(92vw,32rem)] transition-all duration-200",
-//         isOpen ? "pointer-events-auto opacity-100" : "opacity-0"
-//       )}
-//       style={positionStyle}
-//     >
-//       <div
-//         className="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-2xl"
-//         role="dialog"
-//         aria-modal="true"
-//         aria-label={title}
-//       >
-//         <div className="flex items-start justify-between gap-4 border-b px-4 py-4 sm:px-6">
-//           <div>
-//             <h2 className="text-lg font-semibold">{title}</h2>
-//             {description ? (
-//               <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-//             ) : null}
-//           </div>
-//           <Button
-//             type="button"
-//             variant="ghost"
-//             size="icon-sm"
-//             onClick={onClose}
-//             aria-label="Close vocabulary editor"
-//           >
-//             <X className="size-4" />
-//           </Button>
-//         </div>
-
-//         <div className="px-4 py-4 sm:px-6">{children}</div>
-//       </div>
-//     </div>
-//   );
-// }
 "use client";
 
 import { type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AnchorPosition } from "./doc-learning-workspace";
 
@@ -97,10 +14,6 @@ type VocabularyEditorModalProps = {
   onClose: () => void;
   children: ReactNode;
 };
-
-const VIEWPORT_PADDING = 16;
-const ANCHOR_GAP = 16;
-const DESKTOP_BREAKPOINT = 1024;
 
 export function VocabularyEditorModal({
   isOpen,
@@ -292,8 +205,7 @@ export function VocabularyEditorModal({
           // Tablet
           "sm:w-[min(92vw,32rem)] sm:rounded-2xl",
 
-          // Desktop: position is assigned by useLayoutEffect
-          "lg:fixed lg:w-[28rem] lg:max-w-[calc(100vw-2rem)]",
+
         )}
         onMouseDown={(event) => {
           event.stopPropagation();
