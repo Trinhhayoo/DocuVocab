@@ -1,5 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
+import { countMathCandidates, normalizeMathContent } from "@/lib/math-normalize";
 
 export type ExtractedReadableContent = {
   title: string;
@@ -27,13 +28,20 @@ function getPageTitle(document: Document, url: string) {
 
 function looksLikeMainContent(element: Element) {
   const text = normalizeText(element.textContent ?? "");
-
-  if (text.length < 500) return false;
+  const mathCandidateCount = countMathCandidates(element);
 
   const paragraphCount = element.querySelectorAll("p").length;
   const headingCount = element.querySelectorAll("h1, h2, h3").length;
 
-  return paragraphCount >= 3 || headingCount >= 2;
+  if (text.length < 500) {
+    if (mathCandidateCount === 0) return false;
+
+    const listItemCount = element.querySelectorAll("li").length;
+
+    return paragraphCount >= 1 || headingCount >= 1 || listItemCount >= 3;
+  }
+
+  return paragraphCount >= 3 || headingCount >= 2 || mathCandidateCount >= 1;
 }
 
 function findBestContentRoot(document: Document) {
@@ -49,6 +57,8 @@ function findBestContentRoot(document: Document) {
     "[role='main'] article",
     "[role='main']",
     "main",
+    ".main",
+    "#main",
 
     // Common docs/blog content containers
     ".docs-content",
@@ -61,6 +71,7 @@ function findBestContentRoot(document: Document) {
   ];
 
   for (const selector of selectors) {
+    // lay tat ca cac phan tu trong tai lieu ma khop voi selector
     const candidates = Array.from(document.querySelectorAll(selector));
 
     for (const candidate of candidates) {
@@ -86,15 +97,25 @@ function removeNoiseFromContent(root: Element) {
         "[role='button']",
         "[data-heading-link]",
         "[aria-label='Link to this section']",
-        "[aria-hidden='true']",
       ].join(",")
     )
     .forEach((el) => {
       el.remove();
     });
 
-  // Remove empty elements caused by cleanup.
+  root.querySelectorAll("[aria-hidden='true']").forEach((el) => {
+    if (el.closest("[data-math-format]")) {
+      return;
+    }
+
+    el.remove();
+  });
+
   root.querySelectorAll("p, div, span").forEach((el) => {
+    if (el.hasAttribute("data-math-format")) {
+      return;
+    }
+
     const hasMediaOrCode = Boolean(
       el.querySelector("img, video, iframe, pre, code, table, svg")
     );
@@ -143,6 +164,7 @@ function extractFromRawContentRoot(document: Document, url: string) {
     return null;
   }
 
+  normalizeMathContent(clonedRoot);
   removeNoiseFromContent(clonedRoot);
   removeThemeDuplicateImages(clonedRoot);
   ensurePreCodeShape(clonedRoot);
@@ -151,7 +173,7 @@ function extractFromRawContentRoot(document: Document, url: string) {
   const htmlContent = clonedRoot.innerHTML;
   const textContent = normalizeText(clonedRoot.textContent ?? "");
 
-  if (textContent.length < 500) {
+  if (textContent.length < 500 && countMathCandidates(clonedRoot) === 0) {
     return null;
   }
 
@@ -179,6 +201,7 @@ function extractWithReadability(document: Document, url: string) {
   const articleDom = new JSDOM(article.content || "");
   const articleDocument = articleDom.window.document;
 
+  normalizeMathContent(articleDocument.body);
   ensurePreCodeShape(articleDocument.body);
 
   const htmlContent = articleDocument.body.innerHTML;

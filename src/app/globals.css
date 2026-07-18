@@ -163,6 +163,36 @@
   text-align: left;
 }
 
+.doc-reader-content .doc-math {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.doc-reader-content .doc-math-block {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.doc-reader-content .doc-math-inline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.doc-reader-content .doc-math math {
+  max-width: 100%;
+}
+
+.doc-reader-content .doc-math-inline math {
+  display: inline math;
+}
+
+.doc-reader-content .doc-math-block math {
+  display: block math;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .doc-reader-content strong,
 .doc-reader-content b {
   font-weight: 700;
@@ -550,6 +580,11 @@
   background: #fde047;
 }
 
+.doc-reader-content mark.vocab-highlight:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Dark mode reader                                                            */
 /* -------------------------------------------------------------------------- */
@@ -634,6 +669,11 @@
 
 .dark .doc-reader-content mark.vocab-highlight:hover {
   background: #a16207;
+}
+
+.dark .doc-reader-content mark.vocab-highlight:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
 }
 
 .doc-reader-content figure.code-figure {

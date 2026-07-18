@@ -72,36 +72,17 @@ function buildRegex(words) {
   return new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function wordAppearsInPageText(pageText, word) {
-  const normalizedWord = (word || "").trim().toLowerCase();
-  if (!normalizedWord) return false;
-
-  const regex = new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, "i");
-  return regex.test(pageText);
-}
-
-function filterVocabulariesForCurrentPage(items) {
-  const pageText = (document.body?.innerText || "").toLowerCase();
-  if (!pageText) return [];
-
-  const seen = new Set();
+function prepareVocabularies(items) {
+  const seenWords = new Set();
 
   return items.filter((item) => {
     const normalizedWord = (item.word || "").trim().toLowerCase();
 
-    if (!normalizedWord || seen.has(normalizedWord)) {
+    if (!normalizedWord || seenWords.has(normalizedWord)) {
       return false;
     }
 
-    if (!wordAppearsInPageText(pageText, item.word)) {
-      return false;
-    }
-
-    seen.add(normalizedWord);
+    seenWords.add(normalizedWord);
     return true;
   });
 }
@@ -179,11 +160,22 @@ function highlightTextNodes(root = document.body) {
       mark.textContent = matchedText;
 
       const vocabId = vocabIdByWord.get(matchedText.toLowerCase().trim());
-      if (vocabId) mark.dataset.vocabId = vocabId;
+      if (vocabId) {
+        mark.dataset.vocabId = vocabId;
+        mark.tabIndex = 0;
+        mark.setAttribute("role", "button");
+        mark.setAttribute(
+          "aria-label",
+          `Show vocabulary details for ${matchedText}`,
+        );
 
-      // Hover tooltip: show meaning on mouseover
-      mark.addEventListener("mouseenter", showTooltip);
-      mark.addEventListener("mouseleave", hideTooltip);
+        // Pointer + keyboard use the same activation behavior.
+        mark.addEventListener("mouseenter", activateHighlight);
+        mark.addEventListener("click", activateHighlight);
+        mark.addEventListener("keydown", handleHighlightKeyDown);
+        mark.addEventListener("mouseleave", hideTooltip);
+        mark.addEventListener("blur", hideTooltip);
+      }
 
       fragment.append(mark);
       lastIndex = matchIndex + matchedText.length;
@@ -224,8 +216,21 @@ function ensureTooltip() {
   return tooltip;
 }
 
-function showTooltip(event) {
+function activateHighlight(event) {
   const mark = event.currentTarget;
+  if (!(mark instanceof HTMLElement)) return;
+  showTooltipForMark(mark);
+}
+
+function handleHighlightKeyDown(event) {
+  if (event.key !== "Enter" && event.key !== " ") return;
+
+  // Prevent page scroll when using Space to activate a highlight.
+  event.preventDefault();
+  activateHighlight(event);
+}
+
+function showTooltipForMark(mark) {
   const vocabId = mark.dataset.vocabId;
   const vocab = vocabularies.find((v) => v.id === vocabId);
   if (!vocab) return;
@@ -624,9 +629,7 @@ async function fetchVocabularies() {
     });
 
     if (response?.success) {
-      vocabularies = filterVocabulariesForCurrentPage(
-        response.data.vocabularies || [],
-      );
+      vocabularies = prepareVocabularies(response.data.vocabularies || []);
       rebuildRegex();
       return;
     }
@@ -676,6 +679,22 @@ function renderAuthError(statusEl) {
   });
 }
 
+function getHighlightStats() {
+  const highlightNodes = Array.from(
+    document.querySelectorAll("mark.dd-vocab-highlight"),
+  );
+  const uniqueWords = new Set(
+    highlightNodes
+      .map((node) => (node.textContent || "").trim().toLowerCase())
+      .filter(Boolean),
+  );
+
+  return {
+    highlightedOccurrences: highlightNodes.length,
+    matchedWords: uniqueWords.size,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // 8. Init
 // ---------------------------------------------------------------------------
@@ -686,6 +705,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     onPageChange().then(() => sendResponse({ success: true }));
     return true; // async response
   }
+
+  if (message.type === "GET_HIGHLIGHT_STATS") {
+    sendResponse({
+      success: true,
+      data: getHighlightStats(),
+    });
+    return false;
+  }
+
   if (message.type === "AUTH_LOGIN_SUCCESS") {
     const statusEl = document.querySelector(".dd-save-popup-status");
 

@@ -1,0 +1,5 @@
+- data-expr=value 
+    value: gia tri original value from source
+    vi dụ: cong thuc toan hoc tu kalatex - original value se nam trong data-expr
+           Nhung ma Javascript trong browser se lay data tu day va render ra mot cong thuc toan de doc hon
+           va co the (<math> </math>) - (<annotation></annotation>)

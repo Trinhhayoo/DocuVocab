@@ -34,6 +34,38 @@ function sendBackgroundMessage(message) {
   });
 }
 
+function sendTabMessage(tabId, message) {
+  return new Promise((resolve) => {
+    if (!tabId) {
+      resolve({
+        success: false,
+        status: "400",
+        message: "No active tab available.",
+      });
+      return;
+    }
+
+    chrome.tabs.sendMessage(tabId, message, (response) => {
+      if (chrome.runtime.lastError) {
+        resolve({
+          success: false,
+          status: "500",
+          message: chrome.runtime.lastError.message,
+        });
+        return;
+      }
+
+      resolve(
+        response || {
+          success: false,
+          status: "500",
+          message: "No response from content script.",
+        },
+      );
+    });
+  });
+}
+
 function setSettingsStatus(message, type = "") {
   const settingsStatus = document.getElementById("settings-status");
   settingsStatus.textContent = message;
@@ -159,6 +191,18 @@ async function init() {
   const loginButton = document.getElementById("btn-login");
   const logoutButton = document.getElementById("btn-logout");
 
+  async function getPageWordCount(fallbackCount) {
+    const stats = await sendTabMessage(tab?.id, {
+      type: "GET_HIGHLIGHT_STATS",
+    });
+
+    if (stats?.success) {
+      return stats.data?.matchedWords ?? 0;
+    }
+
+    return fallbackCount;
+  }
+
   function setLoggedOutState(message) {
     apiDot.classList.remove("ok");
     apiDot.classList.add("err");
@@ -172,6 +216,7 @@ async function init() {
     apiDot.classList.add("ok");
     apiDot.classList.remove("err");
     apiStatus.textContent = "API connected";
+    console.log("Word count for current page:", wordCount);
     document.getElementById("word-count").textContent = String(wordCount);
     loginButton.style.display = "none";
     logoutButton.style.display = "block";
@@ -188,7 +233,8 @@ async function init() {
     });
 
     if (data.success) {
-      const count = data.data?.vocabularies?.length ?? 0;
+      const fallbackCount = data.data?.vocabularies?.length ?? 0;
+      const count = await getPageWordCount(fallbackCount);
       setLoggedInState(count);
     } else if (isUnauthorizedResponse(data)) {
       setLoggedOutState("Please sign in to continue");

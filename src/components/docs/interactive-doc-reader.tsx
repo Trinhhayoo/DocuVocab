@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { createHighlightedVocabularyHtml } from "@/lib/highlight-vocabulary-client";
+import {
+  createHighlightedVocabularyHtml,
+  stabilizeMathMarkupHtml,
+} from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
 import { AnchorPosition } from "./doc-learning-workspace";
 
@@ -47,9 +50,12 @@ export function InteractiveDocReader({
 
   const highlightedHtml = useMemo(() => {
     if (!isHydrated) return htmlContent;
-    if (vocabularies.length === 0) return htmlContent;
 
-    return createHighlightedVocabularyHtml(htmlContent, vocabularies);
+    const stabilizedHtml = stabilizeMathMarkupHtml(htmlContent);
+
+    if (vocabularies.length === 0) return stabilizedHtml;
+
+    return createHighlightedVocabularyHtml(stabilizedHtml, vocabularies);
   }, [htmlContent, vocabularies, isHydrated]);
 
   function handleMouseDown() {
@@ -138,17 +144,16 @@ export function InteractiveDocReader({
     return fullText.slice(start, end).trim().slice(0, 500);
   }
 
-  function handleMouseOver(event: React.MouseEvent<HTMLDivElement>) {
-    if (isSelectingRef.current) return;
-
-    const target = event.target;
-
-    if (!(target instanceof HTMLElement)) return;
+  function getHighlightMark(
+    target: EventTarget | null
+  ): HTMLElement | null {
+    if (!(target instanceof HTMLElement)) return null;
 
     const mark = target.closest("mark.vocab-highlight");
+    return mark instanceof HTMLElement ? mark : null;
+  }
 
-    if (!(mark instanceof HTMLElement)) return;
-
+  function showTooltipForMark(mark: HTMLElement) {
     const vocabId = mark.dataset.vocabId;
     if (!vocabId) return;
 
@@ -164,17 +169,54 @@ export function InteractiveDocReader({
     });
   }
 
+  function activateHighlightMark(mark: HTMLElement) {
+    if (isSelectingRef.current) return;
+    showTooltipForMark(mark);
+  }
+
+  function handleMouseOver(event: React.MouseEvent<HTMLDivElement>) {
+    const mark = getHighlightMark(event.target);
+    if (!mark) return;
+
+    activateHighlightMark(mark);
+  }
+
+  function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    const mark = getHighlightMark(event.target);
+    if (!mark) return;
+
+    activateHighlightMark(mark);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    const mark = getHighlightMark(event.target);
+    if (!mark) return;
+
+    // Prevent page scroll when Space is used to activate a highlight.
+    event.preventDefault();
+    activateHighlightMark(mark);
+  }
+
+  function handleFocus(event: React.FocusEvent<HTMLDivElement>) {
+    const mark = getHighlightMark(event.target);
+    if (!mark) return;
+
+    activateHighlightMark(mark);
+  }
+
+  function handleBlur(event: React.FocusEvent<HTMLDivElement>) {
+    const mark = getHighlightMark(event.target);
+    if (!mark) return;
+
+    setTooltip(null);
+  }
+
   function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
     if (isSelectingRef.current) return;
 
-    const target = event.target;
-
-    if (!(target instanceof HTMLElement)) {
-      setTooltip(null);
-      return;
-    }
-
-    const mark = target.closest("mark.vocab-highlight");
+    const mark = getHighlightMark(event.target);
 
     if (!mark) {
       setTooltip(null);
@@ -193,6 +235,10 @@ export function InteractiveDocReader({
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseOver={handleMouseOver}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         dangerouslySetInnerHTML={{

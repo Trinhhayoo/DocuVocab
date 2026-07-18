@@ -24,6 +24,7 @@
 // ---------------------------------------------------------------------------
 const WEB_APP_URL = "http://localhost:3000"; // "https://docu-vocab-kappa.vercel.app";
 const API_BASE = `${WEB_APP_URL}/api/extension`;
+let refreshSessionPromise = null;
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   console.log("Received message:", message);
@@ -119,6 +120,121 @@ async function getAuthToken() {
   return result.supabaseAccessToken ?? null;
 }
 
+async function getRefreshToken() {
+  const result = await chrome.storage.local.get(["supabaseRefreshToken"]);
+  return result.supabaseRefreshToken ?? null;
+}
+
+async function saveAuthTokens({ accessToken, refreshToken }) {
+  await chrome.storage.local.set({
+    supabaseAccessToken: accessToken,
+    supabaseRefreshToken: refreshToken,
+  });
+}
+
+async function clearAuthTokens() {
+  await chrome.storage.local.remove([
+    "supabaseAccessToken",
+    "supabaseRefreshToken",
+  ]);
+}
+
+function withAuthorizationHeader(init, token) {
+  const headers = new Headers(init?.headers ?? {});
+
+  headers.set("Authorization", `Bearer ${token}`);
+
+  return {
+    ...(init ?? {}),
+    headers,
+  };
+}
+
+async function refreshAuthSession() {
+  if (refreshSessionPromise) {
+    return refreshSessionPromise;
+  }
+
+  refreshSessionPromise = (async () => {
+    const refreshToken = await getRefreshToken();
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      const data = await parseApiResponse(
+        response,
+        "Cannot refresh session. Please sign in again.",
+      );
+
+      const accessToken = data?.data?.accessToken;
+      const nextRefreshToken = data?.data?.refreshToken;
+
+      if (!response.ok || !accessToken || !nextRefreshToken) {
+        if (response.status === 401) {
+          await clearAuthTokens();
+        }
+
+        return null;
+      }
+
+      await saveAuthTokens({
+        accessToken,
+        refreshToken: nextRefreshToken,
+      });
+
+      return accessToken;
+    } catch {
+      return null;
+    }
+  })();
+
+  try {
+    return await refreshSessionPromise;
+  } finally {
+    refreshSessionPromise = null;
+  }
+}
+
+async function fetchWithAutoRefresh(url, init) {
+  const accessToken = await getAuthToken();
+
+  if (!accessToken) {
+    return { response: null, unauthorized: true };
+  }
+
+  let response = await fetch(url, withAuthorizationHeader(init, accessToken));
+
+  if (response.status !== 401) {
+    return { response, unauthorized: false };
+  }
+
+  const refreshedAccessToken = await refreshAuthSession();
+
+  if (!refreshedAccessToken) {
+    return { response: null, unauthorized: true };
+  }
+
+  response = await fetch(
+    url,
+    withAuthorizationHeader(init, refreshedAccessToken),
+  );
+
+  return {
+    response,
+    unauthorized: response.status === 401,
+  };
+}
+
 async function parseApiResponse(response, fallbackMessage) {
   const contentType = response.headers.get("content-type") || "";
 
@@ -173,10 +289,7 @@ async function loginWithGoogleFromExtension(returnTo) {
           return;
         }
 
-        await chrome.storage.local.set({
-          supabaseAccessToken: accessToken,
-          supabaseRefreshToken: refreshToken,
-        });
+        await saveAuthTokens({ accessToken, refreshToken });
 
         const [activeTab] = await chrome.tabs.query({
           active: true,
@@ -197,10 +310,7 @@ async function loginWithGoogleFromExtension(returnTo) {
 
 async function logoutFromExtension() {
   try {
-    await chrome.storage.local.remove([
-      "supabaseAccessToken",
-      "supabaseRefreshToken",
-    ]);
+    await clearAuthTokens();
 
     return { success: true };
   } catch (error) {
@@ -219,9 +329,18 @@ async function logoutFromExtension() {
  */
 async function getVocabularies({ url, hostname }) {
   try {
-    const token = await getAuthToken();
+    const params = new URLSearchParams({ url, hostname });
+    const { response, unauthorized } = await fetchWithAutoRefresh(
+      `${API_BASE}/vocabularies?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
-    if (!token) {
+    if (unauthorized || !response) {
       return {
         success: false,
         status: "401",
@@ -229,13 +348,6 @@ async function getVocabularies({ url, hostname }) {
       };
     }
 
-    const params = new URLSearchParams({ url, hostname });
-    const response = await fetch(`${API_BASE}/vocabularies?${params}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
     return parseApiResponse(
       response,
       "Cannot fetch vocabularies. Please sign in again.",
@@ -247,9 +359,14 @@ async function getVocabularies({ url, hostname }) {
 
 async function getSettings() {
   try {
-    const token = await getAuthToken();
+    let requestResult = await fetchWithAutoRefresh(`${API_BASE}/settings`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    if (!token) {
+    if (requestResult.unauthorized || !requestResult.response) {
       return {
         success: false,
         status: "401",
@@ -257,22 +374,25 @@ async function getSettings() {
       };
     }
 
-    let response = await fetch(`${API_BASE}/settings`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    let response = requestResult.response;
 
     if (response.status === 404) {
-      response = await fetch(`${WEB_APP_URL}/api/settings`, {
+      requestResult = await fetchWithAutoRefresh(`${WEB_APP_URL}/api/settings`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
+
+      if (requestResult.unauthorized || !requestResult.response) {
+        return {
+          success: false,
+          status: "401",
+          message: "Please sign in first.",
+        };
+      }
+
+      response = requestResult.response;
     }
 
     return parseApiResponse(
@@ -286,9 +406,15 @@ async function getSettings() {
 
 async function updateSettings(payload) {
   try {
-    const token = await getAuthToken();
+    let requestResult = await fetchWithAutoRefresh(`${API_BASE}/settings`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-    if (!token) {
+    if (requestResult.unauthorized || !requestResult.response) {
       return {
         success: false,
         status: "401",
@@ -296,24 +422,26 @@ async function updateSettings(payload) {
       };
     }
 
-    let response = await fetch(`${API_BASE}/settings`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    let response = requestResult.response;
 
     if (response.status === 404) {
-      response = await fetch(`${WEB_APP_URL}/api/settings`, {
+      requestResult = await fetchWithAutoRefresh(`${WEB_APP_URL}/api/settings`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
+
+      if (requestResult.unauthorized || !requestResult.response) {
+        return {
+          success: false,
+          status: "401",
+          message: "Please sign in first.",
+        };
+      }
+
+      response = requestResult.response;
     }
 
     return parseApiResponse(
@@ -331,24 +459,26 @@ async function updateSettings(payload) {
  */
 async function saveVocabulary(payload) {
   try {
-    const token = await getAuthToken();
+    const { response, unauthorized } = await fetchWithAutoRefresh(
+      `${API_BASE}/vocabularies`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
 
-    if (!token) {
+    if (unauthorized || !response) {
       return {
         success: false,
         status: "401",
         message: "Please log in before saving vocabulary.",
       };
     }
-    const response = await fetch(`${API_BASE}/vocabularies`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+
     return parseApiResponse(
       response,
       "Cannot save vocabulary. Please sign in again.",

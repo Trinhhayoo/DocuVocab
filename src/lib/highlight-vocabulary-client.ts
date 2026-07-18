@@ -16,6 +16,13 @@ const SKIP_TAGS = new Set([
   "MARK",
 ]);
 
+const SKIP_CONTAINER_SELECTOR = [
+  "[data-math-format]",
+  ".katex",
+  "math",
+  "mjx-container",
+].join(",");
+
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -41,7 +48,39 @@ function shouldSkipTextNode(node: Text) {
 
   if (!parentElement) return true;
 
+  if (parentElement.closest(SKIP_CONTAINER_SELECTOR)) {
+    return true;
+  }
+
   return Boolean(parentElement.closest([...SKIP_TAGS].join(",")));
+}
+
+export function stabilizeMathMarkupHtml(html: string) {
+  if (typeof DOMParser === "undefined") {
+    return html;
+  }
+
+  const parser = new DOMParser();
+  const document = parser.parseFromString(html, "text/html");
+
+  // Legacy imports may include KaTeX dual-layer markup that can break when
+  // CSS from the source page is missing. Keep the MathML layer as stable output.
+  document.querySelectorAll(".katex-html").forEach((element) => {
+    element.remove();
+  });
+
+  document.querySelectorAll(".katex-mathml").forEach((element) => {
+    const mathElement = element.querySelector("math");
+
+    if (mathElement) {
+      element.replaceWith(mathElement.cloneNode(true));
+      return;
+    }
+
+    element.removeAttribute("style");
+  });
+
+  return document.body.innerHTML;
 }
 
 export function createHighlightedVocabularyHtml(
@@ -118,6 +157,12 @@ export function createHighlightedVocabularyHtml(
 
       if (vocabId) {
         mark.dataset.vocabId = vocabId;
+        mark.tabIndex = 0;
+        mark.setAttribute("role", "button");
+        mark.setAttribute(
+          "aria-label",
+          `Show vocabulary details for ${matchedText}`
+        );
       }
 
       fragment.append(mark);

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { AppHeader } from "@/components/layout/app-header";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AuthProvider } from "@/components/providers/auth-provider";
