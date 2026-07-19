@@ -15,6 +15,7 @@ model User {
   docs         Doc[]
   vocabularies Vocabulary[]
   settings     UserSetting?
+  feedbacks    Feedback[]
 }
 
 model UserSetting {
@@ -77,4 +78,21 @@ model Vocabulary {
   @@index([sourceUrl])
   @@index([sourceHostname])
   @@index([word])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String?
+  email     String?
+  category  String
+  message   String
+  pageUrl   String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([category])
+  @@index([createdAt])
 }

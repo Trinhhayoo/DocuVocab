@@ -15,11 +15,13 @@ import { signInWithGoogle } from "@/lib/supabase/signInWithGoogle";
 import signOutUsecase from "@/feature/core/user/domain/usecase/sign-out.usecase";
 import { GeneralSettingsModal } from "../common/settings-modal";
 import { Settings } from "@/feature/core/settings/domain/entity/settings.entity";
+import { FeedbackModal } from "../common/feedback-modal";
 
 export function AppHeader() {
   const router = useRouter();
   const { user } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [currentSettings, setCurrentSettings] = useState<Settings>({
     allowGlobalVocabulary: false,
   });
@@ -103,7 +105,7 @@ export function AppHeader() {
     } else {
       await signInWithGoogle();
     }
-  }
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
@@ -123,15 +125,18 @@ export function AppHeader() {
             {user != null ? 'Logout' : 'Login'}
           </Button>
 
-          <Link
-            href="#"
+          <button
+            type="button"
             aria-label="Feedback"
             title="Open feedback"
+            aria-haspopup="dialog"
+            aria-expanded={isFeedbackOpen}
+            onClick={() => setIsFeedbackOpen(true)}
             className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
           >
             <MessageSquareText aria-hidden="true" className="size-4" />
             <span>Feedback</span>
-          </Link>
+          </button>
 
           <button
             type="button"
@@ -147,16 +152,21 @@ export function AppHeader() {
           </button>
         </nav>
       </div>
-      {
-        isSettingsOpen && (
-          <GeneralSettingsModal
-            open={isSettingsOpen}
-            onOpenChange={setIsSettingsOpen}
-            onGeneralSettingsChange={handleSettingsChange}
-            currentSettings={currentSettings}
-          />
-        )
-      }
+      {isSettingsOpen && (
+        <GeneralSettingsModal
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+          onGeneralSettingsChange={handleSettingsChange}
+          currentSettings={currentSettings}
+        />
+      )}
+      {isFeedbackOpen && (
+        <FeedbackModal
+          open={isFeedbackOpen}
+          onOpenChange={setIsFeedbackOpen}
+          initialEmail={user?.email ?? ""}
+        />
+      )}
     </header>
   );
 }

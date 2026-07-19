@@ -42,6 +42,10 @@ export default class BackendEndpoint extends Endpoint {
     return this.buildEndpoint("settings");
   }
 
+  get feedback(): string {
+    return this.buildEndpoint("feedback");
+  }
+
   // ── Vocabulary endpoints ──
 
   get vocabularies(): string {
