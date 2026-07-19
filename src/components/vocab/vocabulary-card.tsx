@@ -16,6 +16,9 @@ type VocabularyCardProps = {
 export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const wordFieldId = `vocab-card-word-${vocabulary.id}`;
+  const meaningFieldId = `vocab-card-meaning-${vocabulary.id}`;
+  const noteFieldId = `vocab-card-note-${vocabulary.id}`;
 
   const updateMutation = useMutation({
     mutationFn: updateVocabulary,
@@ -72,11 +75,18 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           name="word"
           // eslint-disable-next-line react/no-children-prop
           children={(field) => (
-            <input
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              className="w-full rounded-md border px-3 py-2 text-sm font-semibold"
-            />
+            <div>
+              <label htmlFor={wordFieldId} className="sr-only">
+                Word
+              </label>
+              <input
+                id={wordFieldId}
+                name="word"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                className="w-full rounded-md border px-3 py-2 text-sm font-semibold"
+              />
+            </div>
           )}
         />
 
@@ -84,12 +94,18 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           name="meaning"
           // eslint-disable-next-line react/no-children-prop
           children={(field) => (
-            <input
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Meaning"
-              className="w-full rounded-md border px-3 py-2 text-sm"
-            />
+            <div>
+              <label htmlFor={meaningFieldId} className="sr-only">
+                Meaning
+              </label>
+              <input
+                id={meaningFieldId}
+                name="meaning"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                className="w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
           )}
         />
 
@@ -97,12 +113,18 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           name="note"
           // eslint-disable-next-line react/no-children-prop
           children={(field) => (
-            <textarea
-              value={field.state.value}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Note"
-              className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
-            />
+            <div>
+              <label htmlFor={noteFieldId} className="sr-only">
+                Note
+              </label>
+              <textarea
+                id={noteFieldId}
+                name="note"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
           )}
         />
 
@@ -125,7 +147,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
         </div>
 
         {updateMutation.isError && (
-          <p className="text-xs text-red-500">
+          <p role="alert" className="text-xs text-red-500">
               {mapHttpErrorToMessage(updateMutation.error)}
           </p>
         )}
@@ -134,7 +156,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
   }
 
   return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm">
+    <article className="rounded-xl border bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold">{vocabulary.word}</h3>
@@ -168,11 +190,12 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
         <button
           type="button"
           onClick={() => deleteMutation.mutate(vocabulary.id)}
+          aria-label={`Delete vocabulary ${vocabulary.word}`}
           className="rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-100"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 aria-hidden="true" className="h-4 w-4" />
         </button>
       </div>
-    </div>
+    </article>
   );
 }

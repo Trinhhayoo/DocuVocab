@@ -22,6 +22,7 @@ export default async function LoginPage() {
 
     return (
     <main className="flex min-h-screen items-center justify-center">
+      <h1 className="sr-only">Login</h1>
       <form action={signInWithGoogle}>
         <button className="rounded-xl bg-slate-900 px-5 py-3 text-white">
           Continue with Google

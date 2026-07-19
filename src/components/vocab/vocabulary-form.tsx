@@ -97,6 +97,12 @@ export function VocabularyForm({
     },
   });
 
+  const wordFieldId = "vocab-word";
+  const wordErrorId = "vocab-word-error";
+  const languageFieldId = "vocab-language";
+  const meaningFieldId = "vocab-meaning";
+  const noteFieldId = "vocab-note";
+
   // Auto-explain for new vocabulary only (not edit mode)
   useEffect(() => {
     if (isEditMode || hasAutoExplained.current || !selectedWord) return;
@@ -157,18 +163,29 @@ export function VocabularyForm({
         event.stopPropagation();
         form.handleSubmit();
       }}
+      aria-busy={isExplaining || saveMutation.isPending}
       className="space-y-3 rounded-xl border bg-white p-4 shadow-sm"
     >
 
       {isExplaining && (
-        <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-700">
-          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-700 border-t-transparent" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-700"
+        >
+          <span
+            aria-hidden="true"
+            className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-700 border-t-transparent"
+          />
           Generating explanation...
         </div>
       )}
 
       {explainMutation.isError && (
-        <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+        <div
+          role="alert"
+          className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700"
+        >
           {mapHttpErrorToMessage(explainMutation.error)}
         </div>
       )}
@@ -178,15 +195,23 @@ export function VocabularyForm({
         // eslint-disable-next-line react/no-children-prop
         children={(field) => (
           <div>
-            <label className="text-sm font-bold">Word</label>
+            <label htmlFor={wordFieldId} className="text-sm font-bold">
+              Word
+            </label>
             <input
+              id={wordFieldId}
+              name="word"
               value={field.state.value}
               onChange={(event) => field.handleChange(event.target.value)}
               onBlur={field.handleBlur}
+              aria-invalid={field.state.meta.errors.length > 0}
+              aria-describedby={
+                field.state.meta.errors.length > 0 ? wordErrorId : undefined
+              }
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
             />
             {field.state.meta.errors.length > 0 && (
-              <p className="mt-1 text-xs text-red-500">
+              <p id={wordErrorId} role="alert" className="mt-1 text-xs text-red-500">
                 {field.state.meta.errors[0]?.message}
               </p>
             )}
@@ -195,8 +220,12 @@ export function VocabularyForm({
       />
 
       <div className="flex items-center justify-between gap-3 rounded-md border bg-slate-50 px-3 py-2">
-        <label className="text-sm font-bold">Language</label>
+        <label htmlFor={languageFieldId} className="text-sm font-bold">
+          Language
+        </label>
         <select
+          id={languageFieldId}
+          name="meaningLanguage"
           value={meaningLanguage}
           onChange={(event) => {
             setMeaningLanguage(event.target.value as "English" | "Vietnamese");
@@ -213,8 +242,12 @@ export function VocabularyForm({
         // eslint-disable-next-line react/no-children-prop
         children={(field) => (
           <div>
-            <label className="text-sm font-bold">Meaning</label>
+            <label htmlFor={meaningFieldId} className="text-sm font-bold">
+              Meaning
+            </label>
             <textarea
+              id={meaningFieldId}
+              name="meaning"
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
               placeholder="Meaning or translation"
@@ -229,8 +262,12 @@ export function VocabularyForm({
         // eslint-disable-next-line react/no-children-prop
         children={(field) => (
           <div>
-            <label className="text-sm font-bold">Simple Explanation</label>
+            <label htmlFor={noteFieldId} className="text-sm font-bold">
+              Simple Explanation
+            </label>
             <textarea
+              id={noteFieldId}
+              name="note"
               value={field.state.value ?? ""}
               onChange={(event) => field.handleChange(event.target.value)}
               placeholder="A simple explanation of the word in context..."
@@ -272,7 +309,9 @@ export function VocabularyForm({
       </div>
 
       {saveMutation.isError && (
-        <p className="text-xs text-red-500">{mapHttpErrorToMessage(saveMutation.error)}</p>
+        <p role="alert" className="text-xs text-red-500">
+          {mapHttpErrorToMessage(saveMutation.error)}
+        </p>
       )}
     </form>
   );

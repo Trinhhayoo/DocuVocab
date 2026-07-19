@@ -105,13 +105,16 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-bold">
-          <div className="flex size-7 items-center justify-center rounded-md bg-orange-500 text-white">
-            <BookOpenText className="size-4" />
+          <div
+            aria-hidden="true"
+            className="flex size-7 items-center justify-center rounded-md bg-orange-500 text-white"
+          >
+            <BookOpenText aria-hidden="true" className="size-4" />
           </div>
           <span>DocuVocab</span>
         </Link>
 
-        <nav className="flex items-center gap-3 text-sm">
+        <nav aria-label="Primary" className="flex items-center gap-3 text-sm">
           <Button size="sm" variant="default" onClick={handleClick}>
             {user != null ? 'Logout' : 'Login'}
           </Button>
@@ -120,7 +123,16 @@ export function AppHeader() {
             Feedback
           </Link>
 
-          <SettingsIcon onClick={() => setIsSettingsOpen(true)} className="hidden size-4 text-muted-foreground hover:text-foreground sm:block" />
+          <button
+            type="button"
+            aria-label="Open settings"
+            aria-expanded={isSettingsOpen}
+            aria-haspopup="dialog"
+            onClick={() => setIsSettingsOpen(true)}
+            className="hidden text-muted-foreground hover:text-foreground sm:block"
+          >
+            <SettingsIcon aria-hidden="true" className="size-4" />
+          </button>
         </nav>
       </div>
       {

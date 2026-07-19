@@ -24,6 +24,9 @@ export function VocabularyEditorModal({
   children,
 }: VocabularyEditorModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const titleId = "vocabulary-editor-title";
+  const descriptionId = "vocabulary-editor-description";
 
   const canUseDOM = typeof document !== "undefined";
 
@@ -31,6 +34,9 @@ export function VocabularyEditorModal({
     if (!isOpen) {
       return;
     }
+
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+    modalRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -46,6 +52,7 @@ export function VocabularyEditorModal({
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElementRef.current?.focus();
     };
   }, [isOpen, onClose]);
 
@@ -178,7 +185,7 @@ export function VocabularyEditorModal({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 -translate-x-1/2 -translate-y-1/2 z-[9999] ",
+        "fixed inset-0 -translate-x-1/2 -translate-y-1/2 z-9999 ",
         "flex items-center justify-center",
       )}
       style={{ left: "50%", top: "50%" }}
@@ -190,11 +197,12 @@ export function VocabularyEditorModal({
     >
       <div
         ref={modalRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="vocabulary-editor-title"
+        aria-labelledby={titleId}
         aria-describedby={
-          description ? "vocabulary-editor-description" : undefined
+          description ? descriptionId : undefined
         }
         className={cn(
           "flex max-h-[90dvh] w-full flex-col overflow-hidden",
@@ -211,6 +219,16 @@ export function VocabularyEditorModal({
           event.stopPropagation();
         }}
       >
+        <div className="space-y-1 px-4 pt-4">
+          <h2 id={titleId} className="text-sm font-semibold text-slate-900">
+            {title}
+          </h2>
+          {description ? (
+            <p id={descriptionId} className="text-xs text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
+        </div>
         {children}
       </div>
     </div>,

@@ -15,7 +15,7 @@ export function DocList({ initialDocs = [] }: { initialDocs: DocParams[] }) {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div role="status" aria-live="polite">Loading...</div>;
   }
 
   if (docsData.docs.length === 0) {
@@ -27,19 +27,20 @@ export function DocList({ initialDocs = [] }: { initialDocs: DocParams[] }) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {docsData.docs.map((doc) => (
-        <Link
-          key={doc.id}
-          href={`/docs/${doc.id}`}
-          className="rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-        >
-          <h3 className="line-clamp-2 text-sm font-semibold">{doc.title}</h3>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {doc.siteName ?? new URL(doc.sourceUrl).hostname}
-          </p>
-        </Link>
+        <li key={doc.id}>
+          <Link
+            href={`/docs/${doc.id}`}
+            className="block rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <h3 className="line-clamp-2 text-sm font-semibold">{doc.title}</h3>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {doc.siteName ?? new URL(doc.sourceUrl).hostname}
+            </p>
+          </Link>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

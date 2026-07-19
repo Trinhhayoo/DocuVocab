@@ -9,8 +9,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-
-      <main>
         <section className="mx-auto max-w-4xl px-4 pb-10 pt-16 text-center sm:pt-20">
           <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
               Save notes while reading{" "}
@@ -37,12 +35,10 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div role="status" aria-live="polite">Loading...</div>}>
         <DocList initialDocs={recentDocs} />
       </Suspense>
       </section>
-
-      </main>
     </div>
   );
 }

@@ -13,6 +13,9 @@ import { mapHttpErrorToMessage } from "@/feature/common/data/http/http-error-mes
 
 export function UrlImportForm() {
   const router = useRouter();
+  const urlInputId = "import-url-input";
+  const urlHintId = "import-url-hint";
+  const urlErrorId = "import-url-error";
 
   const importMutation = useMutation({
     mutationFn: importUrl,
@@ -41,6 +44,7 @@ export function UrlImportForm() {
           event.stopPropagation();
           form.handleSubmit();
         }}
+        aria-busy={importMutation.isPending}
         className="flex flex-col gap-3 rounded-2xl border bg-white p-3 shadow-sm sm:flex-row"
       >
         <form.Field
@@ -48,16 +52,38 @@ export function UrlImportForm() {
           // eslint-disable-next-line react/no-children-prop
           children={(field) => (
             <div className="flex-1">
+              <label htmlFor={urlInputId} className="sr-only">
+                Documentation or article URL
+              </label>
               <input
+                id={urlInputId}
+                name="url"
+                type="url"
+                autoComplete="url"
+                inputMode="url"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
                 onBlur={field.handleBlur}
                 placeholder="Paste documentation or blog URL..."
+                aria-invalid={field.state.meta.errors.length > 0}
+                aria-describedby={
+                  field.state.meta.errors.length > 0
+                    ? `${urlHintId} ${urlErrorId}`
+                    : urlHintId
+                }
                 className="h-11 w-full rounded-xl border px-4 text-sm outline-none focus:border-slate-400"
               />
 
+              <p id={urlHintId} className="sr-only">
+                Paste a public URL to import content.
+              </p>
+
               {field.state.meta.errors.length > 0 && (
-                <p className="mt-2 text-left text-sm text-red-500">
+                <p
+                  id={urlErrorId}
+                  role="alert"
+                  className="mt-2 text-left text-sm text-red-500"
+                >
                   {field.state.meta.errors[0]?.message}
                 </p>
               )}
@@ -75,7 +101,10 @@ export function UrlImportForm() {
       </form>
 
       {importMutation.isError && (
-        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
             {mapHttpErrorToMessage(importMutation.error)}
         </div>
       )}

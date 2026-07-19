@@ -76,11 +76,17 @@ export function DocLearningWorkspace({
   }
 
   return (
-    <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8">
+    <section
+      aria-label="Document learning workspace"
+      className="mx-auto grid max-w-7xl gap-8 px-4 py-8"
+    >
       <section className="min-w-0">
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm lg:hidden">
+        <section
+          aria-label="Vocabulary quick actions"
+          className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm lg:hidden"
+        >
           <div>
-            <p className="text-sm font-semibold">Vocabulary</p>
+            <h2 className="text-sm font-semibold">Vocabulary</h2>
             <p className="text-xs text-muted-foreground">
               Open the editor for selected words and saved notes.
             </p>
@@ -93,11 +99,11 @@ export function DocLearningWorkspace({
               className="gap-2"
               onClick={openModal}
             >
-              <BookOpen className="size-4" />
+              <BookOpen aria-hidden="true" className="size-4" />
               Open
             </Button>
           ) : null}
-        </div>
+        </section>
 
         <article className="rounded-xl border bg-white p-6 shadow-sm">
           <InteractiveDocReader
@@ -139,6 +145,6 @@ export function DocLearningWorkspace({
         )}
         </VocabularyEditorModal>
       ) : null}
-    </main>
+    </section>
   );
 }
