@@ -1,7 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpenText, Settings as SettingsIcon } from "lucide-react";
+import {
+  BookOpenText,
+  MessageSquareText,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
@@ -111,27 +115,35 @@ export function AppHeader() {
           >
             <BookOpenText aria-hidden="true" className="size-4" />
           </div>
-          <span>DocuVocab</span>
+          <span className="hidden md:block">DocuVocab</span>
         </Link>
 
-        <nav aria-label="Primary" className="flex items-center gap-3 text-sm">
+        <nav aria-label="Primary" className="flex items-center gap-1 text-sm sm:gap-3">
           <Button size="sm" variant="default" onClick={handleClick}>
             {user != null ? 'Logout' : 'Login'}
           </Button>
 
-          <Link href="#" className="hidden text-muted-foreground hover:text-foreground sm:block">
-            Feedback
+          <Link
+            href="#"
+            aria-label="Feedback"
+            title="Open feedback"
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
+          >
+            <MessageSquareText aria-hidden="true" className="size-4" />
+            <span>Feedback</span>
           </Link>
 
           <button
             type="button"
             aria-label="Open settings"
+            title="Open settings"
             aria-expanded={isSettingsOpen}
             aria-haspopup="dialog"
             onClick={() => setIsSettingsOpen(true)}
-            className="hidden text-muted-foreground hover:text-foreground sm:block"
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
           >
             <SettingsIcon aria-hidden="true" className="size-4" />
+            <span>Settings</span>
           </button>
         </nav>
       </div>

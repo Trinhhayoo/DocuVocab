@@ -21,7 +21,7 @@ export function DocList({ initialDocs = [] }: { initialDocs: DocParams[] }) {
   if (docsData.docs.length === 0) {
     return (
       <div className="rounded-xl border border-dashed bg-white p-8 text-center text-sm text-muted-foreground">
-        No documents yet. Create your first test document above.
+        No documents yet. Create your first document above.
       </div>
     );
   }
