@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 // Message handler
 // ---------------------------------------------------------------------------
-const WEB_APP_URL = "http://localhost:3000"; // "https://docu-vocab-kappa.vercel.app";
+const WEB_APP_URL = "http://localhost:3000";
 const API_BASE = `${WEB_APP_URL}/api/extension`;
 let refreshSessionPromise = null;
 
@@ -279,6 +279,8 @@ async function loginWithGoogleFromExtension(returnTo) {
         const url = new URL(callbackUrl);
         const accessToken = url.searchParams.get("access_token");
         const refreshToken = url.searchParams.get("refresh_token");
+        console.log(accessToken);
+        console.log(refreshToken);
 
         if (!accessToken || !refreshToken) {
           resolve({
@@ -291,16 +293,16 @@ async function loginWithGoogleFromExtension(returnTo) {
 
         await saveAuthTokens({ accessToken, refreshToken });
 
-        const [activeTab] = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-
-        if (activeTab?.id) {
-          await chrome.tabs.sendMessage(activeTab.id, {
-            type: "AUTH_LOGIN_SUCCESS",
-          });
-        }
+        chrome.tabs
+          .query({ active: true, currentWindow: true })
+          .then(([activeTab]) => {
+            if (activeTab?.id) {
+              chrome.tabs.sendMessage(activeTab.id, {
+                type: "AUTH_LOGIN_SUCCESS",
+              });
+            }
+          })
+          .catch(() => {});
 
         resolve({ success: true });
       },
@@ -311,6 +313,17 @@ async function loginWithGoogleFromExtension(returnTo) {
 async function logoutFromExtension() {
   try {
     await clearAuthTokens();
+
+    chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .then(([activeTab]) => {
+        if (activeTab?.id) {
+          chrome.tabs.sendMessage(activeTab.id, {
+            type: "AUTH_LOGOUT_SUCCESS",
+          });
+        }
+      })
+      .catch(() => {});
 
     return { success: true };
   } catch (error) {

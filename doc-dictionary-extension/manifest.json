@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Doc Dictionary",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Highlight saved vocabulary on any webpage. Select text to save new words.",
 
   "permissions": ["activeTab", "storage", "scripting", "tabs", "identity"],

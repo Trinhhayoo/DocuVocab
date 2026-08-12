@@ -61,22 +61,32 @@ let lastUrl = location.href;
  * Words are sorted longest-first so "machine learning" matches
  * before "machine" alone.
  */
+function normalizeVocabularyKey(value) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function buildRegex(words) {
   const escaped = words
-    .map((w) => w.trim())
+    .map((w) => normalizeVocabularyKey(w))
     .filter(Boolean)
     .sort((a, b) => b.length - a.length)
     .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 
   if (escaped.length === 0) return null;
-  return new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
+
+  // Use Unicode-aware boundaries so accented words and non-Latin scripts
+  // can still be matched on the page.
+  return new RegExp(
+    `(?<![\\p{L}\\p{N}_])(${escaped.join("|")})(?![\\p{L}\\p{N}_])`,
+    "giu",
+  );
 }
 
 function prepareVocabularies(items) {
   const seenWords = new Set();
 
   return items.filter((item) => {
-    const normalizedWord = (item.word || "").trim().toLowerCase();
+    const normalizedWord = normalizeVocabularyKey(item.word || "");
 
     if (!normalizedWord || seenWords.has(normalizedWord)) {
       return false;
@@ -648,7 +658,7 @@ async function fetchVocabularies() {
 function rebuildRegex() {
   vocabIdByWord.clear();
   for (const v of vocabularies) {
-    vocabIdByWord.set(v.word.toLowerCase().trim(), v.id);
+    vocabIdByWord.set(normalizeVocabularyKey(v.word), v.id);
   }
   vocabRegex = buildRegex(vocabularies.map((v) => v.word));
 }

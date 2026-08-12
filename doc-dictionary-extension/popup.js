@@ -1,4 +1,4 @@
-const WEB_APP_URL = "http://localhost:3000"; // "https://docu-vocab-kappa.vercel.app";
+const WEB_APP_URL = "http://localhost:3000";
 
 const settingsState = {
   allowGlobalVocabulary: false,
@@ -77,6 +77,36 @@ function renderSettingsToggle() {
   toggle.classList.toggle("on", settingsState.allowGlobalVocabulary);
   toggle.setAttribute("aria-pressed", String(settingsState.allowGlobalVocabulary));
   toggle.disabled = settingsState.loading;
+}
+
+const AUTH_BUTTON_LABELS = {
+  login: "Login with Google",
+  logout: "Logout",
+};
+
+function setActionLoading(isLoading, message = "") {
+  const apiStatus = document.getElementById("api-status");
+  const loginButton = document.getElementById("btn-login");
+  const logoutButton = document.getElementById("btn-logout");
+  const dashboardButton = document.getElementById("btn-dashboard");
+  const refreshButton = document.getElementById("btn-refresh");
+  const settingsButton = document.getElementById("btn-settings");
+  loginButton.disabled = isLoading;
+  logoutButton.disabled = isLoading;
+  dashboardButton.disabled = isLoading;
+  refreshButton.disabled = isLoading;
+  settingsButton.disabled = isLoading;
+
+  loginButton.textContent = isLoading
+    ? "Signing in..."
+    : AUTH_BUTTON_LABELS.login;
+  logoutButton.textContent = isLoading
+    ? "Logging out..."
+    : AUTH_BUTTON_LABELS.logout;
+
+  if (isLoading) {
+    apiStatus.textContent = message || "Working...";
+  }
 }
 
 function setSettingsPanelOpen(isOpen) {
@@ -208,6 +238,8 @@ async function init() {
     apiDot.classList.add("err");
     apiStatus.textContent = message;
     document.getElementById("word-count").textContent = "0";
+    loginButton.textContent = AUTH_BUTTON_LABELS.login;
+    logoutButton.textContent = AUTH_BUTTON_LABELS.logout;
     loginButton.style.display = "block";
     logoutButton.style.display = "none";
   }
@@ -218,6 +250,8 @@ async function init() {
     apiStatus.textContent = "API connected";
     console.log("Word count for current page:", wordCount);
     document.getElementById("word-count").textContent = String(wordCount);
+    loginButton.textContent = AUTH_BUTTON_LABELS.login;
+    logoutButton.textContent = AUTH_BUTTON_LABELS.logout;
     loginButton.style.display = "none";
     logoutButton.style.display = "block";
   }
@@ -248,43 +282,65 @@ async function init() {
   }
 
   loginButton.addEventListener("click", async () => {
-    const response = await sendBackgroundMessage({
-      type: "OPEN_LOGIN_PAGE",
-      payload: {
-        returnTo: pageUrl || WEB_APP_URL,
-      },
-    });
+    if (loginButton.disabled) return;
 
-    if (response?.success) {
-      if (tab?.id) {
-        await sendBackgroundMessage({
-          type: "REHIGHLIGHT_PAGE",
-          payload: { tabId: tab.id },
-        });
+    setActionLoading(true, "Signing you in with Google...");
+
+    try {
+      const response = await sendBackgroundMessage({
+        type: "OPEN_LOGIN_PAGE",
+        payload: {
+          returnTo: pageUrl || WEB_APP_URL,
+        },
+      });
+
+      if (response?.success) {
+        apiStatus.textContent = "Signed in. Refreshing state...";
+
+        if (tab?.id) {
+          await sendBackgroundMessage({
+            type: "REHIGHLIGHT_PAGE",
+            payload: { tabId: tab.id },
+          });
+        }
+
+        window.location.reload();
+        return;
       }
 
-      window.location.reload();
+      apiDot.classList.add("err");
+      apiStatus.textContent = response?.message || "Login failed.";
+    } finally {
+      setActionLoading(false);
     }
   });
 
   logoutButton.addEventListener("click", async () => {
-    const response = await sendBackgroundMessage({ type: "LOGOUT" });
+    if (logoutButton.disabled) return;
 
-    if (response?.success) {
-      if (tab?.id) {
-        await sendBackgroundMessage({
-          type: "REHIGHLIGHT_PAGE",
-          payload: { tabId: tab.id },
-        });
+    setActionLoading(true, "Logging you out...");
+
+    try {
+      const response = await sendBackgroundMessage({ type: "LOGOUT" });
+
+      if (response?.success) {
+        if (tab?.id) {
+          await sendBackgroundMessage({
+            type: "REHIGHLIGHT_PAGE",
+            payload: { tabId: tab.id },
+          });
+        }
+
+        setLoggedOutState("You are logged out.");
+        setSettingsPanelOpen(false);
+        return;
       }
 
-      setLoggedOutState("You are logged out.");
-      setSettingsPanelOpen(false);
-      return;
+      apiDot.classList.add("err");
+      apiStatus.textContent = response?.message || "Cannot logout right now.";
+    } finally {
+      setActionLoading(false);
     }
-
-    apiDot.classList.add("err");
-    apiStatus.textContent = response?.message || "Cannot logout right now.";
   });
 
   // 3. Dashboard button — opens the web app
@@ -328,5 +384,11 @@ async function init() {
     }
   });
 }
+
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === "AUTH_LOGOUT_SUCCESS") {
+    setLoggedOutState("You are logged out.");
+  }
+});
 
 init();
