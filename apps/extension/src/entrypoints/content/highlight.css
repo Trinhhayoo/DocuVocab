@@ -1,5 +1,5 @@
 /* The highlight name must match HIGHLIGHT_NAME in src/content/highlighter.ts. */
+/* Same yellow as `mark.vocab-highlight` in the web app's light theme. */
 ::highlight(docuvocab-vocabulary) {
-  background-color: rgba(250, 204, 21, 0.35);
-  text-decoration: underline 2px rgb(234, 179, 8);
+  background-color: #fef08a;
 }
