@@ -141,6 +141,8 @@ export function VocabularyForm({
         if (selectedSentence) {
           form.setFieldValue("originalSentence", selectedSentence);
         }
+      } catch {
+        // explainMutation.isError renders the failure message.
       } finally {
         setIsExplaining(false);
       }
@@ -161,6 +163,8 @@ export function VocabularyForm({
       });
 
       applyExplanation(data);
+    } catch {
+      // explainMutation.isError renders the failure message.
     } finally {
       setIsExplaining(false);
     }
