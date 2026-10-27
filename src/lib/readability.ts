@@ -1,6 +1,7 @@
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import { countMathCandidates, normalizeMathContent } from "@/lib/math-normalize";
+import { readTextWithLimit, safeFetch } from "@/lib/safe-fetch";
 
 export type ExtractedReadableContent = {
   title: string;
@@ -224,7 +225,7 @@ function extractWithReadability(document: Document, url: string) {
 export async function extractReadableContent(
   url: string
 ): Promise<ExtractedReadableContent> {
-  const response = await fetch(url, {
+  const response = await safeFetch(url, {
     headers: {
       "User-Agent": "DocDictionaryBot/1.0",
       Accept: "text/html",
@@ -241,7 +242,7 @@ export async function extractReadableContent(
     throw new Error("This URL does not return an HTML page.");
   }
 
-  const html = await response.text();
+  const html = await readTextWithLimit(response);
 
   const rawDom = new JSDOM(html, {
     url,

@@ -8,23 +8,13 @@ import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-u
 
 const settingsRepo = new PrismaSettingsRepository();
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, PATCH, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
-}
-
 export async function GET() {
   const user = await requireCurrentUser();
 
   if (!user) {
     return NextResponse.json(
       { success: false, status: "401", message: "Unauthorized" },
-      { status: 401, headers: CORS_HEADERS },
+      { status: 401 },
     );
   }
 
@@ -33,7 +23,7 @@ export async function GET() {
   if (!result.success) {
     return NextResponse.json(
       { success: false, status: "500", message: result.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
@@ -45,7 +35,6 @@ export async function GET() {
         settings: result.data,
       },
     },
-    { headers: CORS_HEADERS },
   );
 }
 
@@ -55,7 +44,7 @@ export async function PATCH(request: Request) {
   if (!user) {
     return NextResponse.json(
       { success: false, status: "401", message: "Unauthorized" },
-      { status: 401, headers: CORS_HEADERS },
+      { status: 401 },
     );
   }
 
@@ -65,7 +54,7 @@ export async function PATCH(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { success: false, status: "400", message: "Invalid settings data." },
-      { status: 400, headers: CORS_HEADERS },
+      { status: 400 },
     );
   }
 
@@ -74,7 +63,7 @@ export async function PATCH(request: Request) {
   if (!result.success) {
     return NextResponse.json(
       { success: false, status: "500", message: result.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
@@ -86,6 +75,5 @@ export async function PATCH(request: Request) {
         settings: result.data,
       },
     },
-    { headers: CORS_HEADERS },
   );
 }

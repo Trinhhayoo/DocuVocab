@@ -2,19 +2,9 @@ import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
 type RefreshTokenRequestBody = Readonly<{
   refreshToken?: string;
 }>;
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
-}
 
 export async function POST(request: Request) {
   let body: RefreshTokenRequestBody;
@@ -28,7 +18,7 @@ export async function POST(request: Request) {
         status: "400",
         message: "Invalid request body.",
       },
-      { status: 400, headers: CORS_HEADERS },
+      { status: 400 },
     );
   }
 
@@ -39,7 +29,7 @@ export async function POST(request: Request) {
         status: "400",
         message: "refreshToken is required.",
       },
-      { status: 400, headers: CORS_HEADERS },
+      { status: 400 },
     );
   }
 
@@ -55,7 +45,7 @@ export async function POST(request: Request) {
         status: "401",
         message: "Session expired. Please sign in again.",
       },
-      { status: 401, headers: CORS_HEADERS },
+      { status: 401 },
     );
   }
 
@@ -69,6 +59,6 @@ export async function POST(request: Request) {
         expiresAt: data.session.expires_at,
       },
     },
-    { status: 200, headers: CORS_HEADERS },
+    { status: 200 },
   );
 }
