@@ -64,7 +64,9 @@ model Vocabulary {
 
   word             String
   meaning          String?
+  meaningEn        String?
   note             String?
+  noteEn           String?
   originalSentence String?
   exampleSentence  String?
   status           String   @default("new")

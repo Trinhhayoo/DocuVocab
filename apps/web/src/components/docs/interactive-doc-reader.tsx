@@ -262,6 +262,12 @@ export function InteractiveDocReader({
             </div>
           )}
 
+          {tooltip.vocab.meaningEn && (
+            <div lang="en" className="mt-1 text-muted-foreground">
+              {tooltip.vocab.meaningEn}
+            </div>
+          )}
+
           {tooltip.vocab.note && (
             <div className="mt-2 border-t pt-2 text-xs text-slate-500">
               {tooltip.vocab.note}

@@ -19,6 +19,8 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
   const wordFieldId = `vocab-card-word-${vocabulary.id}`;
   const meaningFieldId = `vocab-card-meaning-${vocabulary.id}`;
   const noteFieldId = `vocab-card-note-${vocabulary.id}`;
+  const meaningEnFieldId = `vocab-card-meaning-en-${vocabulary.id}`;
+  const noteEnFieldId = `vocab-card-note-en-${vocabulary.id}`;
 
   const updateMutation = useMutation({
     mutationFn: updateVocabulary,
@@ -47,7 +49,9 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
     defaultValues: {
       word: vocabulary.word,
       meaning: vocabulary.meaning ?? "",
+      meaningEn: vocabulary.meaningEn ?? "",
       note: vocabulary.note ?? "",
+      noteEn: vocabulary.noteEn ?? "",
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate({
@@ -55,7 +59,9 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
         input: {
           word: value.word,
           meaning: value.meaning || null,
+          meaningEn: value.meaningEn || null,
           note: value.note || null,
+          noteEn: value.noteEn || null,
         },
       });
     },
@@ -96,13 +102,34 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           children={(field) => (
             <div>
               <label htmlFor={meaningFieldId} className="sr-only">
-                Meaning
+                Meaning (Tiếng Việt)
               </label>
               <input
                 id={meaningFieldId}
                 name="meaning"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
+                placeholder="Nghĩa (Tiếng Việt)"
+                className="w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
+          )}
+        />
+
+        <form.Field
+          name="meaningEn"
+          // eslint-disable-next-line react/no-children-prop
+          children={(field) => (
+            <div>
+              <label htmlFor={meaningEnFieldId} className="sr-only">
+                Meaning (English)
+              </label>
+              <input
+                id={meaningEnFieldId}
+                name="meaningEn"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                placeholder="Meaning (English)"
                 className="w-full rounded-md border px-3 py-2 text-sm"
               />
             </div>
@@ -115,13 +142,34 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           children={(field) => (
             <div>
               <label htmlFor={noteFieldId} className="sr-only">
-                Note
+                Explanation (Tiếng Việt)
               </label>
               <textarea
                 id={noteFieldId}
                 name="note"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
+                placeholder="Giải thích (Tiếng Việt)"
+                className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
+          )}
+        />
+
+        <form.Field
+          name="noteEn"
+          // eslint-disable-next-line react/no-children-prop
+          children={(field) => (
+            <div>
+              <label htmlFor={noteEnFieldId} className="sr-only">
+                Explanation (English)
+              </label>
+              <textarea
+                id={noteEnFieldId}
+                name="noteEn"
+                value={field.state.value}
+                onChange={(event) => field.handleChange(event.target.value)}
+                placeholder="Explanation (English)"
                 className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
               />
             </div>
@@ -166,6 +214,12 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
               {vocabulary.meaning}
             </p>
           )}
+
+          {vocabulary.meaningEn && (
+            <p lang="en" className="mt-1 text-sm text-muted-foreground">
+              {vocabulary.meaningEn}
+            </p>
+          )}
         </div>
 
         <button
@@ -179,6 +233,12 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
 
       {vocabulary.note && (
         <p className="mt-3 text-sm text-slate-600">{vocabulary.note}</p>
+      )}
+
+      {vocabulary.noteEn && (
+        <p lang="en" className="mt-2 text-sm text-slate-600">
+          {vocabulary.noteEn}
+        </p>
       )}
 
       <div className="mt-3">

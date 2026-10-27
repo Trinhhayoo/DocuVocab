@@ -15,7 +15,6 @@ export default async function explainVocabularyUsecase(
       paragraph: input.paragraph,
       sourceTitle: input.sourceTitle,
       sourceUrl: input.sourceUrl,
-      meaningLanguage: input.meaningLanguage,
     });
 
     return success(explanation);

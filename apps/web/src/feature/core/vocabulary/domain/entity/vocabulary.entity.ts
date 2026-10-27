@@ -13,7 +13,9 @@ export default class Vocabulary {
 
   readonly word: string;
   readonly meaning: string | null;
+  readonly meaningEn: string | null;
   readonly note: string | null;
+  readonly noteEn: string | null;
   readonly originalSentence: string | null;
   readonly exampleSentence: string | null;
   readonly status: VocabularyStatus;
@@ -30,7 +32,9 @@ export default class Vocabulary {
     this.pageTitle = params.pageTitle;
     this.word = params.word;
     this.meaning = params.meaning;
+    this.meaningEn = params.meaningEn;
     this.note = params.note;
+    this.noteEn = params.noteEn;
     this.originalSentence = params.originalSentence;
     this.exampleSentence = params.exampleSentence;
     this.status = params.status;
@@ -48,7 +52,9 @@ export default class Vocabulary {
       pageTitle: this.pageTitle,
       word: this.word,
       meaning: this.meaning,
+      meaningEn: this.meaningEn,
       note: this.note,
+      noteEn: this.noteEn,
       originalSentence: this.originalSentence,
       exampleSentence: this.exampleSentence,
       status: this.status,
