@@ -11,12 +11,12 @@ export function extractSentence(fullText: string, selected: string) {
   }
 
   let start = index;
-  while (start > 0 && !SENTENCE_END.test(fullText[start - 1])) {
+  while (start > 0 && !SENTENCE_END.test(fullText.charAt(start - 1))) {
     start--;
   }
 
   let end = index + selected.length;
-  while (end < fullText.length && !SENTENCE_END.test(fullText[end])) {
+  while (end < fullText.length && !SENTENCE_END.test(fullText.charAt(end))) {
     end++;
   }
 
