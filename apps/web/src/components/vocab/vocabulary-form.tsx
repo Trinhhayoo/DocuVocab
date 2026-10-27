@@ -13,16 +13,26 @@ import {
 } from "@/app/docs/view/client/vocab-api";
 import type { CreateVocabularyInput } from "@/feature/core/vocabulary/domain/params/vocabulary.param";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
+import type { ExplainVocabularyResponse } from "@/feature/support/llm/llm-provider.interface";
 import { mapHttpErrorToMessage } from "@/feature/common/data/http/http-error-message.mapper";
 
 const formSchema = z.object({
   docId: z.string(),
   word: z.string().min(1, "Word is required").max(100),
   meaning: z.string().max(500),
+  meaningEn: z.string().max(500),
   note: z.string().max(1000),
+  noteEn: z.string().max(1000),
   originalSentence: z.string().max(1000),
   exampleSentence: z.string().max(1000),
 });
+
+const EXPLANATION_FIELDS = [
+  { name: "meaning", label: "Meaning (Tiếng Việt)", placeholder: "Nghĩa trong ngữ cảnh", minHeight: "min-h-12" },
+  { name: "meaningEn", label: "Meaning (English)", placeholder: "Meaning in context", minHeight: "min-h-12" },
+  { name: "note", label: "Explanation (Tiếng Việt)", placeholder: "Giải thích ngắn gọn...", minHeight: "min-h-20" },
+  { name: "noteEn", label: "Explanation (English)", placeholder: "A simple explanation in context...", minHeight: "min-h-20" },
+] as const;
 
 type VocabularyFormProps = {
   docId: string;
@@ -49,9 +59,6 @@ export function VocabularyForm({
   const isEditMode = Boolean(existingVocabulary);
   const hasAutoExplained = useRef(false);
   const [isExplaining, setIsExplaining] = useState(false);
-  const [meaningLanguage, setMeaningLanguage] = useState<
-    "English" | "Vietnamese"
-  >("Vietnamese");
 
   const explainMutation = useMutation({
     mutationFn: explainVocabulary,
@@ -65,7 +72,9 @@ export function VocabularyForm({
           input: {
             word: input.word,
             meaning: input.meaning || null,
+            meaningEn: input.meaningEn || null,
             note: input.note || null,
+            noteEn: input.noteEn || null,
             originalSentence: input.originalSentence || null,
             exampleSentence: input.exampleSentence || null,
           },
@@ -85,7 +94,9 @@ export function VocabularyForm({
       docId,
       word: existingVocabulary?.word ?? selectedWord,
       meaning: existingVocabulary?.meaning ?? "",
+      meaningEn: existingVocabulary?.meaningEn ?? "",
       note: existingVocabulary?.note ?? "",
+      noteEn: existingVocabulary?.noteEn ?? "",
       originalSentence: existingVocabulary?.originalSentence ?? "",
       exampleSentence: existingVocabulary?.exampleSentence ?? "",
     },
@@ -99,9 +110,14 @@ export function VocabularyForm({
 
   const wordFieldId = "vocab-word";
   const wordErrorId = "vocab-word-error";
-  const languageFieldId = "vocab-language";
-  const meaningFieldId = "vocab-meaning";
-  const noteFieldId = "vocab-note";
+
+  function applyExplanation(data: ExplainVocabularyResponse) {
+    form.setFieldValue("meaning", data.meaning);
+    form.setFieldValue("meaningEn", data.meaningEn);
+    form.setFieldValue("note", data.simpleExplanation);
+    form.setFieldValue("noteEn", data.simpleExplanationEn);
+    form.setFieldValue("exampleSentence", data.exampleSentence);
+  }
 
   // Auto-explain for new vocabulary only (not edit mode)
   useEffect(() => {
@@ -118,12 +134,9 @@ export function VocabularyForm({
           sentence: selectedSentence,
           sourceTitle,
           sourceUrl,
-          meaningLanguage,
         });
 
-        form.setFieldValue("meaning", data.meaning ?? "");
-        form.setFieldValue("note", data.simpleExplanation ?? "");
-        form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
+        applyExplanation(data);
 
         if (selectedSentence) {
           form.setFieldValue("originalSentence", selectedSentence);
@@ -145,12 +158,9 @@ export function VocabularyForm({
         sentence: selectedSentence,
         sourceTitle,
         sourceUrl,
-        meaningLanguage,
       });
 
-      form.setFieldValue("meaning", data.meaning ?? "");
-      form.setFieldValue("note", data.simpleExplanation ?? "");
-      form.setFieldValue("exampleSentence", data.exampleSentence ?? "");
+      applyExplanation(data);
     } finally {
       setIsExplaining(false);
     }
@@ -219,63 +229,28 @@ export function VocabularyForm({
         )}
       />
 
-      <div className="flex items-center justify-between gap-3 rounded-md border bg-slate-50 px-3 py-2">
-        <label htmlFor={languageFieldId} className="text-sm font-bold">
-          Language
-        </label>
-        <select
-          id={languageFieldId}
-          name="meaningLanguage"
-          value={meaningLanguage}
-          onChange={(event) => {
-            setMeaningLanguage(event.target.value as "English" | "Vietnamese");
-          }}
-          className="rounded-md border bg-white px-2 py-1 text-sm"
-        >
-          <option value="English">English</option>
-          <option value="Vietnamese">Vietnamese</option>
-        </select>
-      </div>
-
-      <form.Field
-        name="meaning"
-        // eslint-disable-next-line react/no-children-prop
-        children={(field) => (
-          <div>
-            <label htmlFor={meaningFieldId} className="text-sm font-bold">
-              Meaning
-            </label>
-            <textarea
-              id={meaningFieldId}
-              name="meaning"
-              value={field.state.value ?? ""}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Meaning or translation"
-              className="mt-1 min-h-12 w-full rounded-md border px-3 py-2 text-sm"
-            />
-          </div>
-        )}
-      />
-
-      <form.Field
-        name="note"
-        // eslint-disable-next-line react/no-children-prop
-        children={(field) => (
-          <div>
-            <label htmlFor={noteFieldId} className="text-sm font-bold">
-              Simple Explanation
-            </label>
-            <textarea
-              id={noteFieldId}
-              name="note"
-              value={field.state.value ?? ""}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="A simple explanation of the word in context..."
-              className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm"
-            />
-          </div>
-        )}
-      />
+      {EXPLANATION_FIELDS.map(({ name, label, placeholder, minHeight }) => (
+        <form.Field
+          key={name}
+          name={name}
+          // eslint-disable-next-line react/no-children-prop
+          children={(field) => (
+            <div>
+              <label htmlFor={`vocab-${name}`} className="text-sm font-bold">
+                {label}
+              </label>
+              <textarea
+                id={`vocab-${name}`}
+                name={name}
+                value={field.state.value ?? ""}
+                onChange={(event) => field.handleChange(event.target.value)}
+                placeholder={placeholder}
+                className={`mt-1 ${minHeight} w-full rounded-md border px-3 py-2 text-sm`}
+              />
+            </div>
+          )}
+        />
+      ))}
 
       <div className="flex gap-2">
         <button
