@@ -4,10 +4,10 @@ Browser extension that highlights saved vocabulary words on any webpage and lets
 
 ## Setup
 
-1. Start the Next.js app: `pnpm dev` (runs on `http://localhost:3000`)
+1. Start the Next.js app: `pnpm dev` from the repo root (runs on `http://localhost:3000`)
 2. Open Chrome → `chrome://extensions`
 3. Enable **Developer mode** (top right)
-4. Click **Load unpacked** → select the `doc-dictionary-extension/` folder
+4. Click **Load unpacked** → select the `apps/extension/` folder
 5. The extension icon appears in the toolbar
 
 ### Icons
