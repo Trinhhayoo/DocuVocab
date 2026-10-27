@@ -1,20 +1,22 @@
+import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
+
 export type HighlightVocabularyItem = {
   id: string;
   word: string;
 };
 
-const SKIP_TAGS = new Set([
-  "SCRIPT",
-  "STYLE",
-  "PRE",
-  "CODE",
-  "A",
-  "BUTTON",
-  "TEXTAREA",
-  "INPUT",
-  "SELECT",
-  "MARK",
-]);
+const SKIP_TAG_SELECTOR = [
+  "script",
+  "style",
+  "pre",
+  "code",
+  "a",
+  "button",
+  "textarea",
+  "input",
+  "select",
+  "mark",
+].join(",");
 
 const SKIP_CONTAINER_SELECTOR = [
   "[data-math-format]",
@@ -27,20 +29,24 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function normalizeVocabularyKey(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+function toWordPattern(word: string) {
+  return escapeRegExp(word).replace(/['’]/g, "['’]");
 }
 
+// Letter/number boundaries instead of \b, so "C++" and accented words match too.
 function buildVocabularyRegex(vocabularies: HighlightVocabularyItem[]) {
   const words = vocabularies
     .map((vocab) => vocab.word.trim())
     .filter(Boolean)
     .sort((a, b) => b.length - a.length)
-    .map(escapeRegExp);
+    .map(toWordPattern);
 
   if (words.length === 0) return null;
 
-  return new RegExp(`\\b(${words.join("|")})\\b`, "gi");
+  return new RegExp(
+    `(?<![\\p{L}\\p{N}_])(${words.join("|")})(?![\\p{L}\\p{N}_])`,
+    "giu"
+  );
 }
 
 function shouldSkipTextNode(node: Text) {
@@ -52,7 +58,7 @@ function shouldSkipTextNode(node: Text) {
     return true;
   }
 
-  return Boolean(parentElement.closest([...SKIP_TAGS].join(",")));
+  return Boolean(parentElement.closest(SKIP_TAG_SELECTOR));
 }
 
 export function stabilizeMathMarkupHtml(html: string) {
@@ -93,7 +99,7 @@ export function createHighlightedVocabularyHtml(
 
   const vocabularyIdByWord = new Map(
     vocabularies.map((vocab) => [
-      normalizeVocabularyKey(vocab.word),
+      normalizeWord(vocab.word),
       vocab.id,
     ])
   );
@@ -152,7 +158,7 @@ export function createHighlightedVocabularyHtml(
       mark.textContent = matchedText;
 
       const vocabId = vocabularyIdByWord.get(
-        normalizeVocabularyKey(matchedText)
+        normalizeWord(matchedText)
       );
 
       if (vocabId) {
