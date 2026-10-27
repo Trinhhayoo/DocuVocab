@@ -4,9 +4,9 @@ import OllamaLLMProvider from "./ollama-llm-provider";
 
 type LlmEnv = Readonly<Record<string, string | undefined>>;
 
-/** Picks the LLM from `LLM_PROVIDER` (`anthropic` by default or `ollama`) and optional `LLM_MODEL`. */
+/** Picks the LLM from `LLM_PROVIDER` (`ollama` by default or `anthropic`) and optional `LLM_MODEL`. */
 export default function createLlmProvider(env: LlmEnv = process.env): LLMProvider {
-  const provider = env.LLM_PROVIDER ?? "anthropic";
+  const provider = env.LLM_PROVIDER ?? "ollama";
   const model = env.LLM_MODEL || undefined;
 
   switch (provider) {
