@@ -6,7 +6,7 @@ import getRecentDocsUsecase from "@/feature/core/doc/domain/usecase/get-recent-d
 import getDocByIdUsecase from "@/feature/core/doc/domain/usecase/get-doc-by-id.usecase";
 import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-user";
 import requireCurrentUserUsecase from "@/feature/core/user/domain/usecase/require-current-user.usecase";
-import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
+import { normalizeWord } from "@docuvocab/shared";
 
 const docRepo = new PrismaDocRepository();
 const settingsRepo = new PrismaSettingsRepository();

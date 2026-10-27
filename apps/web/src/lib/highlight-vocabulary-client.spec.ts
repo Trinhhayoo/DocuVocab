@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 
-import { cleanSelectedText, normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
 import { createHighlightedVocabularyHtml } from "./highlight-vocabulary-client";
 
 function highlightedWords(html: string, words: string[]): string[] {
@@ -11,25 +10,6 @@ function highlightedWords(html: string, words: string[]): string[] {
 
   return [...container.querySelectorAll("mark.vocab-highlight")].map((mark) => mark.textContent ?? "");
 }
-
-describe("cleanSelectedText", () => {
-  it.each([
-    ["Claude's behavior", "Claude's behavior"],
-    ["Claude’s behavior.", "Claude’s behavior"],
-    ['"idempotent",', "idempotent"],
-    ["  race\n  condition  ", "race condition"],
-    ["(Node.js)", "Node.js"],
-    ["state-of-the-art", "state-of-the-art"],
-  ])("cleans %j to %j", (input, expected) => {
-    expect(cleanSelectedText(input)).toBe(expected);
-  });
-});
-
-describe("normalizeWord", () => {
-  it("treats curly and straight apostrophes as the same word", () => {
-    expect(normalizeWord("Claude’s Behavior")).toBe(normalizeWord("claude's behavior"));
-  });
-});
 
 describe("createHighlightedVocabularyHtml", () => {
   it("highlights a phrase with an apostrophe", () => {

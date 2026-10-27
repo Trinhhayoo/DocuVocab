@@ -1,4 +1,4 @@
-import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
+import { buildVocabularyRegex, normalizeWord } from "@docuvocab/shared";
 
 export type HighlightVocabularyItem = {
   id: string;
@@ -24,30 +24,6 @@ const SKIP_CONTAINER_SELECTOR = [
   "math",
   "mjx-container",
 ].join(",");
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function toWordPattern(word: string) {
-  return escapeRegExp(word).replace(/['’]/g, "['’]");
-}
-
-// Letter/number boundaries instead of \b, so "C++" and accented words match too.
-function buildVocabularyRegex(vocabularies: HighlightVocabularyItem[]) {
-  const words = vocabularies
-    .map((vocab) => vocab.word.trim())
-    .filter(Boolean)
-    .sort((a, b) => b.length - a.length)
-    .map(toWordPattern);
-
-  if (words.length === 0) return null;
-
-  return new RegExp(
-    `(?<![\\p{L}\\p{N}_])(${words.join("|")})(?![\\p{L}\\p{N}_])`,
-    "giu"
-  );
-}
 
 function shouldSkipTextNode(node: Text) {
   const parentElement = node.parentElement;
@@ -93,7 +69,7 @@ export function createHighlightedVocabularyHtml(
   html: string,
   vocabularies: HighlightVocabularyItem[]
 ) {
-  const regex = buildVocabularyRegex(vocabularies);
+  const regex = buildVocabularyRegex(vocabularies.map((vocab) => vocab.word));
 
   if (!regex) return html;
 

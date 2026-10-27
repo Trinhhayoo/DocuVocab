@@ -7,7 +7,7 @@ import {
   stabilizeMathMarkupHtml,
 } from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
-import { cleanSelectedText } from "@/bootstrap/helpers/normalize-word.helper";
+import { cleanSelectedText, extractSentence } from "@docuvocab/shared";
 import { AnchorPosition } from "./doc-learning-workspace";
 
 type TooltipState = {
@@ -112,34 +112,10 @@ export function InteractiveDocReader({
           ? selection.anchorNode
           : null;
 
-    const fullText = blockParent?.textContent ?? "";
-    const selected = selection.toString().trim();
-
-    const idx = fullText.indexOf(selected);
-
-    if (idx === -1) {
-      return fullText.slice(0, 200).trim();
-    }
-
-    let start = idx;
-    while (start > 0 && !/[.!?]/.test(fullText[start - 1])) {
-      start--;
-    }
-
-    if (start > 0 && /[.!?]/.test(fullText[start - 1])) {
-      start++;
-    }
-
-    let end = idx + selected.length;
-    while (end < fullText.length && !/[.!?]/.test(fullText[end])) {
-      end++;
-    }
-
-    if (end < fullText.length) {
-      end++;
-    }
-
-    return fullText.slice(start, end).trim().slice(0, 500);
+    return extractSentence(
+      blockParent?.textContent ?? "",
+      selection.toString().trim()
+    );
   }
 
   function getHighlightMark(
