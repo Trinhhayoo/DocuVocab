@@ -1,8 +1,19 @@
-// Redirect hosts that only the browser's identity API can intercept (Chrome/Edge and Firefox).
-const EXTENSION_REDIRECT_HOST =
-  /^([a-p]{32}\.chromiumapp\.org|[0-9a-f]{40}\.extensions\.allizom\.org)$/;
+/** Fixed by the `key` in apps/extension/wxt.config.ts. */
+export const CHROME_EXTENSION_ID = "jgeelnjohablnhdioadaemkefnakdkph";
 
-/** Returns the URL only when it points at an extension identity redirect, so tokens never leave the browser. */
+/** `gecko.id` in apps/extension/wxt.config.ts. */
+export const FIREFOX_ADDON_ID = "doc-dictionary@docuvocab";
+
+/** Firefox's `identity.getRedirectURL()` subdomain: the SHA-1 hex digest of the add-on ID. */
+export const FIREFOX_REDIRECT_SUBDOMAIN = "dee9f0eaa99010512f41f85ded686cbb29122ecc";
+
+// Only our own extension's identity redirects; the browser intercepts these, so tokens never leave it.
+const EXTENSION_REDIRECT_HOSTS: ReadonlySet<string> = new Set([
+  `${CHROME_EXTENSION_ID}.chromiumapp.org`,
+  `${FIREFOX_REDIRECT_SUBDOMAIN}.extensions.allizom.org`,
+]);
+
+/** Returns the URL only when it is our extension's identity redirect. */
 export function parseExtensionRedirectUri(value: string | null): URL | null {
   if (!value) return null;
 
@@ -17,5 +28,5 @@ export function parseExtensionRedirectUri(value: string | null): URL | null {
     return null;
   }
 
-  return EXTENSION_REDIRECT_HOST.test(url.hostname) ? url : null;
+  return EXTENSION_REDIRECT_HOSTS.has(url.hostname) ? url : null;
 }

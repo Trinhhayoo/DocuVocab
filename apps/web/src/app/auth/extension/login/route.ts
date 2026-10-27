@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
@@ -19,10 +18,9 @@ export async function GET(request: Request) {
     );
   }
 
-  const origin =
-    (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_APP_URL!;
-
-  const callbackUrl = new URL(`${origin}/auth/extension/callback`);
+  // The identity API opens this page as a navigation, which sends no Origin header; the request URL
+  // is always the host serving it, locally and on every Vercel deployment.
+  const callbackUrl = new URL("/auth/extension/callback", requestUrl.origin);
   callbackUrl.searchParams.set("next", next);
   callbackUrl.searchParams.set("redirect_uri", redirectUri.href);
 
