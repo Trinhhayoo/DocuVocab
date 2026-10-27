@@ -78,7 +78,9 @@ export default class PrismaVocabularyRepository implements VocabularyRepository 
           pageTitle: input.pageTitle ?? null,
           word: input.word.trim(),
           meaning: input.meaning?.trim() ?? null,
+          meaningEn: input.meaningEn?.trim() ?? null,
           note: input.note?.trim() ?? null,
+          noteEn: input.noteEn?.trim() ?? null,
           originalSentence: input.originalSentence?.trim() ?? null,
           exampleSentence: input.exampleSentence?.trim() ?? null,
           status: VocabularyStatus.NEW,
@@ -149,10 +151,18 @@ export default class PrismaVocabularyRepository implements VocabularyRepository 
             input.meaning === undefined
               ? undefined
               : input.meaning?.trim() || null,
+          meaningEn:
+            input.meaningEn === undefined
+              ? undefined
+              : input.meaningEn?.trim() || null,
           note:
             input.note === undefined
               ? undefined
               : input.note?.trim() || null,
+          noteEn:
+            input.noteEn === undefined
+              ? undefined
+              : input.noteEn?.trim() || null,
           originalSentence:
             input.originalSentence === undefined
               ? undefined

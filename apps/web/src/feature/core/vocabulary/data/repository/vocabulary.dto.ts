@@ -9,7 +9,9 @@ export type VocabularyDto = {
 
   word: string;
   meaning: string | null;
+  meaningEn: string | null;
   note: string | null;
+  noteEn: string | null;
   originalSentence: string | null;
   exampleSentence: string | null;
   status: string;
@@ -28,7 +30,9 @@ export type CreateVocabularyDto = {
 
   word: string;
   meaning?: string | null;
+  meaningEn?: string | null;
   note?: string | null;
+  noteEn?: string | null;
   originalSentence?: string | null;
   exampleSentence?: string | null;
 };
@@ -39,7 +43,9 @@ export type CreateExtensionVocabularyDto = {
 
   word: string;
   meaning?: string | null;
+  meaningEn?: string | null;
   note?: string | null;
+  noteEn?: string | null;
   originalSentence?: string | null;
   exampleSentence?: string | null;
 };
