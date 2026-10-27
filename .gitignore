@@ -45,3 +45,7 @@ apps/web/src/generated/prisma
 .local
 
 .next
+
+# wxt
+.output
+.wxt
