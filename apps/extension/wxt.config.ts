@@ -7,6 +7,8 @@ export default defineConfig({
   srcDir: "src",
   modules: ["@wxt-dev/module-react"],
   imports: false,
+  // WXT defaults to port 3000, which the web app needs; the extension calls it there in dev.
+  dev: { server: { port: 3100 } },
   manifest: ({ mode, browser }) => ({
     name: "Doc Dictionary",
     description: "Highlight saved vocabulary on any webpage. Select text to save new words.",
