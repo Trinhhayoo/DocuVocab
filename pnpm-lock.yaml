@@ -15,6 +15,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^1.3.0
         version: 1.3.0(zod@4.4.3)
+      '@docuvocab/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@mozilla/readability':
         specifier: ^0.6.0
         version: 0.6.0
@@ -139,6 +142,15 @@ importers:
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@opentelemetry/api@1.10.0)(@types/node@20.19.43)(jsdom@24.1.3)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+
+  packages/shared:
+    devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@opentelemetry/api@1.10.0)(jsdom@26.1.0)(vite@8.3.5(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
 
 packages:
 
@@ -7281,7 +7293,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vitest/mocker@5.0.5(vite@8.3.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))':
+  '@vitest/mocker@5.0.5(vite@8.3.5(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.5
@@ -10334,7 +10346,7 @@ snapshots:
   vitest@5.0.5(@opentelemetry/api@1.10.0)(@types/node@20.19.43)(jsdom@24.1.3)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.5(vite@8.3.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+      '@vitest/mocker': 5.0.5(vite@8.3.5(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -10351,6 +10363,28 @@ snapshots:
       '@opentelemetry/api': 1.10.0
       '@types/node': 20.19.43
       jsdom: 24.1.3
+    transitivePeerDependencies:
+      - msw
+
+  vitest@5.0.5(@opentelemetry/api@1.10.0)(jsdom@26.1.0)(vite@8.3.5(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)):
+    dependencies:
+      '@types/chai': 5.2.3
+      '@vitest/mocker': 5.0.5(vite@8.3.5(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+      chai: 6.3.0
+      es-module-lexer: 2.3.2
+      expect-type: 1.4.0
+      magic-string: 1.4.4
+      obug: 3.0.0
+      picomatch: 4.0.7
+      std-env: 4.3.0
+      tinybench: 6.2.2
+      tinyexec: 1.3.1
+      tinyglobby: 0.2.17
+      vite: 8.3.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
+      why-is-node-running: 3.2.1
+    optionalDependencies:
+      '@opentelemetry/api': 1.10.0
+      jsdom: 26.1.0
     transitivePeerDependencies:
       - msw
 

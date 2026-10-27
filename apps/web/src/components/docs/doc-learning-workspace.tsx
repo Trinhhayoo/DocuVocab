@@ -8,7 +8,7 @@ import { VocabularyEditorModal } from "@/components/docs/vocabulary-editor-modal
 import { Button } from "@/components/ui/button";
 import { VocabularyForm } from "@/components/vocab/vocabulary-form";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
-import { normalizeWord } from "@/bootstrap/helpers/normalize-word.helper";
+import { normalizeWord } from "@docuvocab/shared";
 
 export type AnchorPosition = {
   left: number;
