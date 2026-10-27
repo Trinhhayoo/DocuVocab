@@ -7,6 +7,7 @@ import {
   stabilizeMathMarkupHtml,
 } from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
+import { cleanSelectedText } from "@/bootstrap/helpers/normalize-word.helper";
 import { AnchorPosition } from "./doc-learning-workspace";
 
 type TooltipState = {
@@ -71,10 +72,7 @@ export function InteractiveDocReader({
 
     if (!selectedText) return;
 
-    const cleanText = selectedText
-      .replace(/\s+/g, " ")
-      .replace(/[.,;:!?()[\]{}"'“”‘’]/g, "")
-      .trim();
+    const cleanText = cleanSelectedText(selectedText);
 
     if (!cleanText) return;
     if (cleanText.length > 80) return;
