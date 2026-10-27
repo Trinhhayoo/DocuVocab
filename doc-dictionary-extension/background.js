@@ -507,11 +507,22 @@ async function saveVocabulary(payload) {
  */
 async function explainVocabulary(payload) {
   try {
-    const response = await fetch(`${API_BASE}/vocabularies/explain`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const { response, unauthorized } = await fetchWithAutoRefresh(
+      `${API_BASE}/vocabularies/explain`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (unauthorized || !response) {
+      return {
+        success: false,
+        status: "401",
+        message: "Please log in to get AI explanations.",
+      };
+    }
 
     return parseApiResponse(
       response,

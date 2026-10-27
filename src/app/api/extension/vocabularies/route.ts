@@ -11,16 +11,6 @@ import { requireCurrentUser } from "@/feature/core/user/domain/usecase/current-u
 const vocabularyRepo = new PrismaVocabularyRepository();
 const settingsRepo = new PrismaSettingsRepository();
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
-}
-
 /**
  * GET /api/extension/vocabularies?url=<pageUrl>
  * Returns vocabularies based on user settings:
@@ -32,7 +22,7 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
-      { status: 401, headers: CORS_HEADERS },
+      { status: 401 },
     );
   }
 
@@ -42,7 +32,7 @@ export async function GET(request: NextRequest) {
   if (!sourceUrl) {
     return NextResponse.json(
       { success: false, message: "url query param required" },
-      { status: 400, headers: CORS_HEADERS },
+      { status: 400 },
     );
   }
 
@@ -51,7 +41,7 @@ export async function GET(request: NextRequest) {
   if (!settingsResult.success) {
     return NextResponse.json(
       { success: false, message: settingsResult.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
@@ -64,7 +54,7 @@ export async function GET(request: NextRequest) {
   if (!result.success) {
     return NextResponse.json(
       { success: false, message: result.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
@@ -73,7 +63,6 @@ export async function GET(request: NextRequest) {
       success: true,
       data: { vocabularies: result.data.map(VocabularyMapper.toDto) },
     },
-    { headers: CORS_HEADERS },
   );
 }
 
@@ -89,7 +78,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       { success: false, message: "Invalid vocabulary data" },
-      { status: 400, headers: CORS_HEADERS },
+      { status: 400 },
     );
   }
 
@@ -97,7 +86,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
-      { status: 401, headers: CORS_HEADERS },
+      { status: 401 },
     );
   }
   const result = await vocabularyRepo.create(user.id, {
@@ -108,7 +97,7 @@ export async function POST(request: NextRequest) {
   if (!result.success) {
     return NextResponse.json(
       { success: false, message: result.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
@@ -117,6 +106,6 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { vocabulary: VocabularyMapper.toDto(result.data) },
     },
-    { status: 201, headers: CORS_HEADERS },
+    { status: 201 },
   );
 }

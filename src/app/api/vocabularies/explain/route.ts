@@ -3,12 +3,16 @@ import { NextResponse } from "next/server";
 import { explainVocabularySchema } from "@/feature/core/vocabulary/domain/params/explain-vocabulary.param";
 import explainVocabularyUsecase from "@/feature/core/vocabulary/domain/usecase/explain-vocabulary.usecase";
 import GeminiLLMProvider from "@/feature/support/llm/ollama-llm-provider";
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+import requireCurrentUserApiUsecase from "@/feature/core/user/domain/usecase/require-current-user-api.usecase";
+import { nextApiUnauthorized } from "@/feature/common/data/http/next-api-response";
+
 export async function POST(request: Request) {
+  const authResult = await requireCurrentUserApiUsecase();
+
+  if (!authResult.success) {
+    return nextApiUnauthorized(authResult.failure.message);
+  }
+
   const apiKey = process.env.OLLAMA_API_KEY;
 
   if (!apiKey) {
@@ -36,13 +40,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { success: false, message: result.failure.message },
-      { status: 500, headers: CORS_HEADERS },
+      { status: 500 },
     );
   }
 
   return NextResponse.json(
     { success: true, data: result.data },
-    { headers: CORS_HEADERS },
   );
 } catch (error) {
   console.error("Unexpected explain error:", error);
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error",
     },
-    { status: 500, headers: CORS_HEADERS },
+    { status: 500 },
   );
 }
 }
