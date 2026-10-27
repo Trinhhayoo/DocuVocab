@@ -1,65 +1,35 @@
-# Doc Dictionary — Chrome Extension
+# Doc Dictionary extension
 
-Browser extension that highlights saved vocabulary words on any webpage and lets you save new words by selecting text.
+Highlights your saved DocuVocab vocabulary on any web page, and lets you select a word or phrase to get a bilingual (Vietnamese and English) AI explanation and save it. The extension is built with [WXT](https://wxt.dev) and TypeScript, and targets Chrome, Edge, and Firefox 140 or later.
 
-## Setup
+## Develop
 
-1. Start the Next.js app: `pnpm dev` from the repo root (runs on `http://localhost:3000`)
-2. Open Chrome → `chrome://extensions`
-3. Enable **Developer mode** (top right)
-4. Click **Load unpacked** → select the `apps/extension/` folder
-5. The extension icon appears in the toolbar
+Run these commands from the repository root:
 
-### Icons
+1. Start the web app on `http://localhost:3000`: `pnpm dev`.
+2. Start the extension: `pnpm --filter @docuvocab/extension dev` for Chrome, or `pnpm --filter @docuvocab/extension dev:firefox` for Firefox. WXT opens a browser with the extension loaded and reloads it on change.
 
-The extension ships with an SVG placeholder. To generate PNG icons:
+Development builds call `http://localhost:3000`; production builds call `https://docu-vocab-kappa.vercel.app`. To point a build at another web app, set `WXT_API_ORIGIN`.
 
-```bash
-# Using ImageMagick
-convert icons/icon.svg -resize 16x16 icons/icon16.png
-convert icons/icon.svg -resize 48x48 icons/icon48.png
-convert icons/icon.svg -resize 128x128 icons/icon128.png
-```
+To load a production build by hand, run `pnpm --filter @docuvocab/extension build`, then:
 
-Or just remove the icon entries from `manifest.json` — Chrome will use a default icon.
+- **Chrome or Edge:** open `chrome://extensions`, turn on **Developer mode**, select **Load unpacked**, and choose `apps/extension/.output/chrome-mv3`.
+- **Firefox:** open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `apps/extension/.output/firefox-mv2/manifest.json`.
+
+`pnpm --filter @docuvocab/extension zip` produces store-ready archives in `.output/`.
 
 ## How it works
 
-### Content Script (`content.js`)
-Injected into every page. Fetches saved vocabularies from the API, walks the DOM with `TreeWalker`, and wraps matching words in `<mark>` elements. Also listens for text selection to show a floating "Save" button.
+| Part | Location | Responsibility |
+|------|----------|----------------|
+| Background | `src/entrypoints/background.ts`, `src/background/` | Sends every API request under the extension origin, so a page's CSP cannot block it. Stores the session tokens and refreshes them once on a 401. Signs in with Google through `identity.launchWebAuthFlow`. |
+| Content script | `src/entrypoints/content/`, `src/content/` | Highlights saved words with the CSS Custom Highlight API, so the page DOM is never modified. Shows the tooltip, the **Save word** button, and the save dialog inside a closed shadow root. Re-highlights new content and single-page-app navigations. |
+| Popup | `src/entrypoints/popup/` | React UI for sign-in status, the page's word count, re-highlighting, and settings. |
+| Shared | `packages/shared` | Word normalization, the vocabulary regex, and sentence extraction, also used by the web app. |
 
-### Background Worker (`background.js`)
-Relays API requests from the content script (which can't make cross-origin calls due to CSP). Handles `GET_VOCABULARIES` and `SAVE_VOCABULARY` messages.
+Messages between these parts are typed in `src/lib/messages.ts`.
 
-### Popup (`popup.html` + `popup.js`)
-Small UI when clicking the extension icon. Shows API connection status, word count for the current page, and action buttons.
+## Limits
 
-## Architecture
-
-```
-User selects text on any website
-       │
-       ▼
-content.js detects selection
-       │
-       ▼
-Shows floating "Save word" button
-       │  (click)
-       ▼
-Shows inline save popup (meaning + note fields)
-       │  (submit)
-       ▼
-Sends SAVE_VOCABULARY message ──► background.js
-                                       │
-                                       ▼
-                                POST /api/extension/vocabularies
-                                       │
-                                       ▼
-                                  Next.js API → Prisma → DB
-                                       │
-                                       ▼
-                              Response back to content.js
-                                       │
-                                       ▼
-                              Re-highlight page with new word
-```
+- Highlights are not focusable, because the CSS Custom Highlight API does not create elements. You can reach the details of a highlighted word with a pointer only.
+- Safari is not supported yet: it has no `identity.launchWebAuthFlow`, which the sign-in flow depends on.
