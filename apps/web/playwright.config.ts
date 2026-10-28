@@ -1,11 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { STORAGE_STATE_PATH } from "./e2e/support/fixtures";
+import { E2E_BASE_URL, E2E_PORT, STORAGE_STATE_PATH } from "./e2e/support/fixtures";
 import { appEnv, readLocalSupabase } from "./e2e/support/local-supabase";
 
-// Not 3000, so a running `pnpm dev` does not get reused as the app under test.
-const PORT = 3300;
-const BASE_URL = `http://localhost:${PORT}`;
 const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
@@ -17,7 +14,7 @@ export default defineConfig({
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : "list",
   globalSetup: "./e2e/global-setup.ts",
   use: {
-    baseURL: BASE_URL,
+    baseURL: E2E_BASE_URL,
     storageState: STORAGE_STATE_PATH,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
@@ -26,7 +23,7 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /\.(mobile|dark)\.spec\.ts$/,
+      testIgnore: [/\.(mobile|dark)\.spec\.ts$/, /extension\//],
     },
     {
       name: "mobile",
@@ -38,13 +35,18 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
       testMatch: /\.dark\.spec\.ts$/,
     },
+    {
+      // Launches its own Chromium with the extension loaded (e2e/support/extension.ts).
+      name: "extension",
+      testMatch: /extension\/.*\.spec\.ts$/,
+    },
   ],
   webServer: {
     // NEXT_PUBLIC_* values are inlined at build time, so the app is built against local Supabase.
-    command: `pnpm exec next build && pnpm exec next start -p ${PORT}`,
-    url: BASE_URL,
+    command: `pnpm exec next build && pnpm exec next start -p ${E2E_PORT}`,
+    url: E2E_BASE_URL,
     reuseExistingServer: !isCI,
     timeout: 240_000,
-    env: appEnv(readLocalSupabase(), BASE_URL),
+    env: appEnv(readLocalSupabase(), E2E_BASE_URL),
   },
 });

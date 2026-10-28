@@ -28,10 +28,10 @@ export function savedHighlight(page: Page): Locator {
   return page.locator("mark.vocab-highlight", { hasText: SEEDED_DOC.savedWord }).first();
 }
 
-/** Double-clicks a word inside the reader, which selects it like a user would. */
-export async function selectWordInReader(page: Page, word: string) {
-  const point = await page.locator(".doc-reader-content").evaluate((reader, target) => {
-    const walker = document.createTreeWalker(reader, NodeFilter.SHOW_TEXT);
+/** Viewport center of the first occurrence of `word` in the text under `containerSelector`. */
+export async function wordCenter(page: Page, containerSelector: string, word: string) {
+  const point = await page.locator(containerSelector).first().evaluate((container, target) => {
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
       const node = walker.currentNode;
       const index = node.textContent?.indexOf(target) ?? -1;
@@ -46,8 +46,14 @@ export async function selectWordInReader(page: Page, word: string) {
     return null;
   }, word);
 
-  if (!point) throw new Error(`"${word}" is not in the reader.`);
-  await page.mouse.dblclick(point.x, point.y);
+  if (!point) throw new Error(`"${word}" is not under ${containerSelector}.`);
+  return point;
+}
+
+/** Double-clicks a word inside the reader, which selects it like a user would. */
+export async function selectWordInReader(page: Page, word: string) {
+  const { x, y } = await wordCenter(page, ".doc-reader-content", word);
+  await page.mouse.dblclick(x, y);
 }
 
 /** Asserts the element lies fully inside the viewport. */

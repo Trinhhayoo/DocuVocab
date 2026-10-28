@@ -7,7 +7,7 @@ import { SEEDED_DOC } from "./fixtures";
 const { savedWord, savedMeaning, savedMeaningEn, unsavedWord } = SEEDED_DOC;
 
 // The saved word opens a paragraph so a test can hover a highlight at the left edge.
-const HTML = `
+export const ARTICLE_HTML = `
 <p>${savedWord[0].toUpperCase()}${savedWord.slice(1)} operations can be retried safely. An ${savedWord} PUT request leaves the same state no matter how often it runs.</p>
 <p>Batching requests raises ${unsavedWord}, but only when the server stays ${savedWord} under retries.</p>
 <pre><code>PUT /orders/42  # ${savedWord} by design</code></pre>
@@ -31,7 +31,7 @@ export async function seedDatabase(dbUrl: string, user: Readonly<{ id: string; e
     );
     await db.query(
       `INSERT INTO "DocContent" (id, "docId", "htmlContent", "textContent", "wordCount") VALUES ($1, $2, $3, $4, $5)`,
-      [randomUUID(), docId, HTML, HTML.replace(/<[^>]+>/g, " "), 40],
+      [randomUUID(), docId, ARTICLE_HTML, ARTICLE_HTML.replace(/<[^>]+>/g, " "), 40],
     );
     await db.query(
       `INSERT INTO "Vocabulary" (id, "userId", "docId", "sourceUrl", word, meaning, "meaningEn", "updatedAt")
