@@ -1,8 +1,8 @@
-import { type ApiResult, ok } from "@/lib/api-result";
+import type { ApiResult } from "@/lib/api-result";
 import type { BackgroundMessage, BackgroundRequests } from "@/lib/messages";
 
 import type { ApiClient } from "./api-client";
-import { loginWithGoogle } from "./auth";
+import { loginWithGoogle, logout } from "./auth";
 import type { TokenStore } from "./token-store";
 
 type HandlerDeps = Readonly<{ api: ApiClient; tokens: TokenStore; origin: string }>;
@@ -43,7 +43,7 @@ export function createMessageHandler({ api, tokens, origin }: HandlerDeps) {
       case "LOGIN":
         return loginWithGoogle(origin, tokens, message.payload.returnTo);
       case "LOGOUT":
-        return tokens.clear().then(() => ok(null));
+        return logout(api, tokens);
     }
   };
 }
