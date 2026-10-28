@@ -110,7 +110,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold">
+        <Link href="/" aria-label="DocuVocab home" className="flex items-center gap-2 font-bold">
           <div
             aria-hidden="true"
             className="flex size-7 items-center justify-center rounded-md bg-orange-500 text-white"
@@ -132,7 +132,7 @@ export function AppHeader() {
             aria-haspopup="dialog"
             aria-expanded={isFeedbackOpen}
             onClick={() => setIsFeedbackOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
           >
             <MessageSquareText aria-hidden="true" className="size-4" />
             <span>Feedback</span>
@@ -145,7 +145,7 @@ export function AppHeader() {
             aria-expanded={isSettingsOpen}
             aria-haspopup="dialog"
             onClick={() => setIsSettingsOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:gap-1.5 sm:px-2 sm:py-1 sm:text-sm"
           >
             <SettingsIcon aria-hidden="true" className="size-4" />
             <span>Settings</span>
