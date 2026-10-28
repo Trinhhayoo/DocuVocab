@@ -49,3 +49,4 @@ Before you start, install Docker. Then, from `apps/web`:
 
 - The e2e build overwrites `.next`. Run `pnpm build` again before you use `pnpm start` against the hosted project.
 - To stop Supabase, run `pnpm e2e:db:stop`.
+- CI runs the same suite in the `e2e` job on every pull request to `main`. When it fails, download the `playwright-report` artifact from the run to see traces and screenshots.
