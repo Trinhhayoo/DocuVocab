@@ -2,6 +2,8 @@ import { defineConfig } from "wxt";
 
 const PRODUCTION_ORIGIN = "https://docu-vocab-kappa.vercel.app";
 const DEVELOPMENT_ORIGIN = "http://localhost:3000";
+// The web app under Playwright (apps/web/playwright.config.ts); built with `wxt build --mode e2e`.
+const E2E_ORIGIN = "http://localhost:3300";
 
 // Public key that fixes the Chrome extension ID to jgeelnjohablnhdioadaemkefnakdkph on every machine.
 // The web app allows sign-in redirects to that ID only (apps/web/src/lib/extension-redirect.ts).
@@ -24,6 +26,7 @@ export default defineConfig({
     host_permissions: [
       `${PRODUCTION_ORIGIN}/*`,
       ...(mode === "development" ? [`${DEVELOPMENT_ORIGIN}/*`] : []),
+      ...(mode === "e2e" ? [`${E2E_ORIGIN}/*`] : []),
     ],
     icons: { 48: "icon/48.png" },
     ...(browser !== "firefox" && { key: CHROME_PUBLIC_KEY }),

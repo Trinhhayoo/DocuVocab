@@ -19,7 +19,9 @@ export type Overlay = Readonly<{
 /** Mounts the extension UI in a closed shadow root, so page styles and scripts cannot reach into it. */
 export function createOverlay(): Overlay {
   const host = h("div", { "data-docuvocab": "" });
-  const root = host.attachShadow({ mode: "closed" });
+  // Closed in real builds so page scripts cannot read saved words; open only in the e2e build, so
+  // Playwright can query the UI by role and label.
+  const root = host.attachShadow({ mode: import.meta.env.MODE === "e2e" ? "open" : "closed" });
   root.append(h("style", {}, styles));
 
   const tooltip = h("div", { class: "tooltip", role: "tooltip", hidden: "" });
