@@ -51,11 +51,10 @@ export function readLocalSupabase(): LocalSupabase {
 }
 
 /** Environment for the app under test and for Prisma, overriding anything in `.env`. */
-export function appEnv(local: LocalSupabase, baseUrl: string): Record<string, string> {
+export function appEnv(local: LocalSupabase): Record<string, string> {
   return {
     NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.anonKey,
-    NEXT_PUBLIC_APP_URL: baseUrl,
     DATABASE_URL: local.dbUrl,
     DIRECT_URL: local.dbUrl,
     // Explanations are mocked in the browser. An unknown provider makes any unmocked call fail

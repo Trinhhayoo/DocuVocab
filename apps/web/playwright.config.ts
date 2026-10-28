@@ -47,6 +47,6 @@ export default defineConfig({
     url: E2E_BASE_URL,
     reuseExistingServer: !isCI,
     timeout: 240_000,
-    env: appEnv(readLocalSupabase(), E2E_BASE_URL),
+    env: appEnv(readLocalSupabase()),
   },
 });

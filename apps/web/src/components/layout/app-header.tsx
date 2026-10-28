@@ -12,7 +12,6 @@ import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../providers/auth-provider";
-import { signInWithGoogle } from "@/lib/supabase/signInWithGoogle";
 import signOutUsecase from "@/feature/core/user/domain/usecase/sign-out.usecase";
 import type { Settings } from "@/feature/core/settings/domain/entity/settings.entity";
 
@@ -110,7 +109,9 @@ export function AppHeader() {
       await signOutUsecase();
       window.location.href = "/";
     } else {
-      await signInWithGoogle();
+      // Full navigation: the sign-in route redirects to Google, then back to this page.
+      const next = `${window.location.pathname}${window.location.search}`;
+      window.location.assign(`/auth/web/login?next=${encodeURIComponent(next)}`);
     }
   };
 
