@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
-function getBearerToken(authorizationHeader: string | null) {
+export function getBearerToken(authorizationHeader: string | null) {
   if (!authorizationHeader) return null;
 
   const match = authorizationHeader.match(/^Bearer\s+(.+)$/i);

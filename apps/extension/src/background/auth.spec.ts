@@ -1,6 +1,47 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { parseAuthCallback } from "./auth";
+import { type ApiResult, fail, ok } from "@/lib/api-result";
+
+import type { ApiClient } from "./api-client";
+import { logout, parseAuthCallback } from "./auth";
+import type { TokenStore } from "./token-store";
+
+/** `request` is generic, so a fixed-result mock needs a cast; logout never reads the data. */
+function fakeApi(request: () => Promise<ApiResult<null>>) {
+  const mock = vi.fn(request);
+  return { api: { request: mock as unknown as ApiClient["request"] } satisfies ApiClient, request: mock };
+}
+
+function fakeTokens() {
+  return { get: vi.fn(), set: vi.fn(), clear: vi.fn().mockResolvedValue(undefined) } satisfies TokenStore;
+}
+
+describe("logout", () => {
+  it.each([
+    ["the server revokes the session", ok(null)],
+    ["revoking fails", fail(500, "Cannot reach DocuVocab.")],
+  ])("clears the local tokens when %s", async (_, revokeResult) => {
+    const { api, request } = fakeApi(async () => revokeResult);
+    const tokens = fakeTokens();
+
+    expect(await logout(api, tokens)).toEqual(ok(null));
+    expect(request).toHaveBeenCalledWith("/api/extension/auth/logout", { method: "POST" }, expect.any(String));
+    expect(tokens.clear).toHaveBeenCalledOnce();
+  });
+
+  it("revokes on the server before clearing locally", async () => {
+    const calls: string[] = [];
+    const { api } = fakeApi(async () => {
+      calls.push("revoke");
+      return ok(null);
+    });
+    const tokens = { ...fakeTokens(), clear: vi.fn(async () => void calls.push("clear")) };
+
+    await logout(api, tokens);
+
+    expect(calls).toEqual(["revoke", "clear"]);
+  });
+});
 
 const REDIRECT = "https://abcdefghijklmnopabcdefghijklmnop.chromiumapp.org/";
 

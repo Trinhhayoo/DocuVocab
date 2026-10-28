@@ -2,6 +2,7 @@ import { browser } from "wxt/browser";
 
 import { type ApiResult, fail, ok } from "@/lib/api-result";
 
+import type { ApiClient } from "./api-client";
 import type { AuthTokens, TokenStore } from "./token-store";
 
 /** Reads the tokens the web app appends to the identity redirect URL. */
@@ -39,5 +40,15 @@ export async function loginWithGoogle(origin: string, tokens: TokenStore, return
   if (!session) return fail(401, "Sign-in failed. Please try again.");
 
   await tokens.set(session);
+  return ok(null);
+}
+
+/**
+ * Revokes the session on the server so a leaked refresh token stops working, then clears it locally.
+ * The local sign-out happens even when revoking fails, for example while offline.
+ */
+export async function logout(api: ApiClient, tokens: TokenStore): Promise<ApiResult<null>> {
+  await api.request<null>("/api/extension/auth/logout", { method: "POST" }, "Cannot revoke the session.");
+  await tokens.clear();
   return ok(null);
 }
