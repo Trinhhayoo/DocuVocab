@@ -178,14 +178,14 @@ export function VocabularyForm({
         form.handleSubmit();
       }}
       aria-busy={isExplaining || saveMutation.isPending}
-      className="space-y-3 rounded-xl border bg-white p-4 shadow-sm"
+      className="space-y-3 rounded-xl border bg-card p-4 shadow-sm"
     >
 
       {isExplaining && (
         <div
           role="status"
           aria-live="polite"
-          className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-700"
+          className="flex items-center gap-2 rounded-md bg-blue-50 dark:bg-blue-950/40 px-3 py-2 text-xs text-blue-700 dark:text-blue-300"
         >
           <span
             aria-hidden="true"
@@ -260,7 +260,7 @@ export function VocabularyForm({
         <button
           type="submit"
           disabled={saveMutation.isPending}
-          className="flex-1 rounded-md bg-slate-900 px-4 py-2 text-xs font-medium text-white disabled:opacity-60"
+          className="flex-1 rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground disabled:opacity-60"
         >
           {saveMutation.isPending
             ? "Saving..."
@@ -273,7 +273,7 @@ export function VocabularyForm({
           type="button"
           onClick={handleRegenerate}
           disabled={isExplaining}
-          className="rounded-md border px-4 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-60"
+          className="rounded-md border px-4 py-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-60"
         >
           {isExplaining ? "..." : "Regenerate"}
         </button>

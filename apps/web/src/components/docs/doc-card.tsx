@@ -12,7 +12,7 @@ type DocCardProps = {
 export function DocCard({ doc }: DocCardProps) {
   return (
     <Link href={`/docs/${doc.id}`} className="group block">
-      <Card className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <Card className="overflow-hidden rounded-xl border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
         <div className="relative aspect-video overflow-hidden bg-muted">
           <Image
             src={doc.imageUrl}

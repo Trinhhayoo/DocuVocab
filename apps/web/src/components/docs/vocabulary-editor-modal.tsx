@@ -220,7 +220,7 @@ export function VocabularyEditorModal({
         }}
       >
         <div className="space-y-1 px-4 pt-4">
-          <h2 id={titleId} className="text-sm font-semibold text-slate-900">
+          <h2 id={titleId} className="text-sm font-semibold text-foreground">
             {title}
           </h2>
           {description ? (

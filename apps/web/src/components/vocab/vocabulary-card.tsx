@@ -75,7 +75,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           event.stopPropagation();
           form.handleSubmit();
         }}
-        className="space-y-3 rounded-xl border bg-white p-4 shadow-sm"
+        className="space-y-3 rounded-xl border bg-card p-4 shadow-sm"
       >
         <form.Field
           name="word"
@@ -180,7 +180,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="rounded-md bg-slate-900 px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
+            className="rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground disabled:opacity-60"
           >
             {updateMutation.isPending ? "Saving..." : "Save"}
           </button>
@@ -204,7 +204,7 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
   }
 
   return (
-    <article className="rounded-xl border bg-white p-4 shadow-sm">
+    <article className="rounded-xl border bg-card p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold">{vocabulary.word}</h3>
@@ -225,24 +225,24 @@ export function VocabularyCard({ vocabulary }: VocabularyCardProps) {
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100"
+          className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
         >
           Edit
         </button>
       </div>
 
       {vocabulary.note && (
-        <p className="mt-3 text-sm text-slate-600">{vocabulary.note}</p>
+        <p className="mt-3 text-sm text-muted-foreground">{vocabulary.note}</p>
       )}
 
       {vocabulary.noteEn && (
-        <p lang="en" className="mt-2 text-sm text-slate-600">
+        <p lang="en" className="mt-2 text-sm text-muted-foreground">
           {vocabulary.noteEn}
         </p>
       )}
 
       <div className="mt-3">
-        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">
+        <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
           {vocabulary.status}
         </span>
       </div>

@@ -8,7 +8,7 @@ type VocabularyListProps = {
 export function VocabularyList({ vocabularies }: VocabularyListProps) {
   if (vocabularies.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed bg-white p-4 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed bg-card p-4 text-sm text-muted-foreground">
         No vocabulary saved yet.
       </div>
     );

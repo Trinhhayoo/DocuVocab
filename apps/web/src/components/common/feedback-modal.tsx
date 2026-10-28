@@ -30,7 +30,7 @@ export function FeedbackModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto text-black z-100000 sm:max-w-lg">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto text-foreground z-100000 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Feedback</DialogTitle>
           <DialogDescription>
