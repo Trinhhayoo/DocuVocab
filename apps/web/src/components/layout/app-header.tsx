@@ -1,4 +1,5 @@
 "use client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,9 +14,15 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "../providers/auth-provider";
 import { signInWithGoogle } from "@/lib/supabase/signInWithGoogle";
 import signOutUsecase from "@/feature/core/user/domain/usecase/sign-out.usecase";
-import { GeneralSettingsModal } from "../common/settings-modal";
-import { Settings } from "@/feature/core/settings/domain/entity/settings.entity";
-import { FeedbackModal } from "../common/feedback-modal";
+import type { Settings } from "@/feature/core/settings/domain/entity/settings.entity";
+
+// The header is on every page; the modals (TanStack Form and zod) load only when opened.
+const GeneralSettingsModal = dynamic(() =>
+  import("../common/settings-modal").then((mod) => mod.GeneralSettingsModal),
+);
+const FeedbackModal = dynamic(() =>
+  import("../common/feedback-modal").then((mod) => mod.FeedbackModal),
+);
 
 export function AppHeader() {
   const router = useRouter();
