@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 
+// Only the document reader renders math; other pages skip KaTeX's stylesheet.
+import "katex/dist/katex.min.css";
+
 import { getDocById } from "@/app/docs/controller/doc.controller";
 import { DocLearningWorkspace } from "@/components/docs/doc-learning-workspace";
 import { BackButton } from "@/components/common/back-navigation";
