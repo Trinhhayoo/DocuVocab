@@ -1,14 +1,15 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+
+import { safeNextPath } from "@/lib/safe-next-path";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+/** The only place the web app starts Google sign-in; the header button and /login both link here. */
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const next = requestUrl.searchParams.get("next") ?? "/";
-  const origin =
-    (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_APP_URL!;
+  const next = safeNextPath(requestUrl.searchParams.get("next"));
 
-  const callbackUrl = new URL(`${origin}/auth/web/callback`);
+  // The request URL is always the host serving it, locally and on every Vercel deployment.
+  const callbackUrl = new URL("/auth/web/callback", requestUrl.origin);
   callbackUrl.searchParams.set("next", next);
 
   const supabase = await createSupabaseServerClient();
