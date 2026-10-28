@@ -1,20 +1,74 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   createHighlightedVocabularyHtml,
   stabilizeMathMarkupHtml,
 } from "@/lib/highlight-vocabulary-client";
 import type { VocabularyItem } from "@/app/docs/view/client/vocab.types";
-import { cleanSelectedText, extractSentence } from "@docuvocab/shared";
+import {
+  type Box,
+  cleanSelectedText,
+  extractSentence,
+  placeNear,
+} from "@docuvocab/shared";
 import { AnchorPosition } from "./doc-learning-workspace";
 
-type TooltipState = {
+type TooltipState = Readonly<{
   vocab: VocabularyItem;
-  x: number;
-  y: number;
-};
+  anchor: Box;
+}>;
+
+/** Shows above the word, or below it near the top, and never past a screen edge. */
+function VocabularyTooltip({ vocab, anchor }: TooltipState) {
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  // Position from the rendered size before paint, so the tooltip never flashes off-screen.
+  useLayoutEffect(() => {
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
+
+    const { width, height } = tooltip.getBoundingClientRect();
+    const { left, top } = placeNear(
+      anchor,
+      { width, height },
+      { width: window.innerWidth, height: window.innerHeight },
+      "above"
+    );
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.style.visibility = "visible";
+  }, [anchor, vocab]);
+
+  return (
+    <div
+      ref={tooltipRef}
+      role="tooltip"
+      className="pointer-events-none fixed top-0 left-0 z-50 max-w-xs rounded-xl border bg-white px-3 py-2 text-sm shadow-lg"
+      style={{ visibility: "hidden" }}
+    >
+      <div className="font-semibold">{vocab.word}</div>
+
+      {vocab.meaning && (
+        <div className="mt-1 text-muted-foreground">{vocab.meaning}</div>
+      )}
+
+      {vocab.meaningEn && (
+        <div lang="en" className="mt-1 text-muted-foreground">
+          {vocab.meaningEn}
+        </div>
+      )}
+
+      {vocab.note && (
+        <div className="mt-2 border-t pt-2 text-xs text-slate-500">
+          {vocab.note}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type InteractiveDocReaderProps = {
   htmlContent: string;
@@ -134,13 +188,9 @@ export function InteractiveDocReader({
     const vocab = vocabularyById.get(vocabId);
     if (!vocab) return;
 
-    const rect = mark.getBoundingClientRect();
+    const { top, bottom, left, right } = mark.getBoundingClientRect();
 
-    setTooltip({
-      vocab,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
-    });
+    setTooltip({ vocab, anchor: { top, bottom, left, right } });
   }
 
   function activateHighlightMark(mark: HTMLElement) {
@@ -220,35 +270,7 @@ export function InteractiveDocReader({
         }}
       />
 
-      {tooltip && (
-        <div
-          className="pointer-events-none fixed z-50 max-w-xs -translate-x-1/2 -translate-y-full rounded-xl border bg-white px-3 py-2 text-sm shadow-lg"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y - 8,
-          }}
-        >
-          <div className="font-semibold">{tooltip.vocab.word}</div>
-
-          {tooltip.vocab.meaning && (
-            <div className="mt-1 text-muted-foreground">
-              {tooltip.vocab.meaning}
-            </div>
-          )}
-
-          {tooltip.vocab.meaningEn && (
-            <div lang="en" className="mt-1 text-muted-foreground">
-              {tooltip.vocab.meaningEn}
-            </div>
-          )}
-
-          {tooltip.vocab.note && (
-            <div className="mt-2 border-t pt-2 text-xs text-slate-500">
-              {tooltip.vocab.note}
-            </div>
-          )}
-        </div>
-      )}
+      {tooltip && <VocabularyTooltip vocab={tooltip.vocab} anchor={tooltip.anchor} />}
     </div>
   );
 }

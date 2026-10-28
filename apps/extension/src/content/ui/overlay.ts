@@ -1,6 +1,6 @@
 import type { Vocabulary } from "@/lib/vocabulary";
 
-import { h, placeNear } from "./dom";
+import { h, placeElementNear } from "./dom";
 import styles from "./overlay.css?inline";
 
 export type Overlay = Readonly<{
@@ -15,8 +15,6 @@ export type Overlay = Readonly<{
   dispose(): void;
 }>;
 
-const TOOLTIP_SIZE = { width: 320, height: 120 };
-const SAVE_BUTTON_SIZE = { width: 110, height: 32 };
 
 /** Mounts the extension UI in a closed shadow root, so page styles and scripts cannot reach into it. */
 export function createOverlay(): Overlay {
@@ -31,12 +29,6 @@ export function createOverlay(): Overlay {
 
   let onSaveClick: (() => void) | null = null;
   saveButton.addEventListener("click", () => onSaveClick?.());
-
-  function moveTo(element: HTMLElement, anchor: DOMRect, size: { width: number; height: number }) {
-    const { left, top } = placeNear(anchor, size);
-    element.style.left = `${left}px`;
-    element.style.top = `${top}px`;
-  }
 
   return {
     host,
@@ -56,7 +48,7 @@ export function createOverlay(): Overlay {
         ),
       );
       tooltip.hidden = false;
-      moveTo(tooltip, anchor, TOOLTIP_SIZE);
+      placeElementNear(tooltip, anchor);
     },
     hideTooltip() {
       tooltip.hidden = true;
@@ -64,7 +56,7 @@ export function createOverlay(): Overlay {
     showSaveButton(anchor, onClick) {
       onSaveClick = onClick;
       saveButton.hidden = false;
-      moveTo(saveButton, anchor, SAVE_BUTTON_SIZE);
+      placeElementNear(saveButton, anchor);
     },
     hideSaveButton() {
       saveButton.hidden = true;
