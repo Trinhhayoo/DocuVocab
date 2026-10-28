@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## End-to-end tests
+
+Playwright tests in `e2e/` run the production build against a local Supabase stack in Docker, so they never touch the hosted project. AI explanations are mocked in the browser.
+
+Before you start, install Docker. Then, from `apps/web`:
+
+1. Start local Supabase (Postgres and Auth only): `pnpm e2e:db`. The first run pulls the Docker images.
+2. Install the test browser once: `pnpm exec playwright install chromium`.
+3. Run the tests: `pnpm e2e`.
+
+`pnpm e2e` applies the Prisma migrations, recreates the `e2e@docuvocab.test` user and its seeded document, builds the app with the local Supabase URL and keys, and serves it on port 3300.
+
+- The e2e build overwrites `.next`. Run `pnpm build` again before you use `pnpm start` against the hosted project.
+- To stop Supabase, run `pnpm e2e:db:stop`.
