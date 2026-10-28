@@ -48,3 +48,14 @@ export async function seedDatabase(dbUrl: string, user: Readonly<{ id: string; e
     await db.end();
   }
 }
+
+/** Removes one saved word, so a test that saves it starts clean on every attempt. */
+export async function deleteVocabulary(dbUrl: string, userId: string, word: string) {
+  const db = new pg.Client({ connectionString: dbUrl });
+  await db.connect();
+  try {
+    await db.query(`DELETE FROM "Vocabulary" WHERE "userId" = $1 AND lower(word) = lower($2)`, [userId, word]);
+  } finally {
+    await db.end();
+  }
+}

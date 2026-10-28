@@ -22,7 +22,23 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "desktop", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /\.(mobile|dark)\.spec\.ts$/,
+    },
+    {
+      name: "mobile",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 375, height: 812 } },
+      testMatch: /\.mobile\.spec\.ts$/,
+    },
+    {
+      name: "dark",
+      use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
+      testMatch: /\.dark\.spec\.ts$/,
+    },
+  ],
   webServer: {
     // NEXT_PUBLIC_* values are inlined at build time, so the app is built against local Supabase.
     command: `pnpm exec next build && pnpm exec next start -p ${PORT}`,
