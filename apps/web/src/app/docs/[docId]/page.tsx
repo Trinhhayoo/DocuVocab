@@ -27,12 +27,12 @@ export default async function DocPage({ params }: DocPageProps) {
       <section className="mx-auto max-w-7xl px-4 py-8">
         <BackButton />
 
-        <div className="mt-8 rounded-2xl border bg-white px-6 py-8 shadow-sm">
+        <div className="mt-8 rounded-2xl border bg-card px-6 py-8 shadow-sm">
           <p className="text-sm font-medium text-muted-foreground">
             {doc.siteName ?? new URL(doc.sourceUrl).hostname}
           </p>
 
-          <h1 className="mt-3 max-w-4xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-3 max-w-4xl text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {doc.title}
           </h1>
 
@@ -40,7 +40,7 @@ export default async function DocPage({ params }: DocPageProps) {
             href={doc.sourceUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-5 inline-flex text-sm font-medium text-blue-600 hover:underline"
+            className="mt-5 inline-flex text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
             Open original source
           </a>

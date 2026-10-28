@@ -46,7 +46,7 @@ function VocabularyTooltip({ vocab, anchor }: TooltipState) {
     <div
       ref={tooltipRef}
       role="tooltip"
-      className="pointer-events-none fixed top-0 left-0 z-50 max-w-xs rounded-xl border bg-white px-3 py-2 text-sm shadow-lg"
+      className="pointer-events-none fixed top-0 left-0 z-50 max-w-xs rounded-xl border bg-popover px-3 py-2 text-sm text-popover-foreground shadow-lg"
       style={{ visibility: "hidden" }}
     >
       <div className="font-semibold">{vocab.word}</div>
@@ -62,7 +62,7 @@ function VocabularyTooltip({ vocab, anchor }: TooltipState) {
       )}
 
       {vocab.note && (
-        <div className="mt-2 border-t pt-2 text-xs text-slate-500">
+        <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
           {vocab.note}
         </div>
       )}

@@ -3,7 +3,7 @@
 export default function PrivacyPolicyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">
         Privacy Policy
       </h1>
 
@@ -11,9 +11,9 @@ export default function PrivacyPolicyPage() {
         Last updated: July 9, 2026
       </p>
 
-      <div className="mt-8 space-y-6 text-sm leading-7 text-slate-700">
+      <div className="mt-8 space-y-6 text-sm leading-7 text-foreground/80">
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             1. Overview
           </h2>
           <p className="mt-2">
@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             2. Information We Collect
           </h2>
           <p className="mt-2">We may collect the following information:</p>
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             3. How We Use Information
           </h2>
           <p className="mt-2">We use collected information to:</p>
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             4. Data Sharing
           </h2>
           <p className="mt-2">
@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             5. Chrome Extension Data
           </h2>
           <p className="mt-2">
@@ -74,7 +74,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             6. Data Retention and Deletion
           </h2>
           <p className="mt-2">
@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             7. Security
           </h2>
           <p className="mt-2">
@@ -95,14 +95,14 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-slate-950">
+          <h2 className="text-xl font-semibold text-foreground">
             8. Contact
           </h2>
           <p className="mt-2">
             If you have questions about this Privacy Policy or want to request
             data deletion, contact us at:
           </p>
-          <p className="mt-2 font-medium text-slate-950">
+          <p className="mt-2 font-medium text-foreground">
             your-email@example.com
           </p>
         </section>

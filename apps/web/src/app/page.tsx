@@ -8,9 +8,9 @@ export default async function HomePage() {
   const recentDocs = await getRecentDocs();
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen bg-muted/50">
         <section className="mx-auto max-w-4xl px-4 pb-10 pt-16 text-center sm:pt-20">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               Save notes while reading{" "}
             <span className="block text-blue-500">interactive vocabulary</span>
           </h1>

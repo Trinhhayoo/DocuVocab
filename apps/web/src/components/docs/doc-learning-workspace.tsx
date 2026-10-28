@@ -83,7 +83,7 @@ export function DocLearningWorkspace({
       <section className="min-w-0">
         <section
           aria-label="Vocabulary quick actions"
-          className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm lg:hidden"
+          className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm lg:hidden"
         >
           <div>
             <h2 className="text-sm font-semibold">Vocabulary</h2>
@@ -105,7 +105,7 @@ export function DocLearningWorkspace({
           ) : null}
         </section>
 
-        <article className="rounded-xl border bg-white p-6 shadow-sm">
+        <article className="rounded-xl border bg-card p-6 shadow-sm">
           <InteractiveDocReader
             htmlContent={htmlContent}
             vocabularies={vocabularies}
@@ -139,7 +139,7 @@ export function DocLearningWorkspace({
             onCancel={closeModal}
           />
         ) : (
-          <div className="rounded-xl border border-dashed bg-slate-50 p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed bg-muted/50 p-4 text-sm text-muted-foreground">
             Select a word in the article to add or edit a note.
           </div>
         )}

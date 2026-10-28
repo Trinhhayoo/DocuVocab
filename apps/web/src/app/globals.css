@@ -3,7 +3,8 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark mode follows the operating system; there is no in-app toggle. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 @theme inline {
   --color-background: var(--background);
@@ -50,6 +51,7 @@
 }
 
 :root {
+  color-scheme: light dark;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,38 +86,40 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+  }
 }
 
 @layer base {
@@ -589,91 +593,93 @@
 /* Dark mode reader                                                            */
 /* -------------------------------------------------------------------------- */
 
-.dark .doc-reader-content {
-  color: #e5e7eb;
-}
+@media (prefers-color-scheme: dark) {
+  .doc-reader-content {
+    color: #e5e7eb;
+  }
 
-.dark .doc-reader-content h1,
-.dark .doc-reader-content h2,
-.dark .doc-reader-content h3,
-.dark .doc-reader-content h4,
-.dark .doc-reader-content h5,
-.dark .doc-reader-content h6,
-.dark .doc-reader-content strong,
-.dark .doc-reader-content b {
-  color: #f8fafc;
-}
+  .doc-reader-content h1,
+  .doc-reader-content h2,
+  .doc-reader-content h3,
+  .doc-reader-content h4,
+  .doc-reader-content h5,
+  .doc-reader-content h6,
+  .doc-reader-content strong,
+  .doc-reader-content b {
+    color: #f8fafc;
+  }
 
-.dark .doc-reader-content h2 {
-  border-bottom-color: rgb(255 255 255 / 12%);
-}
+  .doc-reader-content h2 {
+    border-bottom-color: rgb(255 255 255 / 12%);
+  }
 
-.dark .doc-reader-content a {
-  color: #93c5fd;
-}
+  .doc-reader-content a {
+    color: #93c5fd;
+  }
 
-.dark .doc-reader-content a:hover {
-  color: #bfdbfe;
-  background-color: rgb(59 130 246 / 12%);
-  box-shadow: 0 0 0 2px rgb(59 130 246 / 12%);
-}
+  .doc-reader-content a:hover {
+    color: #bfdbfe;
+    background-color: rgb(59 130 246 / 12%);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 12%);
+  }
 
-.dark .doc-reader-content blockquote {
-  border-left-color: #475569;
-  background: rgb(255 255 255 / 5%);
-  color: #cbd5e1;
-}
+  .doc-reader-content blockquote {
+    border-left-color: #475569;
+    background: rgb(255 255 255 / 5%);
+    color: #cbd5e1;
+  }
 
-.dark .doc-reader-content img {
-  border-color: rgb(255 255 255 / 12%);
-}
+  .doc-reader-content img {
+    border-color: rgb(255 255 255 / 12%);
+  }
 
-.dark .doc-reader-content figcaption,
-.dark .doc-reader-content li::marker {
-  color: #94a3b8;
-}
+  .doc-reader-content figcaption,
+  .doc-reader-content li::marker {
+    color: #94a3b8;
+  }
 
-.dark .doc-reader-content thead,
-.dark .doc-reader-content tbody tr:nth-child(even) {
-  background: rgb(255 255 255 / 5%);
-}
+  .doc-reader-content thead,
+  .doc-reader-content tbody tr:nth-child(even) {
+    background: rgb(255 255 255 / 5%);
+  }
 
-.dark .doc-reader-content th,
-.dark .doc-reader-content td {
-  border-color: rgb(255 255 255 / 14%);
-}
+  .doc-reader-content th,
+  .doc-reader-content td {
+    border-color: rgb(255 255 255 / 14%);
+  }
 
-.dark .doc-reader-content th {
-  color: #f8fafc;
-}
+  .doc-reader-content th {
+    color: #f8fafc;
+  }
 
-.dark .doc-reader-content hr {
-  border-top-color: rgb(255 255 255 / 12%);
-}
+  .doc-reader-content hr {
+    border-top-color: rgb(255 255 255 / 12%);
+  }
 
-.dark .doc-reader-content :not(pre) > code {
-  background: rgb(255 255 255 / 10%);
-  color: #fda4af;
-}
+  .doc-reader-content :not(pre) > code {
+    background: rgb(255 255 255 / 10%);
+    color: #fda4af;
+  }
 
-.dark .doc-reader-content pre.plain-text-block {
-  border-color: rgb(255 255 255 / 12%);
-  background: rgb(255 255 255 / 5%);
-  color: #cbd5e1;
-}
+  .doc-reader-content pre.plain-text-block {
+    border-color: rgb(255 255 255 / 12%);
+    background: rgb(255 255 255 / 5%);
+    color: #cbd5e1;
+  }
 
-.dark .doc-reader-content mark.vocab-highlight {
-  background: #854d0e;
-  color: #fef9c3;
-}
+  .doc-reader-content mark.vocab-highlight {
+    background: #854d0e;
+    color: #fef9c3;
+  }
 
-.dark .doc-reader-content mark.vocab-highlight:hover {
-  background: #a16207;
-}
+  .doc-reader-content mark.vocab-highlight:hover {
+    background: #a16207;
+  }
 
-.dark .doc-reader-content mark.vocab-highlight:focus-visible {
-  outline: 2px solid #93c5fd;
-  outline-offset: 2px;
+  .doc-reader-content mark.vocab-highlight:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+  }
 }
 
 .doc-reader-content figure.code-figure {

@@ -45,7 +45,7 @@ export function UrlImportForm() {
           form.handleSubmit();
         }}
         aria-busy={importMutation.isPending}
-        className="flex flex-col gap-3 rounded-2xl border bg-white p-3 shadow-sm sm:flex-row"
+        className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm sm:flex-row"
       >
         <form.Field
           name="url"
@@ -71,7 +71,7 @@ export function UrlImportForm() {
                     ? `${urlHintId} ${urlErrorId}`
                     : urlHintId
                 }
-                className="h-11 w-full rounded-xl border px-4 text-sm outline-none focus:border-slate-400"
+                className="h-11 w-full rounded-xl border px-4 text-sm outline-none focus:border-ring"
               />
 
               <p id={urlHintId} className="sr-only">
@@ -94,7 +94,7 @@ export function UrlImportForm() {
         <button
           type="submit"
           disabled={importMutation.isPending}
-          className="h-11 rounded-xl bg-slate-900 px-5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {importMutation.isPending ? "Importing..." : "Import Doc"}
         </button>

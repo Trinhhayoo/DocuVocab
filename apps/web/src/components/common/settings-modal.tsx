@@ -39,7 +39,7 @@ export const GeneralSettingsModal: FC<Props> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-106.25 text-black z-100000">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-106.25 text-foreground z-100000">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
 

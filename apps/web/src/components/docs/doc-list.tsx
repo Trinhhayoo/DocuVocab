@@ -20,7 +20,7 @@ export function DocList({ initialDocs = [] }: { initialDocs: DocParams[] }) {
 
   if (docsData.docs.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed bg-white p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
         No documents yet. Create your first document above.
       </div>
     );
@@ -32,7 +32,7 @@ export function DocList({ initialDocs = [] }: { initialDocs: DocParams[] }) {
         <li key={doc.id}>
           <Link
             href={`/docs/${doc.id}`}
-            className="block rounded-xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="block rounded-xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             <h3 className="line-clamp-2 text-sm font-semibold">{doc.title}</h3>
             <p className="mt-2 text-xs text-muted-foreground">
