@@ -1,7 +1,7 @@
 import { type ApiResult, isUnauthorized, toUserMessage } from "@/lib/api-result";
 import type { Explanation, Vocabulary } from "@/lib/vocabulary";
 
-import { h, placeNear } from "./dom";
+import { h, placeElementNear } from "./dom";
 
 export type PopoverValues = Readonly<{
   meaning: string;
@@ -22,7 +22,6 @@ export type PopoverOptions = Readonly<{
   onSaved(vocabulary: Vocabulary): void;
 }>;
 
-const POPOVER_SIZE = { width: 360, height: 520 };
 const CLOSE_AFTER_SAVE_MS = 800;
 
 type FieldName = keyof PopoverValues;
@@ -83,10 +82,8 @@ export function openPopover(root: ShadowRoot, options: PopoverOptions): () => vo
     status,
   );
 
-  const { left, top } = placeNear(options.anchor, POPOVER_SIZE);
-  popover.style.left = `${left}px`;
-  popover.style.top = `${top}px`;
   root.append(popover);
+  placeElementNear(popover, options.anchor);
 
   let closeTimer: number | undefined;
 
