@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { safeNextPath } from "@/lib/safe-next-path";
+import { RETURN_PATH_COOKIE, WEB_CALLBACK_PATH } from "@/lib/sign-in-return-path";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import PrismaAuthUserRepository from "@/feature/core/user/data/repository/auth-user.repository";
 import syncAuthUserUsecase from "@/feature/core/user/domain/usecase/sync-auth-user.usecase";
@@ -11,7 +13,9 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
 
   const code = requestUrl.searchParams.get("code");
-  const next = safeNextPath(requestUrl.searchParams.get("next"));
+  const cookieStore = await cookies();
+  const next = safeNextPath(cookieStore.get(RETURN_PATH_COOKIE)?.value ?? null);
+  cookieStore.delete({ name: RETURN_PATH_COOKIE, path: WEB_CALLBACK_PATH });
 
   if (!code) {
     return NextResponse.json(
