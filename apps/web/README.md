@@ -47,6 +47,7 @@ Before you start, install Docker. Then, from `apps/web`:
 
 `pnpm e2e` applies the Prisma migrations, recreates the `e2e@docuvocab.test` user and its seeded document, builds the app with the local Supabase URL and keys, and serves it on port 3300.
 
+- The `extension` project also builds the extension with `wxt build --mode e2e` (into `apps/extension/.output/chrome-mv3-e2e`, pointed at port 3300) and loads it into Playwright's Chromium. Each test signs the extension in with a fresh Supabase session. In that build only, the extension UI uses an open shadow root so tests can query it.
 - The e2e build overwrites `.next`. Run `pnpm build` again before you use `pnpm start` against the hosted project.
 - To stop Supabase, run `pnpm e2e:db:stop`.
 - CI runs the same suite in the `e2e` job on every pull request to `main`. When it fails, download the `playwright-report` artifact from the run to see traces and screenshots.

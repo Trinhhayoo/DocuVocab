@@ -5,7 +5,14 @@ import path from "node:path";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
-import { AUTH_DIR, E2E_USER, FIXTURES_PATH, type SeededIds, STORAGE_STATE_PATH } from "./support/fixtures";
+import {
+  AUTH_DIR,
+  E2E_BASE_URL,
+  E2E_USER,
+  FIXTURES_PATH,
+  type SeededIds,
+  STORAGE_STATE_PATH,
+} from "./support/fixtures";
 import { readLocalSupabase } from "./support/local-supabase";
 import { seedDatabase } from "./support/seed";
 
@@ -14,9 +21,18 @@ const APP_HOST = "localhost";
 
 type CookieToSet = { name: string; value: string };
 
-/** Applies migrations, recreates the e2e user and its data, and saves a signed-in browser state. */
+/**
+ * Applies migrations, recreates the e2e user and its data, saves a signed-in browser state, and
+ * builds the extension against the app under test.
+ */
 export default async function globalSetup() {
   const local = readLocalSupabase();
+
+  // Outputs .output/chrome-mv3-e2e, so the real extension build is left alone.
+  execFileSync("pnpm", ["--filter", "@docuvocab/extension", "exec", "wxt", "build", "--mode", "e2e"], {
+    env: { ...process.env, WXT_API_ORIGIN: E2E_BASE_URL },
+    stdio: "ignore",
+  });
 
   execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
     cwd: APP_ROOT,
