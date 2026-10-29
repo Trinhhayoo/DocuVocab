@@ -5,10 +5,10 @@ const DEVELOPMENT_ORIGIN = "http://localhost:3000";
 // The web app under Playwright (apps/web/playwright.config.ts); built with `wxt build --mode e2e`.
 const E2E_ORIGIN = "http://localhost:3300";
 
-// Public key that fixes the Chrome extension ID to jgeelnjohablnhdioadaemkefnakdkph on every machine.
+// The Chrome Web Store item's public key: unpacked builds get its ID, bpeoeihgcioncibdafpcpfnfcgijlacp.
 // The web app allows sign-in redirects to that ID only (apps/web/src/lib/extension-redirect.ts).
 const CHROME_PUBLIC_KEY =
-  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4bKfnc4caOLVqvv4KODGq5aawHehQ/wVlHI5v7OsAT4EiI0lRIUABXgY27FPsNYwfCLoH7Z9ilZYJFuy7bwL7+aY+8NPTIT5cfnetqq4Db5FS4w+3N9pWC9kvxMPF8bqrNgNYehCTG2/sOK578COwJKn9rIAUqf5yxkeWpSppLpYFwBgwkx10ZRC5eiAvG7mCb9uUDYlwPk2hYp32hCcAHEvDl0W9XGsWLEfWRQ8DY/KTPBViexMERAA7UY/cvAb1nTRIPKQfCRP8Xry7cwVdBCqq0AjoFYJmbMHEa7EF52uy/4bhtNItibWWvz53BWVhDWAKrPaOgcM+wlJjKbh6QIDAQAB";
+  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlnzRAC7wV2mEcNf5UYbsAKqJ2w/Gv0itZX9KdA12qZOn7yiYV8+9t3JI9hDeEj93ElMMt5NVp0R2ZNl6q3YMxtbCWHGPao5os122LOX+rAfuQC6Pa9t4fGXKeOSeHWfhcX2hqdeoEKWkdLrc7086e7PxiBk8nU+oF8HZW6KwjYB+edBYQQNGyH3CUpdPLNBPp4+h9EAmBWNYHHkccBTb0oGu4Gm5xQvZjK912l7zCnpGYN/nxDbZWDakZP0J5O7YS3cNwNeDO4syQ7AsDkXYcut6j+Y+gRmgGHEypNJk+HRBOJl9y0f6pih6zh7tX/KX4Fc8NaXhcqNrBHlIPv+7qQIDAQAB";
 
 // Must match FIREFOX_ADDON_ID in apps/web/src/lib/extension-redirect.ts.
 const FIREFOX_ADDON_ID = "doc-dictionary@docuvocab";
