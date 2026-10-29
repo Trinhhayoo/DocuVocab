@@ -30,3 +30,23 @@ export function parseExtensionRedirectUri(value: string | null): URL | null {
 
   return EXTENSION_REDIRECT_HOSTS.has(url.hostname) ? url : null;
 }
+
+/**
+ * The extension's identity redirect travels in a cookie instead of the OAuth callback URL, so the
+ * callback stays one exact URL that matches Supabase's Redirect URLs allow list. Supabase matches
+ * the query string too, and falls back to the Site URL when a callback does not match.
+ */
+export const EXTENSION_REDIRECT_COOKIE = "docuvocab-extension-redirect";
+
+export const EXTENSION_CALLBACK_PATH = "/auth/extension/callback";
+
+export function extensionRedirectCookieOptions(secure: boolean) {
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    // Sent only to the callback, and only for the length of a sign-in.
+    path: EXTENSION_CALLBACK_PATH,
+    maxAge: 60 * 10,
+  };
+}
