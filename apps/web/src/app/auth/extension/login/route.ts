@@ -1,12 +1,17 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
-import { parseExtensionRedirectUri } from "@/lib/extension-redirect";
+import {
+  EXTENSION_CALLBACK_PATH,
+  EXTENSION_REDIRECT_COOKIE,
+  extensionRedirectCookieOptions,
+  parseExtensionRedirectUri,
+} from "@/lib/extension-redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const next = requestUrl.searchParams.get("next") ?? "/";
   const redirectUri = parseExtensionRedirectUri(
     requestUrl.searchParams.get("redirect_uri"),
   );
@@ -20,9 +25,13 @@ export async function GET(request: Request) {
 
   // The identity API opens this page as a navigation, which sends no Origin header; the request URL
   // is always the host serving it, locally and on every Vercel deployment.
-  const callbackUrl = new URL("/auth/extension/callback", requestUrl.origin);
-  callbackUrl.searchParams.set("next", next);
-  callbackUrl.searchParams.set("redirect_uri", redirectUri.href);
+  const callbackUrl = new URL(EXTENSION_CALLBACK_PATH, requestUrl.origin);
+
+  (await cookies()).set(
+    EXTENSION_REDIRECT_COOKIE,
+    redirectUri.href,
+    extensionRedirectCookieOptions(requestUrl.protocol === "https:"),
+  );
 
   const supabase = await createSupabaseServerClient();
 
