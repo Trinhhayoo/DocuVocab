@@ -1,3 +1,5 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { defineConfig } from "wxt";
 
 const PRODUCTION_ORIGIN = "https://docu-vocab-kappa.vercel.app";
@@ -6,7 +8,8 @@ const DEVELOPMENT_ORIGIN = "http://localhost:3000";
 const E2E_ORIGIN = "http://localhost:3300";
 
 // Public key that fixes the Chrome extension ID to jgeelnjohablnhdioadaemkefnakdkph on every machine.
-// The web app allows sign-in redirects to that ID only (apps/web/src/lib/extension-redirect.ts).
+// Store archives (`wxt zip`) leave it out: the Chrome Web Store assigns its own ID.
+// The web app allows sign-in redirects to both IDs only (apps/web/src/lib/extension-redirect.ts).
 const CHROME_PUBLIC_KEY =
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4bKfnc4caOLVqvv4KODGq5aawHehQ/wVlHI5v7OsAT4EiI0lRIUABXgY27FPsNYwfCLoH7Z9ilZYJFuy7bwL7+aY+8NPTIT5cfnetqq4Db5FS4w+3N9pWC9kvxMPF8bqrNgNYehCTG2/sOK578COwJKn9rIAUqf5yxkeWpSppLpYFwBgwkx10ZRC5eiAvG7mCb9uUDYlwPk2hYp32hCcAHEvDl0W9XGsWLEfWRQ8DY/KTPBViexMERAA7UY/cvAb1nTRIPKQfCRP8Xry7cwVdBCqq0AjoFYJmbMHEa7EF52uy/4bhtNItibWWvz53BWVhDWAKrPaOgcM+wlJjKbh6QIDAQAB";
 
@@ -19,6 +22,15 @@ export default defineConfig({
   imports: false,
   // WXT defaults to port 3000, which the web app needs; the extension calls it there in dev.
   dev: { server: { port: 3100 } },
+  hooks: {
+    // The store rejects a `key` for another ID, so archives drop it after the build.
+    "zip:extension:start": async (wxt) => {
+      const manifestPath = join(wxt.config.outDir, "manifest.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      delete manifest.key;
+      await writeFile(manifestPath, JSON.stringify(manifest));
+    },
+  },
   manifest: ({ mode, browser }) => ({
     name: "Doc Dictionary",
     description: "Highlight saved vocabulary on any webpage. Select text to save new words.",
@@ -28,7 +40,8 @@ export default defineConfig({
       ...(mode === "development" ? [`${DEVELOPMENT_ORIGIN}/*`] : []),
       ...(mode === "e2e" ? [`${E2E_ORIGIN}/*`] : []),
     ],
-    icons: { 48: "icon/48.png" },
+    // Drawn by store/render.mjs.
+    icons: { 16: "icon/16.png", 32: "icon/32.png", 48: "icon/48.png", 128: "icon/128.png" },
     ...(browser !== "firefox" && { key: CHROME_PUBLIC_KEY }),
     ...(browser === "firefox" && {
       browser_specific_settings: {

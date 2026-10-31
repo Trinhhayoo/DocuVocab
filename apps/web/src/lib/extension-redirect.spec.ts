@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CHROME_EXTENSION_ID,
+  CHROME_WEB_STORE_EXTENSION_ID,
   FIREFOX_ADDON_ID,
   FIREFOX_REDIRECT_SUBDOMAIN,
   parseExtensionRedirectUri,
@@ -21,6 +22,7 @@ describe("parseExtensionRedirectUri", () => {
   it.each([
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org/`,
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org/callback`,
+    `https://${CHROME_WEB_STORE_EXTENSION_ID}.chromiumapp.org/`,
     `https://${FIREFOX_REDIRECT_SUBDOMAIN}.extensions.allizom.org/`,
   ])("accepts %s", (value) => {
     expect(parseExtensionRedirectUri(value)?.href).toBe(value);

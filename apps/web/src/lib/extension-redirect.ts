@@ -1,5 +1,8 @@
-/** Fixed by the `key` in apps/extension/wxt.config.ts. */
+/** Fixed by the `key` in apps/extension/wxt.config.ts, for development, e2e, and unpacked builds. */
 export const CHROME_EXTENSION_ID = "jgeelnjohablnhdioadaemkefnakdkph";
+
+/** Assigned by the Chrome Web Store to the published extension, which ships without the `key`. */
+export const CHROME_WEB_STORE_EXTENSION_ID = "bpeoeihgcioncibdafpcpfnfcgijlacp";
 
 /** `gecko.id` in apps/extension/wxt.config.ts. */
 export const FIREFOX_ADDON_ID = "doc-dictionary@docuvocab";
@@ -10,6 +13,7 @@ export const FIREFOX_REDIRECT_SUBDOMAIN = "dee9f0eaa99010512f41f85ded686cbb29122
 // Only our own extension's identity redirects; the browser intercepts these, so tokens never leave it.
 const EXTENSION_REDIRECT_HOSTS: ReadonlySet<string> = new Set([
   `${CHROME_EXTENSION_ID}.chromiumapp.org`,
+  `${CHROME_WEB_STORE_EXTENSION_ID}.chromiumapp.org`,
   `${FIREFOX_REDIRECT_SUBDOMAIN}.extensions.allizom.org`,
 ]);
 
