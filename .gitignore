@@ -49,6 +49,9 @@ apps/web/src/generated/prisma
 # wxt
 .output
 .wxt
+# Store screenshots can show a signed-in account; keep them local.
+apps/extension/store/screenshots
+apps/extension/store/output/screenshot-*
 
 # playwright
 apps/web/e2e/.auth
