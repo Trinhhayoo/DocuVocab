@@ -1,5 +1,5 @@
 /** Fixed by the `key` in apps/extension/wxt.config.ts. */
-export const CHROME_EXTENSION_ID = "jgeelnjohablnhdioadaemkefnakdkph";
+export const CHROME_EXTENSION_ID = "bpeoeihgcioncibdafpcpfnfcgijlacp";
 
 /** `gecko.id` in apps/extension/wxt.config.ts. */
 export const FIREFOX_ADDON_ID = "doc-dictionary@docuvocab";

@@ -103,7 +103,7 @@ export default function PrivacyPolicyPage() {
             data deletion, contact us at:
           </p>
           <p className="mt-2 font-medium text-foreground">
-            your-email@example.com
+            phuongtrinhh2003@gmail.com
           </p>
         </section>
       </div>
