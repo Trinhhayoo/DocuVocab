@@ -30,6 +30,12 @@ export function createMessageHandler({ api, tokens, origin }: HandlerDeps) {
           jsonInit("POST", message.payload),
           "Cannot save vocabulary.",
         );
+      case "UPDATE_VOCABULARY":
+        return api.request(
+          `/api/extension/vocabularies/${encodeURIComponent(message.payload.id)}`,
+          jsonInit("PATCH", message.payload.values),
+          "Cannot update vocabulary.",
+        );
       case "EXPLAIN_VOCABULARY":
         return api.request(
           "/api/extension/vocabularies/explain",

@@ -37,4 +37,13 @@ export type SaveVocabularyInput = Readonly<{
   pageTitle?: string;
 }>;
 
-export type Settings = Readonly<{ allowGlobalVocabulary: boolean }>;
+/** Editable fields of a saved vocabulary; `null` clears a field. */
+export type UpdateVocabularyInput = Readonly<{
+  meaning: string | null;
+  meaningEn: string | null;
+  note: string | null;
+  noteEn: string | null;
+  exampleSentence: string | null;
+}>;
+
+export type Settings =Readonly<{ allowGlobalVocabulary: boolean }>;

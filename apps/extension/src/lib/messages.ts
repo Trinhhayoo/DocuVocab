@@ -6,6 +6,7 @@ import type {
   ExplainVocabularyInput,
   SaveVocabularyInput,
   Settings,
+  UpdateVocabularyInput,
   Vocabulary,
 } from "./vocabulary";
 
@@ -13,6 +14,10 @@ import type {
 export type BackgroundRequests = {
   GET_VOCABULARIES: { payload: { url: string }; data: { vocabularies: Vocabulary[] } };
   SAVE_VOCABULARY: { payload: SaveVocabularyInput; data: { vocabulary: Vocabulary } };
+  UPDATE_VOCABULARY: {
+    payload: { id: string; values: UpdateVocabularyInput };
+    data: { vocabulary: Vocabulary };
+  };
   EXPLAIN_VOCABULARY: { payload: ExplainVocabularyInput; data: Explanation };
   GET_SETTINGS: { payload: null; data: { settings: Settings } };
   UPDATE_SETTINGS: { payload: Settings; data: { settings: Settings } };
