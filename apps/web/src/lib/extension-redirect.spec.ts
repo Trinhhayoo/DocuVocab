@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   CHROME_EXTENSION_ID,
-  CHROME_WEB_STORE_EXTENSION_ID,
   FIREFOX_ADDON_ID,
   FIREFOX_REDIRECT_SUBDOMAIN,
   parseExtensionRedirectUri,
 } from "./extension-redirect";
 
 const OTHER_CHROME_ID = "abcdefghijklmnopabcdefghijklmnop";
+/** The dev-only ID that unpacked builds had before they took the store key. */
+const RETIRED_DEV_CHROME_ID = "jgeelnjohablnhdioadaemkefnakdkph";
 const OTHER_FIREFOX_SUBDOMAIN = "0123456789abcdef0123456789abcdef01234567";
 
 describe("FIREFOX_REDIRECT_SUBDOMAIN", () => {
@@ -22,7 +23,6 @@ describe("parseExtensionRedirectUri", () => {
   it.each([
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org/`,
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org/callback`,
-    `https://${CHROME_WEB_STORE_EXTENSION_ID}.chromiumapp.org/`,
     `https://${FIREFOX_REDIRECT_SUBDOMAIN}.extensions.allizom.org/`,
   ])("accepts %s", (value) => {
     expect(parseExtensionRedirectUri(value)?.href).toBe(value);
@@ -34,6 +34,7 @@ describe("parseExtensionRedirectUri", () => {
     "not a url",
     "https://evil.com/",
     `https://${OTHER_CHROME_ID}.chromiumapp.org/`,
+    `https://${RETIRED_DEV_CHROME_ID}.chromiumapp.org/`,
     `https://${OTHER_FIREFOX_SUBDOMAIN}.extensions.allizom.org/`,
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org.evil.com/`,
     `https://evil.com/${CHROME_EXTENSION_ID}.chromiumapp.org/`,
