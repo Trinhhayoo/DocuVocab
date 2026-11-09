@@ -3,6 +3,7 @@ import type { BackgroundMessage, BackgroundRequests } from "@/lib/messages";
 
 import type { ApiClient } from "./api-client";
 import { loginWithGoogle, logout } from "./auth";
+import { connectOpenRouter, disconnectOpenRouter } from "./openrouter-connect";
 import type { TokenStore } from "./token-store";
 
 type HandlerDeps = Readonly<{ api: ApiClient; tokens: TokenStore; origin: string }>;
@@ -46,6 +47,10 @@ export function createMessageHandler({ api, tokens, origin }: HandlerDeps) {
         return api.request("/api/extension/settings", jsonInit("GET"), "Cannot load settings.");
       case "UPDATE_SETTINGS":
         return api.request("/api/extension/settings", jsonInit("PATCH", message.payload), "Cannot save settings.");
+      case "CONNECT_OPENROUTER":
+        return connectOpenRouter(api);
+      case "DISCONNECT_OPENROUTER":
+        return disconnectOpenRouter(api);
       case "LOGIN":
         return loginWithGoogle(origin, tokens, message.payload.returnTo);
       case "LOGOUT":

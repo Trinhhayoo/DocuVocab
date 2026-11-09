@@ -1,8 +1,14 @@
+import { AI_MODELS, resolveAiModelId } from "@docuvocab/shared";
 import { useEffect, useState } from "react";
+import { browser } from "wxt/browser";
 
 import { toUserMessage } from "@/lib/api-result";
+import { API_ORIGIN } from "@/lib/config";
 import { sendToBackground } from "@/lib/messages";
-import type { Settings } from "@/lib/vocabulary";
+import type { Settings, UpdateSettingsInput } from "@/lib/vocabulary";
+
+/** OpenRouter is connected on the web app, which opens its settings for this query parameter. */
+const WEB_SETTINGS_URL = `${API_ORIGIN}/?settings=open`;
 
 type SettingsPanelProps = Readonly<{
   isOpen: boolean;
@@ -13,6 +19,7 @@ type SettingsPanelProps = Readonly<{
 
 export function SettingsPanel({ isOpen, settings, onClose, onSaved }: SettingsPanelProps) {
   const [allowGlobal, setAllowGlobal] = useState(settings.allowGlobalVocabulary);
+  const [aiModel, setAiModel] = useState(resolveAiModelId(settings.aiModel, settings.openRouterConnected));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,22 +34,52 @@ export function SettingsPanel({ isOpen, settings, onClose, onSaved }: SettingsPa
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  async function handleToggle() {
-    const next = !allowGlobal;
-    setAllowGlobal(next);
+  /** Saves one change; `revert` restores the control when the server rejects it. */
+  async function save(input: UpdateSettingsInput, revert: () => void) {
     setIsSaving(true);
     setError(null);
 
-    const result = await sendToBackground("UPDATE_SETTINGS", { allowGlobalVocabulary: next });
+    const result = await sendToBackground("UPDATE_SETTINGS", input);
     setIsSaving(false);
 
     if (!result.success) {
-      setAllowGlobal(!next);
+      revert();
       setError(toUserMessage(result));
       return;
     }
 
     await onSaved();
+  }
+
+  function handleToggle() {
+    const next = !allowGlobal;
+    setAllowGlobal(next);
+    void save({ allowGlobalVocabulary: next }, () => setAllowGlobal(!next));
+  }
+
+  /** Connect opens an OpenRouter window; Chrome may close this popup meanwhile, and the background finishes. */
+  async function handleOpenRouter() {
+    setIsSaving(true);
+    setError(null);
+
+    const result = await sendToBackground(
+      settings.openRouterConnected ? "DISCONNECT_OPENROUTER" : "CONNECT_OPENROUTER",
+      null,
+    );
+    setIsSaving(false);
+
+    if (!result.success) {
+      setError(toUserMessage(result));
+      return;
+    }
+
+    await onSaved();
+  }
+
+  function handleModelChange(next: string) {
+    const previous = aiModel;
+    setAiModel(next);
+    void save({ aiModel: next }, () => setAiModel(previous));
   }
 
   return (
@@ -74,6 +111,49 @@ export function SettingsPanel({ isOpen, settings, onClose, onSaved }: SettingsPa
             disabled={isSaving}
             onClick={handleToggle}
           />
+        </div>
+
+        <div className="settings-row settings-row-stacked">
+          <label className="settings-label" htmlFor="ai-model">
+            AI model
+          </label>
+          <select
+            id="ai-model"
+            className="settings-select"
+            value={aiModel}
+            disabled={isSaving}
+            onChange={(event) => handleModelChange(event.target.value)}
+          >
+            {AI_MODELS.map((model) => {
+              const isLocked = model.requiresOwnKey && !settings.openRouterConnected;
+              return (
+                <option key={model.id} value={model.id} disabled={isLocked}>
+                  {model.label}
+                  {isLocked ? " (connect OpenRouter)" : ""}
+                </option>
+              );
+            })}
+          </select>
+          <p className="settings-hint">
+            {settings.openRouterConnected
+              ? "OpenRouter connected: explanations are billed to your account."
+              : "Connect your OpenRouter account to use any model."}
+          </p>
+          <button
+            type="button"
+            className={`settings-button ${settings.openRouterConnected ? "" : "primary"}`}
+            disabled={isSaving}
+            onClick={() => void handleOpenRouter()}
+          >
+            {settings.openRouterConnected ? "Disconnect OpenRouter" : "Connect OpenRouter"}
+          </button>
+          <button
+            type="button"
+            className="settings-link"
+            onClick={() => browser.tabs.create({ url: WEB_SETTINGS_URL })}
+          >
+            Manage on the web app
+          </button>
         </div>
 
         <p className={`settings-status ${error ? "error" : ""}`} aria-live="polite">

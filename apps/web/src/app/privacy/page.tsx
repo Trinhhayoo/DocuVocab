@@ -34,6 +34,11 @@ export default function PrivacyPolicyPage() {
             <li>Text, words, phrases, notes, and meanings that you choose to save.</li>
             <li>Webpage URL or hostname related to saved notes.</li>
             <li>Basic technical information needed to operate the service.</li>
+            <li>
+              Your chosen AI model and, if you connect one, your OpenRouter API
+              key, which we store encrypted and never show back to you or anyone
+              else.
+            </li>
           </ul>
         </section>
 
@@ -58,6 +63,16 @@ export default function PrivacyPolicyPage() {
             We do not sell your personal data. We may use trusted service
             providers, such as hosting, database, and authentication providers,
             only as necessary to operate DocuVocab.
+          </p>
+          <p className="mt-2">
+            When you ask for an AI explanation, the selected text, its
+            surrounding sentence or paragraph, and the page title and URL are
+            sent to an AI provider to generate the explanation. If you connected
+            your own OpenRouter account, this goes through OpenRouter to the
+            model you chose and is billed to your account; OpenRouter&apos;s and
+            the model provider&apos;s privacy terms then apply. You can
+            disconnect OpenRouter in Settings at any time; this deletes the key
+            from DocuVocab, and you can revoke it in your OpenRouter account.
           </p>
         </section>
 

@@ -13,5 +13,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return handleExplainVocabulary(request);
+  return handleExplainVocabulary(request, user.id);
 }

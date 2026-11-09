@@ -6,6 +6,7 @@ import type {
   ExplainVocabularyInput,
   SaveVocabularyInput,
   Settings,
+  UpdateSettingsInput,
   UpdateVocabularyInput,
   Vocabulary,
 } from "./vocabulary";
@@ -20,7 +21,9 @@ export type BackgroundRequests = {
   };
   EXPLAIN_VOCABULARY: { payload: ExplainVocabularyInput; data: Explanation };
   GET_SETTINGS: { payload: null; data: { settings: Settings } };
-  UPDATE_SETTINGS: { payload: Settings; data: { settings: Settings } };
+  UPDATE_SETTINGS: { payload: UpdateSettingsInput; data: { settings: Settings } };
+  CONNECT_OPENROUTER: { payload: null; data: { settings: Settings } };
+  DISCONNECT_OPENROUTER: { payload: null; data: { settings: Settings } };
   LOGIN: { payload: { returnTo: string }; data: null };
   LOGOUT: { payload: null; data: null };
 };
