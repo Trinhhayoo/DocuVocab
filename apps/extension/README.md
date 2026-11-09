@@ -16,7 +16,7 @@ To load a production build by hand, run `pnpm --filter @docuvocab/extension buil
 - **Chrome or Edge:** open `chrome://extensions`, turn on **Developer mode**, select **Load unpacked**, and choose `apps/extension/.output/chrome-mv3`.
 - **Firefox:** open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `apps/extension/.output/firefox-mv2/manifest.json`.
 
-`pnpm --filter @docuvocab/extension zip` produces store-ready archives in `.output/`.
+`pnpm --filter @docuvocab/extension zip` produces store-ready archives in `.output/`. The Chrome archive leaves out the manifest `key`; the store install gets the Chrome Web Store ID (`bpeoeihgcioncibdafpcpfnfcgijlacp`), the same ID unpacked builds get from that `key`, and the only Chrome ID the web app accepts for sign-in. For Firefox Add-ons, upload `*-sources-full.zip` as the source code: it also holds `packages/shared` and the lockfile, which the `*-sources.zip` from WXT leaves out. It is built from the last commit, so commit your changes first.
 
 ## How it works
 

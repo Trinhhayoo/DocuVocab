@@ -11,18 +11,14 @@ export async function getSettingsByUserIdQuery(
   });
 }
 
+/** Undefined fields are left unchanged on update and take the column default on create. */
 export async function upsertSettingsByUserIdQuery(
   userId: string,
-  input: UpdateSettings,
+  input: UpdateSettings & { openRouterKeyEncrypted?: string | null },
 ): Promise<UserSetting> {
   return prisma.userSetting.upsert({
     where: { userId },
-    create: {
-      userId,
-      allowGlobalVocabulary: input.allowGlobalVocabulary,
-    },
-    update: {
-      allowGlobalVocabulary: input.allowGlobalVocabulary,
-    },
+    create: { userId, ...input },
+    update: input,
   });
 }

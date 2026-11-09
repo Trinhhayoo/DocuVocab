@@ -9,6 +9,8 @@ import {
 } from "./extension-redirect";
 
 const OTHER_CHROME_ID = "abcdefghijklmnopabcdefghijklmnop";
+/** The dev-only ID that unpacked builds had before they took the store key. */
+const RETIRED_DEV_CHROME_ID = "jgeelnjohablnhdioadaemkefnakdkph";
 const OTHER_FIREFOX_SUBDOMAIN = "0123456789abcdef0123456789abcdef01234567";
 
 describe("FIREFOX_REDIRECT_SUBDOMAIN", () => {
@@ -32,6 +34,7 @@ describe("parseExtensionRedirectUri", () => {
     "not a url",
     "https://evil.com/",
     `https://${OTHER_CHROME_ID}.chromiumapp.org/`,
+    `https://${RETIRED_DEV_CHROME_ID}.chromiumapp.org/`,
     `https://${OTHER_FIREFOX_SUBDOMAIN}.extensions.allizom.org/`,
     `https://${CHROME_EXTENSION_ID}.chromiumapp.org.evil.com/`,
     `https://evil.com/${CHROME_EXTENSION_ID}.chromiumapp.org/`,

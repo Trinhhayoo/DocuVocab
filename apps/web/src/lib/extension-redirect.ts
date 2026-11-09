@@ -1,4 +1,7 @@
-/** Fixed by the `key` in apps/extension/wxt.config.ts. */
+/**
+ * The Chrome Web Store item's ID. Unpacked builds get it from the `key` in apps/extension/wxt.config.ts,
+ * and the store gives it to the published install.
+ */
 export const CHROME_EXTENSION_ID = "bpeoeihgcioncibdafpcpfnfcgijlacp";
 
 /** `gecko.id` in apps/extension/wxt.config.ts. */

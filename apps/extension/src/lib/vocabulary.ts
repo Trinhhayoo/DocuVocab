@@ -37,4 +37,22 @@ export type SaveVocabularyInput = Readonly<{
   pageTitle?: string;
 }>;
 
-export type Settings = Readonly<{ allowGlobalVocabulary: boolean }>;
+/** Editable fields of a saved vocabulary; `null` clears a field. */
+export type UpdateVocabularyInput = Readonly<{
+  meaning: string | null;
+  meaningEn: string | null;
+  note: string | null;
+  noteEn: string | null;
+  exampleSentence: string | null;
+}>;
+
+export type Settings = Readonly<{
+  allowGlobalVocabulary: boolean;
+  /** OpenRouter model slug from @docuvocab/shared AI_MODELS; null means the default. */
+  aiModel: string | null;
+  /** Whether the user connected their own OpenRouter account on the web app. */
+  openRouterConnected: boolean;
+}>;
+
+/** Each field is optional: the server changes only the ones sent. */
+export type UpdateSettingsInput = Partial<Pick<Settings, "allowGlobalVocabulary" | "aiModel">>;

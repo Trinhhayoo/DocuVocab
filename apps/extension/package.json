@@ -1,13 +1,15 @@
 {
   "name": "@docuvocab/extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build && wxt build -b firefox",
-    "zip": "wxt zip && wxt zip -b firefox",
+    "zip": "wxt zip && wxt zip -b firefox && pnpm zip:sources",
+    "zip:sources": "node scripts/zip-sources.mjs",
+    "store:graphics": "node store/render.mjs",
     "postinstall": "wxt prepare",
     "lint": "eslint",
     "test": "vitest run",

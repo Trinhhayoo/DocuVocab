@@ -54,13 +54,23 @@ export default defineContentScript({
       setVocabularies(result.success ? result.data.vocabularies : []);
     }
 
+    function upsertVocabulary(vocabulary: Vocabulary) {
+      const exists = vocabularies.some((item) => item.id === vocabulary.id);
+      setVocabularies(
+        exists
+          ? vocabularies.map((item) => (item.id === vocabulary.id ? vocabulary : item))
+          : [...vocabularies, vocabulary],
+      );
+    }
+
     function openSaveDialog(word: string, sentence: string, anchor: DOMRect) {
       closePopover?.();
+      const saved = matcher.findVocabulary(word);
       closePopover = openPopover(overlay.root, {
         word,
         sentence,
         anchor,
-        saved: matcher.findVocabulary(word),
+        saved,
         explain: () =>
           sendToBackground("EXPLAIN_VOCABULARY", {
             text: word,
@@ -69,20 +79,31 @@ export default defineContentScript({
             sourceUrl: location.href,
           }),
         save: (values: PopoverValues) =>
-          sendToBackground("SAVE_VOCABULARY", {
-            word,
-            meaning: optional(values.meaning),
-            meaningEn: optional(values.meaningEn),
-            note: optional(values.note),
-            noteEn: optional(values.noteEn),
-            exampleSentence: optional(values.exampleSentence),
-            originalSentence: optional(sentence),
-            sourceUrl: location.href,
-            sourceHostname: location.hostname,
-            pageTitle: optional(document.title.slice(0, MAX_PAGE_TITLE_LENGTH)),
-          }),
+          saved
+            ? sendToBackground("UPDATE_VOCABULARY", {
+                id: saved.id,
+                values: {
+                  meaning: values.meaning || null,
+                  meaningEn: values.meaningEn || null,
+                  note: values.note || null,
+                  noteEn: values.noteEn || null,
+                  exampleSentence: values.exampleSentence || null,
+                },
+              })
+            : sendToBackground("SAVE_VOCABULARY", {
+                word,
+                meaning: optional(values.meaning),
+                meaningEn: optional(values.meaningEn),
+                note: optional(values.note),
+                noteEn: optional(values.noteEn),
+                exampleSentence: optional(values.exampleSentence),
+                originalSentence: optional(sentence),
+                sourceUrl: location.href,
+                sourceHostname: location.hostname,
+                pageTitle: optional(document.title.slice(0, MAX_PAGE_TITLE_LENGTH)),
+              }),
         login: () => sendToBackground("LOGIN", { returnTo: location.href }),
-        onSaved: (vocabulary) => setVocabularies([...vocabularies, vocabulary]),
+        onSaved: upsertVocabulary,
       });
     }
 

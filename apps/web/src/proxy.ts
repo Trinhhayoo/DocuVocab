@@ -4,7 +4,7 @@ const EXTENSION_ORIGIN_PATTERN =
   /^(chrome-extension|moz-extension|safari-web-extension):\/\/[a-z0-9-]+$/i;
 
 const CORS_OPTIONS = {
-  "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   Vary: "Origin",
 };

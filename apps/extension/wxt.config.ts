@@ -1,3 +1,5 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { defineConfig } from "wxt";
 
 const PRODUCTION_ORIGIN = "https://docu-vocab-kappa.vercel.app";
@@ -6,6 +8,7 @@ const DEVELOPMENT_ORIGIN = "http://localhost:3000";
 const E2E_ORIGIN = "http://localhost:3300";
 
 // The Chrome Web Store item's public key: unpacked builds get its ID, bpeoeihgcioncibdafpcpfnfcgijlacp.
+// Store archives (`wxt zip`) leave it out; the store gives the same ID to the install.
 // The web app allows sign-in redirects to that ID only (apps/web/src/lib/extension-redirect.ts).
 const CHROME_PUBLIC_KEY =
   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlnzRAC7wV2mEcNf5UYbsAKqJ2w/Gv0itZX9KdA12qZOn7yiYV8+9t3JI9hDeEj93ElMMt5NVp0R2ZNl6q3YMxtbCWHGPao5os122LOX+rAfuQC6Pa9t4fGXKeOSeHWfhcX2hqdeoEKWkdLrc7086e7PxiBk8nU+oF8HZW6KwjYB+edBYQQNGyH3CUpdPLNBPp4+h9EAmBWNYHHkccBTb0oGu4Gm5xQvZjK912l7zCnpGYN/nxDbZWDakZP0J5O7YS3cNwNeDO4syQ7AsDkXYcut6j+Y+gRmgGHEypNJk+HRBOJl9y0f6pih6zh7tX/KX4Fc8NaXhcqNrBHlIPv+7qQIDAQAB";
@@ -19,6 +22,15 @@ export default defineConfig({
   imports: false,
   // WXT defaults to port 3000, which the web app needs; the extension calls it there in dev.
   dev: { server: { port: 3100 } },
+  hooks: {
+    // The store sets the item's key itself, so archives drop `key` after the build.
+    "zip:extension:start": async (wxt) => {
+      const manifestPath = join(wxt.config.outDir, "manifest.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      delete manifest.key;
+      await writeFile(manifestPath, JSON.stringify(manifest));
+    },
+  },
   manifest: ({ mode, browser }) => ({
     name: "Doc Dictionary",
     description: "Highlight saved vocabulary on any webpage. Select text to save new words.",
@@ -28,7 +40,8 @@ export default defineConfig({
       ...(mode === "development" ? [`${DEVELOPMENT_ORIGIN}/*`] : []),
       ...(mode === "e2e" ? [`${E2E_ORIGIN}/*`] : []),
     ],
-    icons: { 48: "icon/48.png" },
+    // Drawn by store/render.mjs.
+    icons: { 16: "icon/16.png", 32: "icon/32.png", 48: "icon/48.png", 128: "icon/128.png" },
     ...(browser !== "firefox" && { key: CHROME_PUBLIC_KEY }),
     ...(browser === "firefox" && {
       browser_specific_settings: {

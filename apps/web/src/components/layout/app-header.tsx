@@ -13,7 +13,11 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../providers/auth-provider";
 import signOutUsecase from "@/feature/core/user/domain/usecase/sign-out.usecase";
-import type { Settings } from "@/feature/core/settings/domain/entity/settings.entity";
+import {
+  DEFAULT_SETTINGS,
+  type Settings,
+} from "@/feature/core/settings/domain/entity/settings.entity";
+import { buildOpenRouterConnectUrl, OPEN_SETTINGS_PARAM } from "@/lib/openrouter-connect";
 
 // The header is on every page; the modals (TanStack Form and zod) load only when opened.
 const GeneralSettingsModal = dynamic(() =>
@@ -28,9 +32,27 @@ export function AppHeader() {
   const { user } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [currentSettings, setCurrentSettings] = useState<Settings>({
-    allowGlobalVocabulary: false,
-  });
+  const [currentSettings, setCurrentSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [isOpenRouterBusy, setIsOpenRouterBusy] = useState(false);
+  const [openRouterError, setOpenRouterError] = useState<string | null>(null);
+
+  // `?settings=open` (from the OpenRouter callback or the extension) opens the modal once.
+  // Deferred so React strict mode's effect re-run cancels the first attempt instead of losing it.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const url = new URL(window.location.href);
+
+      if (!url.searchParams.has(OPEN_SETTINGS_PARAM)) {
+        return;
+      }
+
+      url.searchParams.delete(OPEN_SETTINGS_PARAM);
+      window.history.replaceState(window.history.state, "", url);
+      setIsSettingsOpen(true);
+    });
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!user?.id) {
@@ -77,6 +99,7 @@ export function AppHeader() {
         },
         body: JSON.stringify({
           allowGlobalVocabulary: nextSettings.allowGlobalVocabulary,
+          aiModel: nextSettings.aiModel,
         }),
       });
 
@@ -102,6 +125,34 @@ export function AppHeader() {
     }
 
     void updateSettingsMutation.mutateAsync(updatedSettings);
+  };
+
+  const handleConnectOpenRouter = async () => {
+    setIsOpenRouterBusy(true);
+    setOpenRouterError(null);
+
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(await buildOpenRouterConnectUrl(window.location.origin, returnTo));
+  };
+
+  const handleDisconnectOpenRouter = async () => {
+    setIsOpenRouterBusy(true);
+    setOpenRouterError(null);
+
+    try {
+      const response = await fetch("/api/settings/openrouter", { method: "DELETE" });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message ?? "Cannot disconnect OpenRouter.");
+      }
+
+      setCurrentSettings(payload.data.settings);
+    } catch (error) {
+      setOpenRouterError(error instanceof Error ? error.message : "Cannot disconnect OpenRouter.");
+    } finally {
+      setIsOpenRouterBusy(false);
+    }
   };
 
   const handleClick = async () => {
@@ -166,6 +217,10 @@ export function AppHeader() {
           onOpenChange={setIsSettingsOpen}
           onGeneralSettingsChange={handleSettingsChange}
           currentSettings={currentSettings}
+          onConnectOpenRouter={() => void handleConnectOpenRouter()}
+          onDisconnectOpenRouter={() => void handleDisconnectOpenRouter()}
+          isOpenRouterBusy={isOpenRouterBusy || !user}
+          openRouterError={user ? openRouterError : "Log in to choose a model or connect OpenRouter."}
         />
       )}
       {isFeedbackOpen && (

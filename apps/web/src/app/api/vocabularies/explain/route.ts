@@ -9,5 +9,5 @@ export async function POST(request: Request) {
     return nextApiUnauthorized(authResult.failure.message);
   }
 
-  return handleExplainVocabulary(request);
+  return handleExplainVocabulary(request, authResult.data.id);
 }
