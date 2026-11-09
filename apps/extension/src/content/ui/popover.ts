@@ -6,14 +6,10 @@ import { h, placeElementNear } from "./dom";
 export type PopoverValues = Readonly<{
   meaning: string;
   meaningEn: string;
-  note: string;
-  noteEn: string;
-  exampleSentence: string;
 }>;
 
 export type PopoverOptions = Readonly<{
   word: string;
-  sentence: string;
   anchor: DOMRect;
   saved: Vocabulary | undefined;
   explain(): Promise<ApiResult<Explanation>>;
@@ -26,21 +22,15 @@ const CLOSE_AFTER_SAVE_MS = 800;
 
 type FieldName = keyof PopoverValues;
 
-const FIELDS: ReadonlyArray<{ name: FieldName; label: string; lang?: string; multiline?: boolean }> = [
+const FIELDS: ReadonlyArray<{ name: FieldName; label: string; lang: string }> = [
   { name: "meaning", label: "Meaning (Vietnamese)", lang: "vi" },
   { name: "meaningEn", label: "Meaning (English)", lang: "en" },
-  { name: "note", label: "Explanation (Vietnamese)", lang: "vi", multiline: true },
-  { name: "noteEn", label: "Explanation (English)", lang: "en", multiline: true },
-  { name: "exampleSentence", label: "Example", multiline: true },
 ];
 
 function fromExplanation(explanation: Explanation): PopoverValues {
   return {
     meaning: explanation.meaning,
     meaningEn: explanation.meaningEn,
-    note: explanation.simpleExplanation,
-    noteEn: explanation.simpleExplanationEn,
-    exampleSentence: explanation.exampleSentence,
   };
 }
 
@@ -48,19 +38,15 @@ function fromVocabulary(vocabulary: Vocabulary): PopoverValues {
   return {
     meaning: vocabulary.meaning ?? "",
     meaningEn: vocabulary.meaningEn ?? "",
-    note: vocabulary.note ?? "",
-    noteEn: vocabulary.noteEn ?? "",
-    exampleSentence: vocabulary.exampleSentence ?? "",
   };
 }
 
 /** Opens the save dialog in `root`; returns a function that closes it. */
 export function openPopover(root: ShadowRoot, options: PopoverOptions): () => void {
-  const inputs = new Map<FieldName, HTMLInputElement | HTMLTextAreaElement>();
-  const fieldElements = FIELDS.map(({ name, label, lang, multiline }) => {
+  const inputs = new Map<FieldName, HTMLTextAreaElement>();
+  const fieldElements = FIELDS.map(({ name, label, lang }) => {
     const id = `docuvocab-${name}`;
-    const input = multiline ? h("textarea", { id, rows: "2" }) : h("input", { id, type: "text" });
-    if (lang) input.lang = lang;
+    const input = h("textarea", { id, rows: "2", lang });
     inputs.set(name, input);
     return [h("label", { for: id }, label), input];
   }).flat();
@@ -75,7 +61,6 @@ export function openPopover(root: ShadowRoot, options: PopoverOptions): () => vo
     "div",
     { class: "popover", role: "dialog", "aria-label": `Save ${options.word}` },
     h("div", { class: "popover-header" }, h("strong", {}, options.word), closeButton),
-    options.sentence && h("div", { class: "popover-sentence" }, options.sentence),
     explainStatus,
     ...fieldElements,
     h("div", { class: "popover-actions" }, submitButton, regenerateButton),
@@ -101,9 +86,6 @@ export function openPopover(root: ShadowRoot, options: PopoverOptions): () => vo
     return {
       meaning: value("meaning"),
       meaningEn: value("meaningEn"),
-      note: value("note"),
-      noteEn: value("noteEn"),
-      exampleSentence: value("exampleSentence"),
     };
   }
 

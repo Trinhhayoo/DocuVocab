@@ -34,6 +34,10 @@ export default defineContentScript({
   matches: ["<all_urls>"],
   runAt: "document_idle",
   main(ctx) {
+    // A tab can start this script while the extension reloads or updates; the extension APIs are
+    // gone by then (`browser.storage` is undefined), so do nothing and let the new version take over.
+    if (ctx.isInvalid) return;
+
     const overlay = createOverlay();
     const highlighter = isHighlightApiSupported() ? createHighlighter(overlay.host) : null;
     let vocabularies: Vocabulary[] = [];
@@ -68,7 +72,6 @@ export default defineContentScript({
       const saved = matcher.findVocabulary(word);
       closePopover = openPopover(overlay.root, {
         word,
-        sentence,
         anchor,
         saved,
         explain: () =>
@@ -85,18 +88,12 @@ export default defineContentScript({
                 values: {
                   meaning: values.meaning || null,
                   meaningEn: values.meaningEn || null,
-                  note: values.note || null,
-                  noteEn: values.noteEn || null,
-                  exampleSentence: values.exampleSentence || null,
                 },
               })
             : sendToBackground("SAVE_VOCABULARY", {
                 word,
                 meaning: optional(values.meaning),
                 meaningEn: optional(values.meaningEn),
-                note: optional(values.note),
-                noteEn: optional(values.noteEn),
-                exampleSentence: optional(values.exampleSentence),
                 originalSentence: optional(sentence),
                 sourceUrl: location.href,
                 sourceHostname: location.hostname,

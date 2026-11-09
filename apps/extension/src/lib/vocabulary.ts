@@ -37,13 +37,10 @@ export type SaveVocabularyInput = Readonly<{
   pageTitle?: string;
 }>;
 
-/** Editable fields of a saved vocabulary; `null` clears a field. */
+/** Fields the save popup edits; `null` clears a field, and fields left out stay unchanged. */
 export type UpdateVocabularyInput = Readonly<{
   meaning: string | null;
   meaningEn: string | null;
-  note: string | null;
-  noteEn: string | null;
-  exampleSentence: string | null;
 }>;
 
 export type Settings = Readonly<{
