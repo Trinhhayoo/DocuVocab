@@ -88,17 +88,6 @@
   padding: 0 4px;
 }
 
-.popover-sentence {
-  font-size: 12px;
-  color: #64748b;
-  background: #f8fafc;
-  padding: 8px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  max-height: 60px;
-  overflow-y: auto;
-  line-height: 1.4;
-}
 
 .popover-explain-status {
   font-size: 12px;
@@ -117,7 +106,6 @@
   margin: 8px 0 4px;
 }
 
-.popover input,
 .popover textarea {
   width: 100%;
   padding: 8px 10px;
@@ -129,15 +117,16 @@
   background: #fff;
   outline: none;
   resize: vertical;
+  /* Grows with the text where supported (Chromium); elsewhere it stays 2 rows and scrolls. */
+  field-sizing: content;
+  min-height: 3lh;
 }
 
-.popover input:focus,
 .popover textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-.popover input:disabled,
 .popover textarea:disabled {
   background: #f8fafc;
   color: #94a3b8;
